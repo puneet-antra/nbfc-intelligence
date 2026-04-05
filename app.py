@@ -222,6 +222,10 @@ COLOR = {
 }
 
 PERIOD_ORDER = ["FY2021", "FY2022", "FY2023", "FY2024", "FY2025", "9MFY26 (Ann.)"]
+PERIOD_SHORT = {
+    "FY2021": "FY21", "FY2022": "FY22", "FY2023": "FY23",
+    "FY2024": "FY24", "FY2025": "FY25", "9MFY26 (Ann.)": "9MFY26",
+}
 
 # ── Data loaders ─────────────────────────────────────────────────────────────
 
@@ -430,7 +434,9 @@ def chart_layout(fig, title=None):
         ),
         xaxis=dict(gridcolor=CHART_GRID, tickfont=dict(family=CHART_MONO, size=11),
                    showgrid=True, zeroline=False, tickcolor="rgba(0,0,0,0)",
-                   linecolor="rgba(0,0,0,0)", title=""),
+                   linecolor="rgba(0,0,0,0)", title="",
+                   tickvals=list(PERIOD_SHORT.keys()),
+                   ticktext=list(PERIOD_SHORT.values())),
         yaxis=dict(gridcolor=CHART_GRID, tickfont=dict(family=CHART_FONT, size=12),
                    zeroline=False, tickcolor="rgba(0,0,0,0)", linecolor="rgba(0,0,0,0)",
                    title=""),
