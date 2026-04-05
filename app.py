@@ -302,11 +302,47 @@ h1 {
     font-size: 0.85rem !important;
 }
 
+/* ── Tab panel fade-in ── */
+@keyframes tabFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+[data-testid="stTabsContent"] > div[role="tabpanel"] {
+    animation: tabFadeIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+}
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #b0ccb0; border-radius: 10px; }
 </style>
+""", unsafe_allow_html=True)
+
+# Re-trigger tab animation on each tab click via JS
+st.markdown("""
+<script>
+(function() {
+    function hookTabs() {
+        const tabs = document.querySelectorAll('[data-baseweb="tab"]');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                setTimeout(() => {
+                    const panels = document.querySelectorAll('[role="tabpanel"]');
+                    panels.forEach(p => {
+                        p.style.animation = 'none';
+                        p.offsetHeight; // reflow
+                        p.style.animation = '';
+                    });
+                }, 20);
+            });
+        });
+    }
+    // Wait for Streamlit to render
+    const observer = new MutationObserver(() => { hookTabs(); });
+    observer.observe(document.body, { childList: true, subtree: true });
+    hookTabs();
+})();
+</script>
 """, unsafe_allow_html=True)
 
 COLOR = {
@@ -501,14 +537,17 @@ def bar_chart_height(n, min_h=340, max_h=800, px_per_row=30):
     return max(min_h, min(max_h, n * px_per_row))
 
 
-CHART_FONT = "DM Sans"
-CHART_MONO = "DM Mono"
-CHART_BG = "#f8faf8"
-CHART_GRID = "#eaf0ea"
+CHART_FONT  = "DM Sans"
+CHART_TITLE_FONT = "Fraunces"
+CHART_MONO  = "DM Mono"
+CHART_BG    = "#f9fbf9"
+CHART_PAPER = "#ffffff"
+CHART_GRID  = "#e8efe8"
 HOVER_LABEL = dict(
-    bgcolor="#0f1f0f", bordercolor="#0f1f0f",
-    font=dict(family=CHART_MONO, size=11, color="#c8dfc4"),
+    bgcolor="#0d1a0d", bordercolor="#236b35",
+    font=dict(family=CHART_MONO, size=11, color="#b8d4b8"),
     align="left",
+    namelength=0,
 )
 
 
@@ -562,17 +601,18 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None):
     fig.update_layout(
         title=dict(
             text=wrap_title(title),
-            font=dict(color=COLOR["text"], size=14, family=CHART_FONT, weight="bold"),
+            font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT, weight=600),
             x=0.5, xanchor="center", xref="paper",
-            pad=dict(t=6, b=10),
+            pad=dict(t=8, b=12),
         ),
-        paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
+        paper_bgcolor=CHART_PAPER, plot_bgcolor=CHART_BG,
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
         yaxis=dict(autorange="reversed", tickfont=dict(family=CHART_FONT, size=12),
                    showgrid=False, tickcolor="rgba(0,0,0,0)", title=""),
         xaxis=dict(showgrid=True, gridcolor=CHART_GRID, showticklabels=False,
-                   range=x_range, zeroline=False, tickcolor="rgba(0,0,0,0)", title=""),
-        margin=dict(l=10, r=130, t=82, b=20),
+                   range=x_range, zeroline=True, zerolinecolor=CHART_GRID,
+                   zerolinewidth=1.5, tickcolor="rgba(0,0,0,0)", title=""),
+        margin=dict(l=10, r=130, t=86, b=20),
         hoverlabel=HOVER_LABEL,
     )
     if hover_text is not None:
@@ -590,28 +630,34 @@ def chart_layout(fig, title=None):
         existing = fig.layout.title.text
     t = wrap_title(title) if title else (wrap_title(existing) if existing else "")
     fig.update_layout(
-        paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
+        paper_bgcolor=CHART_PAPER, plot_bgcolor=CHART_BG,
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
         title=dict(
             text=t,
-            font=dict(color=COLOR["text"], size=14, family=CHART_FONT, weight="bold"),
+            font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT, weight=600),
             x=0.5, xanchor="center", xref="paper",
-            pad=dict(t=6, b=10),
+            pad=dict(t=8, b=12),
         ),
-        xaxis=dict(gridcolor=CHART_GRID, tickfont=dict(family=CHART_MONO, size=11),
-                   showgrid=True, zeroline=False, tickcolor="rgba(0,0,0,0)",
-                   linecolor="rgba(0,0,0,0)", title="",
-                   tickvals=list(PERIOD_SHORT.keys()),
-                   ticktext=list(PERIOD_SHORT.values())),
-        yaxis=dict(gridcolor=CHART_GRID, tickfont=dict(family=CHART_MONO, size=11),
-                   zeroline=False, tickcolor="rgba(0,0,0,0)", linecolor="rgba(0,0,0,0)",
-                   title=""),
-        margin=dict(t=82, b=90, l=10, r=24),
+        xaxis=dict(
+            gridcolor=CHART_GRID, gridwidth=1,
+            tickfont=dict(family=CHART_MONO, size=11, color="#52725a"),
+            showgrid=True, zeroline=False,
+            tickcolor="rgba(0,0,0,0)", linecolor="rgba(0,0,0,0)", title="",
+            tickvals=list(PERIOD_SHORT.keys()),
+            ticktext=list(PERIOD_SHORT.values()),
+        ),
+        yaxis=dict(
+            gridcolor=CHART_GRID, gridwidth=1,
+            tickfont=dict(family=CHART_MONO, size=11, color="#52725a"),
+            zeroline=True, zerolinecolor="#d0ddd0", zerolinewidth=1.5,
+            tickcolor="rgba(0,0,0,0)", linecolor="rgba(0,0,0,0)", title="",
+        ),
+        margin=dict(t=86, b=90, l=10, r=24),
         legend=dict(
-            font=dict(family=CHART_FONT, size=11),
-            bgcolor="rgba(255,255,255,0)",
-            bordercolor="rgba(0,0,0,0)",
-            borderwidth=0,
+            font=dict(family=CHART_FONT, size=11, color="#52725a"),
+            bgcolor="rgba(249,251,249,0.85)",
+            bordercolor="rgba(35,107,53,0.12)",
+            borderwidth=1,
             orientation="h",
             yanchor="bottom", y=-0.32,
             xanchor="left", x=0,
@@ -625,11 +671,18 @@ def chart_layout(fig, title=None):
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 
 st.sidebar.markdown("""
-<div style="padding: 0.3rem 0 1rem 0;">
-  <div style="font-family:'Fraunces',serif; font-size:1.15rem; font-weight:600; color:#e8f0e8; letter-spacing:-0.02em;">NBFC Intelligence</div>
-  <div style="font-family:'DM Sans',sans-serif; font-size:0.7rem; color:#6a8f6a; letter-spacing:0.06em; text-transform:uppercase; margin-top:2px;">India · FY2021–9MFY26</div>
+<div style="padding:1.4rem 0.2rem 1.2rem 0.2rem; margin-bottom:0.4rem;">
+  <div style="font-family:'Fraunces',serif; font-size:1.4rem; font-weight:700; letter-spacing:-0.03em; line-height:1.1;
+              background:linear-gradient(135deg,#c8dfc4 0%,#7ab87a 100%);
+              -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">
+    NBFC<br>Intelligence
+  </div>
+  <div style="font-family:'DM Sans',sans-serif; font-size:0.65rem; color:#4a6a4a;
+              letter-spacing:0.1em; text-transform:uppercase; margin-top:6px; font-weight:600;">
+    India &nbsp;·&nbsp; FY21 – 9MFY26
+  </div>
 </div>
-<hr style="border:none; border-top:1px solid #1e3a1e; margin:0 0 1rem 0;">
+<div style="height:1px; background:linear-gradient(90deg, #2a4a2a, transparent); margin:0 0 1.2rem 0;"></div>
 """, unsafe_allow_html=True)
 
 nbfc_df = load_nbfc_table()
