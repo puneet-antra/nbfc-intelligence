@@ -77,6 +77,9 @@ COMPANIES = [
     ("Ugro Capital", "Middle", "SME Finance", 1, 1, 13200, "audited", "UGROCAP.NS", "Ugro Capital Annual Reports"),
     ("Muthoot Microfin", "Middle", "Microfinance", 1, 1, 14000, "audited", "MUTHOOTMF.NS", "Muthoot Microfin Annual Reports"),
     ("SBI Cards and Payment Services", "Upper", "Consumer Finance", 1, 1, 62000, "audited", "SBICARD.NS", "SBI Cards Annual Reports"),
+    # Unlisted fintechs
+    ("KreditBee", "Middle", "Consumer Finance", 0, 1, 10800, "estimated", None, "KreditBee (Krazybee Services) - MCA filings"),
+    ("Fibe", "Middle", "Consumer Finance", 0, 1, 7900, "estimated", None, "Fibe (EarlySalary) standalone NBFC - MCA filings"),
 ]
 
 # ── Financial data ────────────────────────────────────────────────────────────
@@ -275,6 +278,16 @@ FINANCIALS = [
     ("SK Finance", "FY2026-Q3", 15049, 19000, 3785, 1980, 265, 75, 0.67, 1.86, 2.00, 9.70, "audited", "SK Finance Q3FY26 - AUM ₹15,049 Cr (+23% YoY); Q3 PAT ₹88.37 Cr; net worth ₹3,785 Cr"),
     ("Ugro Capital", "FY2026-Q3", 15454, 18500, 2700, 1250, 130, 112, 1.00, 2.20, 1.00, 7.00, "audited", "Ugro Capital Q3FY26 - AUM ₹15,454 Cr (+40% YoY); Q3 PAT ₹46.3 Cr (+23%); GNPA 2.2%"),
     ("Muthoot Microfin", "FY2026-Q3", 10000, 13000, 2600, 1500, 50, 700, 7.00, 4.40, 0.50, 2.60, "audited", "Muthoot Microfin Q3FY26 - Q3 PAT surged 1544%; GNPA 4.40% (improved from 4.61% in Q2)"),
+    # ── KreditBee ─────────────────────────────────────────────────────────────
+    ("KreditBee", "FY2023", 4800, 6000, 1500, 780, 280, 120, 2.5, 2.80, 5.1, 20.0, "estimated", "KreditBee MCA filings FY23 - estimated"),
+    ("KreditBee", "FY2024", 7200, 9000, 2200, 1200, 420, 202, 2.8, 3.20, 5.1, 21.9, "estimated", "KreditBee MCA filings FY24 - estimated"),
+    ("KreditBee", "FY2025", 8500, 10800, 2800, 1450, 380, 298, 3.5, 4.50, 3.8, 15.0, "estimated", "KreditBee MCA filings FY25 - estimated"),
+    ("KreditBee", "FY2026-Q3", 9800, 12400, 3100, 1120, 290, 255, 3.8, 4.80, 3.5, 13.5, "estimated", "KreditBee Q3FY26 - estimated from FY25 run-rate"),
+    # ── Fibe ──────────────────────────────────────────────────────────────────
+    ("Fibe", "FY2023", 3200, 4100, 900, 520, 145, 64, 2.0, 2.50, 3.8, 17.5, "estimated", "Fibe MCA filings FY23 - estimated"),
+    ("Fibe", "FY2024", 5500, 7000, 1400, 890, 195, 165, 3.0, 3.80, 3.1, 16.1, "estimated", "Fibe MCA filings FY24 - estimated"),
+    ("Fibe", "FY2025", 6200, 7900, 1700, 1020, 165, 248, 4.0, 5.20, 2.3, 10.8, "estimated", "Fibe MCA filings FY25 - estimated"),
+    ("Fibe", "FY2026-Q3", 6500, 8300, 1820, 790, 120, 200, 4.2, 5.50, 2.1, 9.5, "estimated", "Fibe Q3FY26 - estimated from FY25 run-rate"),
 ]
 
 
