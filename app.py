@@ -53,20 +53,20 @@ h1 {
     color: #0f1f0f !important;
     opacity: 1 !important;
     font-weight: 500 !important;
-    font-size: 1.5rem !important;
+    font-size: 1.45rem !important;
     letter-spacing: -0.01em !important;
 }
 [data-testid="stMetricLabel"] {
     font-family: 'DM Sans', sans-serif !important;
     color: #52725a !important;
     opacity: 1 !important;
-    font-weight: 500 !important;
-    font-size: 0.7rem !important;
-    letter-spacing: 0.08em !important;
+    font-weight: 600 !important;
+    font-size: 0.74rem !important;
+    letter-spacing: 0.07em !important;
     text-transform: uppercase !important;
     white-space: normal !important;
     overflow: visible !important;
-    line-height: 1.4 !important;
+    line-height: 1.5 !important;
 }
 [data-testid="stMetricDelta"] { opacity: 1 !important; }
 
@@ -97,9 +97,9 @@ h1 {
 /* ── Section headers ── */
 .section-header {
     font-family: 'DM Sans', sans-serif;
-    font-size: 10.5px;
+    font-size: 0.72rem;
     font-weight: 600;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
     color: #52725a;
     margin: 2.5rem 0 1.1rem 0;
@@ -132,7 +132,7 @@ h1 {
 [data-testid="stTabs"] [data-baseweb="tab"] {
     font-family: 'DM Sans', sans-serif !important;
     font-weight: 500 !important;
-    font-size: 0.82rem !important;
+    font-size: 0.85rem !important;
     color: #7a9e82 !important;
     padding: 0.65rem 1rem !important;
     border-radius: 0 !important;
@@ -147,7 +147,7 @@ h1 {
 /* ── Dataframes ── */
 [data-testid="stDataFrame"] {
     font-family: 'DM Mono', monospace !important;
-    font-size: 0.77rem !important;
+    font-size: 0.8rem !important;
     border-radius: 10px !important;
     border: 1px solid #e4ede6 !important;
     overflow: hidden !important;
@@ -391,21 +391,21 @@ def make_hbar(df, x_col, y_col, color, title, height=None):
         marker_color=color, marker_line_width=0,
         marker_opacity=0.88,
         textposition="outside",
-        textfont=dict(family=CHART_MONO, size=10, color=COLOR["text_secondary"]),
+        textfont=dict(family=CHART_MONO, size=11, color=COLOR["text_secondary"]),
         cliponaxis=False,
     )
     fig.update_layout(
         title=dict(
             text=wrap_title(title),
-            font=dict(color=COLOR["text"], size=13, family=CHART_FONT, weight="bold"),
+            font=dict(color=COLOR["text"], size=14, family=CHART_FONT, weight="bold"),
             x=0, xanchor="left", xref="paper",
             pad=dict(t=6, b=10),
         ),
         paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
-        yaxis=dict(autorange="reversed", tickfont=dict(family=CHART_FONT, size=11.5),
+        yaxis=dict(autorange="reversed", tickfont=dict(family=CHART_FONT, size=12),
                    showgrid=False, tickcolor="rgba(0,0,0,0)"),
-        xaxis=dict(showgrid=True, gridcolor=CHART_GRID, tickfont=dict(family=CHART_MONO, size=10),
+        xaxis=dict(showgrid=True, gridcolor=CHART_GRID, tickfont=dict(family=CHART_MONO, size=11),
                    range=x_range, zeroline=False, tickcolor="rgba(0,0,0,0)"),
         margin=dict(l=10, r=130, t=82, b=20),
         hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6",
@@ -424,18 +424,18 @@ def chart_layout(fig, title=None):
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
         title=dict(
             text=t,
-            font=dict(color=COLOR["text"], size=13, family=CHART_FONT, weight="bold"),
+            font=dict(color=COLOR["text"], size=14, family=CHART_FONT, weight="bold"),
             x=0, xanchor="left", xref="paper",
             pad=dict(t=6, b=10),
         ),
-        xaxis=dict(gridcolor=CHART_GRID, tickfont=dict(family=CHART_MONO, size=10),
+        xaxis=dict(gridcolor=CHART_GRID, tickfont=dict(family=CHART_MONO, size=11),
                    showgrid=True, zeroline=False, tickcolor="rgba(0,0,0,0)",
                    linecolor="rgba(0,0,0,0)"),
-        yaxis=dict(gridcolor=CHART_GRID, tickfont=dict(family=CHART_FONT, size=11),
+        yaxis=dict(gridcolor=CHART_GRID, tickfont=dict(family=CHART_FONT, size=12),
                    zeroline=False, tickcolor="rgba(0,0,0,0)", linecolor="rgba(0,0,0,0)"),
         margin=dict(t=82, b=44, l=10, r=24),
         legend=dict(
-            font=dict(family=CHART_FONT, size=11),
+            font=dict(family=CHART_FONT, size=12),
             bgcolor="rgba(255,255,255,0.9)",
             bordercolor="#e4ede6",
             borderwidth=1,
