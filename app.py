@@ -21,11 +21,11 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,0,600;9..144,0,700;9..144,1,300;9..144,1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,0,600;9..144,0,700;9..144,1,300;9..144,1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
 /* ── Base ── */
 html, body, [class*="css"] {
-    font-family: 'DM Sans', sans-serif !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
     background-color: #eef2ee !important;
     background-image:
         radial-gradient(ellipse at 10% 50%, rgba(35,107,53,0.09) 0%, transparent 50%),
@@ -73,7 +73,7 @@ h1 {
     letter-spacing: -0.02em !important;
 }
 [data-testid="stMetricLabel"] {
-    font-family: 'DM Sans', sans-serif !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
     color: #52725a !important;
     opacity: 1 !important;
     font-weight: 600 !important;
@@ -168,7 +168,7 @@ h1 {
 }
 [data-testid="stSidebar"] [data-testid="stWidgetLabel"],
 [data-testid="stSidebar"] label {
-    font-family: 'DM Sans', sans-serif !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
     color: #7aa87a !important;
     font-size: 0.7rem !important;
     font-weight: 600 !important;
@@ -219,7 +219,7 @@ h1 {
     display: none !important;
 }
 [data-testid="stTabs"] [data-baseweb="tab"] {
-    font-family: 'DM Sans', sans-serif !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
     font-weight: 500 !important;
     font-size: 0.82rem !important;
     color: #4a6a50 !important;
@@ -271,14 +271,14 @@ h1 {
     background: #fff5ed; color: #9a3412;
     padding: 3px 10px; border-radius: 20px;
     font-size: 11px; font-weight: 600;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     border: 1px solid #fed7aa;
 }
 .estimated-badge {
     background: #f0fdf4; color: #15803d;
     padding: 3px 10px; border-radius: 20px;
     font-size: 11px; font-weight: 500;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     border: 1px solid #bbf7d0;
 }
 
@@ -289,7 +289,7 @@ h1 {
 .stCaption, [data-testid="stCaptionContainer"] {
     font-size: 0.68rem !important;
     color: #8aaa8a !important;
-    font-family: 'DM Sans', sans-serif !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
     opacity: 0.85 !important;
 }
 
@@ -298,7 +298,7 @@ h1 {
 [data-testid="stTextInput"] input {
     border-radius: 8px !important;
     border: 1px solid #ccdacd !important;
-    font-family: 'DM Sans', sans-serif !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
     font-size: 0.85rem !important;
 }
 
@@ -537,7 +537,7 @@ def bar_chart_height(n, min_h=340, max_h=800, px_per_row=30):
     return max(min_h, min(max_h, n * px_per_row))
 
 
-CHART_FONT  = "DM Sans"
+CHART_FONT  = "Plus Jakarta Sans"
 CHART_TITLE_FONT = "Fraunces"
 CHART_MONO  = "DM Mono"
 CHART_BG    = "#f9fbf9"
@@ -677,7 +677,7 @@ st.sidebar.markdown("""
               -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">
     NBFC<br>Intelligence
   </div>
-  <div style="font-family:'DM Sans',sans-serif; font-size:0.65rem; color:#4a6a4a;
+  <div style="font-family:'Plus Jakarta Sans',sans-serif; font-size:0.65rem; color:#4a6a4a;
               letter-spacing:0.1em; text-transform:uppercase; margin-top:6px; font-weight:600;">
     India &nbsp;·&nbsp; FY21 – 9MFY26
   </div>
@@ -753,7 +753,7 @@ st.markdown("""
     display: inline;
 }
 .page-badge {
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 0.72rem;
     font-weight: 600;
     color: #d97706;
@@ -767,7 +767,7 @@ st.markdown("""
     top: -4px;
 }
 .page-subtitle {
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 0.85rem;
     color: #52725a;
     margin: 0.4rem 0 0 0;
