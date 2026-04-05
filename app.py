@@ -998,64 +998,63 @@ with tabs[5]:
         chart_df = get_chart_periods(company_fin)
 
         col1, col2 = st.columns(2)
-        LABEL_MAP = {
-            "total_assets_cr": "Total Assets",
-            "loan_book_cr": "Loan Book",
-            "net_interest_income_cr": "NII",
-            "pat_cr": "PAT",
-            "roa_pct": "ROA %",
-            "roe_pct": "ROE %",
-            "gnpa_pct": "GNPA %",
-            "credit_loss_rate_pct": "Credit Loss Rate %",
-        }
+        DD_MARGIN = dict(t=82, b=120, l=10, r=24)
+        DD_LEGEND = dict(
+            font=dict(family=CHART_FONT, size=11),
+            bgcolor="rgba(255,255,255,0)", borderwidth=0,
+            orientation="h", yanchor="bottom", y=-0.38,
+            xanchor="left", x=0, title_text="",
+        )
         with col1:
-            fig = px.bar(chart_df, x="period", y=["total_assets_cr", "loan_book_cr"],
+            bar_df = chart_df[["period", "total_assets_cr", "loan_book_cr"]].rename(
+                columns={"total_assets_cr": "Total Assets", "loan_book_cr": "Loan Book"})
+            fig = px.bar(bar_df, x="period", y=["Total Assets", "Loan Book"],
                          barmode="group", text_auto=".3s",
-                         title=f"Assets & Loan Book (₹ Crore, to {lbl})", height=380,
-                         category_orders={"period": PERIOD_ORDER},
-                         labels=LABEL_MAP)
+                         title=f"Assets & Loan Book (₹ Crore, to {lbl})", height=400,
+                         category_orders={"period": PERIOD_ORDER})
             fig.update_traces(textposition="outside", textfont=dict(family=CHART_MONO, size=11),
                               cliponaxis=False)
             chart_layout(fig)
-            fig.update_layout(xaxis=dict(tickangle=-30), margin=dict(b=110))
+            fig.update_layout(xaxis=dict(tickangle=-30), margin=DD_MARGIN, legend=DD_LEGEND)
             st.plotly_chart(fig, use_container_width=True)
         with col2:
-            nii_pat = chart_df[["period", "net_interest_income_cr", "pat_cr"]].dropna()
-            fig = px.line(nii_pat, x="period", y=["net_interest_income_cr", "pat_cr"],
-                          title=f"NII & PAT (₹ Crore, to {lbl})", height=380,
-                          category_orders={"period": PERIOD_ORDER},
-                          labels=LABEL_MAP, markers=True)
+            nii_pat = chart_df[["period", "net_interest_income_cr", "pat_cr"]].dropna().rename(
+                columns={"net_interest_income_cr": "NII", "pat_cr": "PAT"})
+            fig = px.line(nii_pat, x="period", y=["NII", "PAT"],
+                          title=f"NII & PAT (₹ Crore, to {lbl})", height=400,
+                          category_orders={"period": PERIOD_ORDER}, markers=True)
             chart_layout(fig)
-            fig.update_layout(xaxis=dict(tickangle=-30), margin=dict(b=110))
+            fig.update_layout(xaxis=dict(tickangle=-30), margin=DD_MARGIN, legend=DD_LEGEND)
             st.plotly_chart(fig, use_container_width=True)
 
         col3, col4 = st.columns(2)
         with col3:
             gnpa_df = chart_df[["period", "gnpa_pct"]].dropna()
             fig = px.line(gnpa_df, x="period", y="gnpa_pct",
-                          title=f"GNPA % Trend (to {lbl})", markers=True, height=360,
-                          category_orders={"period": PERIOD_ORDER}, labels=LABEL_MAP)
+                          title=f"GNPA % Trend (to {lbl})", markers=True, height=380,
+                          category_orders={"period": PERIOD_ORDER})
             fig.update_traces(line_color=COLOR["danger"], marker_color=COLOR["danger"])
             chart_layout(fig)
-            fig.update_layout(xaxis=dict(tickangle=-30), margin=dict(b=110), showlegend=False)
+            fig.update_layout(xaxis=dict(tickangle=-30), margin=DD_MARGIN, showlegend=False)
             st.plotly_chart(fig, use_container_width=True)
         with col4:
-            ror_df = chart_df[["period", "roa_pct", "roe_pct"]].dropna()
-            fig = px.line(ror_df, x="period", y=["roa_pct", "roe_pct"],
-                          title=f"ROA & ROE % (to {lbl})", markers=True, height=360,
-                          category_orders={"period": PERIOD_ORDER}, labels=LABEL_MAP)
+            ror_df = chart_df[["period", "roa_pct", "roe_pct"]].dropna().rename(
+                columns={"roa_pct": "ROA %", "roe_pct": "ROE %"})
+            fig = px.line(ror_df, x="period", y=["ROA %", "ROE %"],
+                          title=f"ROA & ROE % (to {lbl})", markers=True, height=380,
+                          category_orders={"period": PERIOD_ORDER})
             chart_layout(fig)
-            fig.update_layout(xaxis=dict(tickangle=-30), margin=dict(b=110))
+            fig.update_layout(xaxis=dict(tickangle=-30), margin=DD_MARGIN, legend=DD_LEGEND)
             st.plotly_chart(fig, use_container_width=True)
 
         cl_df = chart_df[["period", "credit_loss_rate_pct"]].dropna()
         fig = px.line(cl_df, x="period", y="credit_loss_rate_pct",
-                      title=f"Credit Loss Rate % (to {lbl})", markers=True, height=360,
-                      category_orders={"period": PERIOD_ORDER}, labels=LABEL_MAP)
+                      title=f"Credit Loss Rate % (to {lbl})", markers=True, height=380,
+                      category_orders={"period": PERIOD_ORDER})
         fig.add_hline(y=2.0, line_dash="dot", line_color=COLOR["warning"],
                       annotation_text="2% reference")
         chart_layout(fig)
-        fig.update_layout(xaxis=dict(tickangle=-30), margin=dict(b=110), showlegend=False)
+        fig.update_layout(xaxis=dict(tickangle=-30), margin=DD_MARGIN, showlegend=False)
         st.plotly_chart(fig, use_container_width=True)
 
         # Financial table
