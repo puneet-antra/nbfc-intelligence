@@ -61,7 +61,7 @@ h1 {
     color: #52725a !important;
     opacity: 1 !important;
     font-weight: 600 !important;
-    font-size: 0.74rem !important;
+    font-size: 0.68rem !important;
     letter-spacing: 0.07em !important;
     text-transform: uppercase !important;
     white-space: normal !important;
@@ -529,7 +529,7 @@ avg_growth = growth_df_header["growth_pct"].mean() if not growth_df_header.empty
 
 c1, c2, c3, c4, c5 = st.columns(5)
 c1.metric("Total NBFCs", f"{total_nbfcs:,}", help="RBI Registry")
-c2.metric("With Financial Data", f"{with_data:,}")
+c2.metric("With Financials", f"{with_data:,}")
 c3.metric("Combined Assets", f"₹{total_assets:.1f}L Cr", help="FY25")
 c4.metric("Avg AUM Growth", f"{avg_growth:.1f}%", help="Latest 1Y")
 c5.metric("Avg GNPA", f"{avg_gnpa:.2f}%", help="FY25")
