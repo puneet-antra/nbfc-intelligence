@@ -523,7 +523,7 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None):
         title=dict(
             text=wrap_title(title),
             font=dict(color=COLOR["text"], size=14, family=CHART_FONT, weight="bold"),
-            x=0, xanchor="left", xref="paper",
+            x=0.5, xanchor="center", xref="paper",
             pad=dict(t=6, b=10),
         ),
         paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
@@ -555,7 +555,7 @@ def chart_layout(fig, title=None):
         title=dict(
             text=t,
             font=dict(color=COLOR["text"], size=14, family=CHART_FONT, weight="bold"),
-            x=0, xanchor="left", xref="paper",
+            x=0.5, xanchor="center", xref="paper",
             pad=dict(t=6, b=10),
         ),
         xaxis=dict(gridcolor=CHART_GRID, tickfont=dict(family=CHART_MONO, size=11),
@@ -782,7 +782,7 @@ with tabs[1]:
     fig.update_layout(barmode="group", paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
                       title=dict(text=wrap_title(f"ROA & ROE by Sector ({lbl})"),
                                  font=dict(color=COLOR["text"], family=CHART_FONT, size=14, weight="bold"),
-                                 x=0, xanchor="left", xref="paper",
+                                 x=0.5, xanchor="center", xref="paper",
                                  pad=dict(t=6, b=10)),
                       font=dict(color=COLOR["text_secondary"], family=CHART_FONT),
                       height=380,
@@ -873,7 +873,7 @@ with tabs[2]:
     fig.update_layout(
         title=dict(text=wrap_title(f"GNPA % Heatmap (to {lbl})"),
                    font=dict(color=COLOR["text"], family=CHART_FONT, size=14, weight="bold"),
-                   x=0, xanchor="left", xref="paper", pad=dict(t=6, b=8)),
+                   x=0.5, xanchor="center", xref="paper", pad=dict(t=6, b=8)),
         paper_bgcolor=CHART_BG,
         height=max(340, len(stressed_35) * 26),
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
@@ -965,7 +965,7 @@ with tabs[3]:
     fig.update_layout(
         title=dict(text=wrap_title("Change in Credit Loss Rate: FY2021 → FY2025 (green = improved)"),
                    font=dict(color=COLOR["text"], family=CHART_FONT, size=14, weight="bold"),
-                   x=0, xanchor="left", xref="paper", pad=dict(t=6, b=10)),
+                   x=0.5, xanchor="center", xref="paper", pad=dict(t=6, b=10)),
         paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT),
         height=bar_chart_height(len(wf)),
@@ -1000,7 +1000,7 @@ with tabs[3]:
     fig.update_layout(
         title=dict(text=wrap_title(f"Credit Loss Rate % Heatmap (to {lbl})"),
                    font=dict(color=COLOR["text"], family=CHART_FONT, size=14, weight="bold"),
-                   x=0, xanchor="left", xref="paper", pad=dict(t=6, b=8)),
+                   x=0.5, xanchor="center", xref="paper", pad=dict(t=6, b=8)),
         paper_bgcolor=CHART_BG, height=max(340, len(top40) * 26),
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
         margin=dict(t=82, b=30, l=10, r=30),
@@ -1398,7 +1398,7 @@ with tabs[5]:
         fig.update_layout(
             title=dict(text="12-Month Price Change %",
                        font=dict(color=COLOR["text"], family=CHART_FONT, size=14, weight="bold"),
-                       x=0, xanchor="left", xref="paper", pad=dict(t=6, b=10)),
+                       x=0.5, xanchor="center", xref="paper", pad=dict(t=6, b=10)),
             paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
             font=dict(color=COLOR["text_secondary"], family=CHART_FONT),
             height=bar_chart_height(len(chg_df)),
