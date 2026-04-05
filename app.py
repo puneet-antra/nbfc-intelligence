@@ -1021,7 +1021,7 @@ with tabs[5]:
             fig.update_traces(textposition="outside", textfont=dict(family=CHART_MONO, size=11),
                               cliponaxis=False)
             chart_layout(fig)
-            fig.update_layout(xaxis=dict(tickangle=-30), margin=DD_MARGIN, legend=DD_LEGEND)
+            fig.update_layout(margin=DD_MARGIN, legend=DD_LEGEND)
             st.plotly_chart(fig, use_container_width=True)
         with col2:
             nii_pat = chart_df[["period", "net_interest_income_cr", "pat_cr"]].dropna().rename(
@@ -1030,7 +1030,7 @@ with tabs[5]:
                           title=f"NII & PAT (₹ Crore, to {lbl})", height=400,
                           category_orders={"period": PERIOD_ORDER}, markers=True)
             chart_layout(fig)
-            fig.update_layout(xaxis=dict(tickangle=-30), margin=DD_MARGIN, legend=DD_LEGEND)
+            fig.update_layout(margin=DD_MARGIN, legend=DD_LEGEND)
             st.plotly_chart(fig, use_container_width=True)
 
         col3, col4 = st.columns(2)
@@ -1041,7 +1041,7 @@ with tabs[5]:
                           category_orders={"period": PERIOD_ORDER})
             fig.update_traces(line_color=COLOR["danger"], marker_color=COLOR["danger"])
             chart_layout(fig)
-            fig.update_layout(xaxis=dict(tickangle=-30), margin=DD_MARGIN, showlegend=False)
+            fig.update_layout(margin=DD_MARGIN, showlegend=False)
             st.plotly_chart(fig, use_container_width=True)
         with col4:
             ror_df = chart_df[["period", "roa_pct", "roe_pct"]].dropna().rename(
@@ -1050,7 +1050,7 @@ with tabs[5]:
                           title=f"ROA & ROE % (to {lbl})", markers=True, height=380,
                           category_orders={"period": PERIOD_ORDER})
             chart_layout(fig)
-            fig.update_layout(xaxis=dict(tickangle=-30), margin=DD_MARGIN, legend=DD_LEGEND)
+            fig.update_layout(margin=DD_MARGIN, legend=DD_LEGEND)
             st.plotly_chart(fig, use_container_width=True)
 
         cl_df = chart_df[["period", "credit_loss_rate_pct"]].dropna()
@@ -1060,7 +1060,7 @@ with tabs[5]:
         fig.add_hline(y=2.0, line_dash="dot", line_color=COLOR["warning"],
                       annotation_text="2% reference")
         chart_layout(fig)
-        fig.update_layout(xaxis=dict(tickangle=-30), margin=DD_MARGIN, showlegend=False)
+        fig.update_layout(margin=DD_MARGIN, showlegend=False)
         st.plotly_chart(fig, use_container_width=True)
 
         # Financial table
