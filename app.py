@@ -496,8 +496,8 @@ nbfc_filtered = apply_filters(nbfc_df)
 # ── Page header ───────────────────────────────────────────────────────────────
 
 st.markdown("""
-<div style="display:flex; align-items:baseline; gap:0.9rem; margin-bottom:0.2rem;">
-  <span style="font-family:'Fraunces',serif; font-weight:600; font-size:2rem; color:#0f1f0f; letter-spacing:-0.03em; line-height:1.1;">NBFC Intelligence</span>
+<div style="display:flex; align-items:baseline; gap:0.9rem; margin-bottom:0.2rem; padding-top:0.5rem;">
+  <span style="font-family:'Fraunces',serif; font-weight:600; font-size:2rem; color:#0f1f0f; letter-spacing:-0.03em; line-height:1.2;">NBFC Intelligence</span>
   <span style="font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:500; color:#ffffff; background:#236b35; padding:3px 10px; border-radius:20px; letter-spacing:0.04em;">INDIA</span>
 </div>
 <p style="font-family:'DM Sans',sans-serif; font-size:0.88rem; color:#52725a; margin:0 0 1.4rem 0; font-weight:400; letter-spacing:0.01em;">
