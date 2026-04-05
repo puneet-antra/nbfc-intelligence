@@ -407,10 +407,10 @@ def make_hbar(df, x_col, y_col, color, title, height=None):
         ),
         paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
-        yaxis=dict(autorange="reversed", tickfont=dict(family=CHART_FONT, size=12),
-                   showgrid=False, tickcolor="rgba(0,0,0,0)"),
-        xaxis=dict(showgrid=True, gridcolor=CHART_GRID, tickfont=dict(family=CHART_MONO, size=11),
-                   range=x_range, zeroline=False, tickcolor="rgba(0,0,0,0)"),
+        yaxis=dict(autorange="reversed", showticklabels=False,
+                   showgrid=False, tickcolor="rgba(0,0,0,0)", title=""),
+        xaxis=dict(showgrid=True, gridcolor=CHART_GRID, showticklabels=False,
+                   range=x_range, zeroline=False, tickcolor="rgba(0,0,0,0)", title=""),
         margin=dict(l=10, r=130, t=82, b=20),
         hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6",
                         font=dict(family=CHART_FONT, size=12)),
@@ -432,12 +432,10 @@ def chart_layout(fig, title=None):
             x=0, xanchor="left", xref="paper",
             pad=dict(t=6, b=10),
         ),
-        xaxis=dict(gridcolor=CHART_GRID, tickfont=dict(family=CHART_MONO, size=11),
+        xaxis=dict(gridcolor=CHART_GRID, showticklabels=False,
                    showgrid=True, zeroline=False, tickcolor="rgba(0,0,0,0)",
-                   linecolor="rgba(0,0,0,0)", title="",
-                   tickvals=list(PERIOD_SHORT.keys()),
-                   ticktext=list(PERIOD_SHORT.values())),
-        yaxis=dict(gridcolor=CHART_GRID, tickfont=dict(family=CHART_FONT, size=12),
+                   linecolor="rgba(0,0,0,0)", title=""),
+        yaxis=dict(gridcolor=CHART_GRID, showticklabels=False,
                    zeroline=False, tickcolor="rgba(0,0,0,0)", linecolor="rgba(0,0,0,0)",
                    title=""),
         margin=dict(t=82, b=90, l=10, r=24),
@@ -538,8 +536,8 @@ c5.metric("Avg GNPA", f"{avg_gnpa:.2f}%", help="FY25")
 
 tabs = st.tabs([
     "📈 Growth", "💰 Profitability", "🏥 Asset Quality",
-    "⚠️ Credit Losses", "📊 Trends", "🔍 Deep Dive",
-    "💹 Valuation", "🌐 Universe", "🗃️ Data",
+    "⚠️ Credit Losses", "🔍 Deep Dive",
+    "💹 Valuation", "🌐 Universe", "🗃️ Data", "📊 Trends",
 ])
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -659,9 +657,9 @@ with tabs[1]:
                                   bgcolor="rgba(255,255,255,0)", borderwidth=0,
                                   orientation="h", yanchor="bottom", y=-0.25,
                                   xanchor="left", x=0),
-                      xaxis=dict(tickfont=dict(family=CHART_FONT, size=12), gridcolor=CHART_GRID,
+                      xaxis=dict(showticklabels=False, gridcolor=CHART_GRID,
                                  tickcolor="rgba(0,0,0,0)", linecolor="rgba(0,0,0,0)", title=""),
-                      yaxis=dict(gridcolor=CHART_GRID, tickfont=dict(family=CHART_MONO, size=11),
+                      yaxis=dict(gridcolor=CHART_GRID, showticklabels=False,
                                  tickcolor="rgba(0,0,0,0)", title=""),
                       hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6",
                                       font=dict(family=CHART_FONT, size=12)),
@@ -832,11 +830,10 @@ with tabs[3]:
         paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT),
         height=bar_chart_height(len(wf)),
-        xaxis=dict(title="", gridcolor=CHART_GRID,
-                   tickfont=dict(family=CHART_MONO, size=11),
+        xaxis=dict(title="", gridcolor=CHART_GRID, showticklabels=False,
                    range=[-(wf_max * 1.5), wf_max * 1.5], zeroline=True,
                    zerolinecolor="#c8dfc4", zerolinewidth=1.5, tickcolor="rgba(0,0,0,0)"),
-        yaxis=dict(tickfont=dict(family=CHART_FONT, size=12), showgrid=False,
+        yaxis=dict(showticklabels=False, showgrid=False,
                    tickcolor="rgba(0,0,0,0)", title=""),
         margin=dict(t=82, b=20, l=10, r=130),
         hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6",
@@ -875,9 +872,9 @@ with tabs[3]:
     st.plotly_chart(fig, use_container_width=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TAB 5: TRENDS
+# TAB 9: TRENDS
 # ─────────────────────────────────────────────────────────────────────────────
-with tabs[4]:
+with tabs[8]:
     lbl = latest_period_label(fin_filtered)
     latest_snap = get_latest_period_data(fin_filtered)
     top10 = latest_snap.nlargest(10, "loan_book_cr")["name"].tolist()
@@ -941,7 +938,7 @@ with tabs[4]:
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 6: DEEP DIVE
 # ─────────────────────────────────────────────────────────────────────────────
-with tabs[5]:
+with tabs[4]:
     companies_with_data = (
         fin_filtered[fin_filtered["has_financials"] == 1]["name"]
         .dropna().unique().tolist()
@@ -1080,7 +1077,7 @@ with tabs[5]:
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 7: VALUATION
 # ─────────────────────────────────────────────────────────────────────────────
-with tabs[6]:
+with tabs[5]:
     st.info("📡 Live data from Yahoo Finance. P/E is trailing twelve months. Refreshes every hour.")
 
     TICKER_MAP = {
@@ -1259,10 +1256,9 @@ with tabs[6]:
             paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
             font=dict(color=COLOR["text_secondary"], family=CHART_FONT),
             height=bar_chart_height(len(chg_df)),
-            yaxis=dict(autorange="reversed", tickfont=dict(family=CHART_FONT, size=12),
+            yaxis=dict(autorange="reversed", showticklabels=False,
                        showgrid=False, tickcolor="rgba(0,0,0,0)", title=""),
-            xaxis=dict(title="", gridcolor=CHART_GRID,
-                       tickfont=dict(family=CHART_MONO, size=11),
+            xaxis=dict(title="", gridcolor=CHART_GRID, showticklabels=False,
                        range=[-(chg_max * 1.5), chg_max * 1.5],
                        zeroline=True, zerolinecolor="#c8dfc4", zerolinewidth=1.5,
                        tickcolor="rgba(0,0,0,0)"),
@@ -1285,7 +1281,7 @@ with tabs[6]:
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 8: UNIVERSE
 # ─────────────────────────────────────────────────────────────────────────────
-with tabs[7]:
+with tabs[6]:
     lbl = latest_period_label(fin_filtered)
 
     st.markdown('<div class="section-header">RBI Layer Distribution (Full 9,359 Registry)</div>',
@@ -1355,7 +1351,7 @@ with tabs[7]:
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 9: DATA
 # ─────────────────────────────────────────────────────────────────────────────
-with tabs[8]:
+with tabs[7]:
     search = st.text_input("Search companies", placeholder="Type company name…")
     lbl = latest_period_label(fin_filtered)
 
