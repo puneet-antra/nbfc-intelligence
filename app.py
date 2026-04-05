@@ -26,7 +26,10 @@ st.markdown("""
 /* ── Base ── */
 html, body, [class*="css"] {
     font-family: 'DM Sans', sans-serif !important;
-    background-color: #f7f8fa !important;
+    background-color: #f3f6f3 !important;
+    background-image:
+        radial-gradient(ellipse at 15% 40%, rgba(45,106,45,0.05) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 15%, rgba(45,106,45,0.04) 0%, transparent 50%) !important;
 }
 
 /* ── Remove default Streamlit padding ── */
@@ -52,9 +55,9 @@ h1 {
     font-family: 'DM Mono', monospace !important;
     color: #0f1f0f !important;
     opacity: 1 !important;
-    font-weight: 500 !important;
-    font-size: 1.2rem !important;
-    letter-spacing: -0.01em !important;
+    font-weight: 600 !important;
+    font-size: 1.6rem !important;
+    letter-spacing: -0.02em !important;
 }
 [data-testid="stMetricLabel"] {
     font-family: 'DM Sans', sans-serif !important;
@@ -70,6 +73,12 @@ h1 {
 }
 [data-testid="stMetricDelta"] { opacity: 1 !important; }
 
+/* ── Metric card entry animation ── */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ── Metric cards ── */
 [data-testid="metric-container"] {
     background: #ffffff !important;
@@ -80,6 +89,7 @@ h1 {
     transition: box-shadow 0.2s ease, transform 0.2s ease !important;
     position: relative !important;
     overflow: hidden !important;
+    animation: fadeInUp 0.45s ease both !important;
 }
 [data-testid="metric-container"]::after {
     content: '' !important;
@@ -93,55 +103,109 @@ h1 {
     box-shadow: 0 8px 24px rgba(45,106,45,0.12), 0 2px 8px rgba(0,0,0,0.04) !important;
     transform: translateY(-2px) !important;
 }
+/* Stagger each metric card by column position */
+[data-testid="stColumns"] > div:nth-child(1) [data-testid="metric-container"] { animation-delay: 0.05s !important; }
+[data-testid="stColumns"] > div:nth-child(2) [data-testid="metric-container"] { animation-delay: 0.13s !important; }
+[data-testid="stColumns"] > div:nth-child(3) [data-testid="metric-container"] { animation-delay: 0.21s !important; }
+[data-testid="stColumns"] > div:nth-child(4) [data-testid="metric-container"] { animation-delay: 0.29s !important; }
+[data-testid="stColumns"] > div:nth-child(5) [data-testid="metric-container"] { animation-delay: 0.37s !important; }
 
 /* ── Section headers ── */
 .section-header {
     font-family: 'DM Sans', sans-serif;
-    font-size: 0.72rem;
+    font-size: 1.0rem;
     font-weight: 600;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: #52725a;
+    letter-spacing: -0.01em;
+    color: #0f1f0f;
     margin: 2.5rem 0 1.1rem 0;
-    padding-bottom: 0.6rem;
-    border-bottom: 1px solid #e0ebe2;
+    padding: 0.35rem 0 0.35rem 0.85rem;
+    border-left: 4px solid #2d6a2d;
+    border-bottom: none;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    line-height: 1.2;
 }
 
 /* ── Sidebar ── */
 [data-testid="stSidebar"] {
-    background: #ffffff !important;
-    border-right: 1px solid #e4ede6 !important;
+    background: #0f1f0f !important;
+    border-right: none !important;
 }
 [data-testid="stSidebar"] [data-testid="stWidgetLabel"],
 [data-testid="stSidebar"] label {
     font-family: 'DM Sans', sans-serif !important;
-    color: #1e3a22 !important;
-    font-size: 0.78rem !important;
+    color: #a8c4a8 !important;
+    font-size: 0.72rem !important;
     font-weight: 600 !important;
-    letter-spacing: 0.02em !important;
+    letter-spacing: 0.08em !important;
     text-transform: uppercase !important;
+}
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] .stCaption,
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
+    color: #6a8f6a !important;
+}
+[data-testid="stSidebar"] hr {
+    border-color: #1e3a1e !important;
+}
+[data-testid="stSidebar"] [data-baseweb="select"] > div,
+[data-testid="stSidebar"] [data-testid="stSelectbox"] > div > div {
+    background: #1a2e1a !important;
+    border-color: #2d4a2d !important;
+    color: #e0ede0 !important;
+}
+[data-testid="stSidebar"] [data-baseweb="radio"] label span,
+[data-testid="stSidebar"] [data-baseweb="checkbox"] label span {
+    color: #c8dfc4 !important;
+}
+[data-testid="stSidebar"] [data-testid="stSlider"] [data-testid="stTickBar"] {
+    color: #6a8f6a !important;
+}
+[data-testid="stSidebar"] [role="slider"] {
+    background: #2d6a2d !important;
 }
 
 /* ── Tabs ── */
 [data-testid="stTabs"] {
-    border-bottom: 1px solid #e4ede6 !important;
+    border-bottom: none !important;
+    margin-bottom: 1.5rem !important;
+}
+[data-baseweb="tab-list"] {
+    background: #e8ede9 !important;
+    border-radius: 12px !important;
+    padding: 4px !important;
+    gap: 2px !important;
+    border: none !important;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.06) !important;
+}
+[data-baseweb="tab-border"] {
+    display: none !important;
 }
 [data-testid="stTabs"] [data-baseweb="tab"] {
     font-family: 'DM Sans', sans-serif !important;
     font-weight: 500 !important;
-    font-size: 0.85rem !important;
-    color: #7a9e82 !important;
-    padding: 0.65rem 1rem !important;
-    border-radius: 0 !important;
+    font-size: 0.82rem !important;
+    color: #52725a !important;
+    padding: 0.45rem 1.05rem !important;
+    border-radius: 9px !important;
     background: transparent !important;
+    border: none !important;
+    transition: color 0.18s ease, background 0.18s ease !important;
+    letter-spacing: 0.01em !important;
+    white-space: nowrap !important;
+}
+[data-testid="stTabs"] [data-baseweb="tab"]:hover {
+    color: #1e3a22 !important;
+    background: rgba(255,255,255,0.55) !important;
 }
 [data-testid="stTabs"] [aria-selected="true"] {
-    color: #1e3a22 !important;
+    color: #ffffff !important;
     font-weight: 600 !important;
-    border-bottom: 2px solid #2d6a2d !important;
+    background: #1e3a22 !important;
+    box-shadow: 0 2px 8px rgba(30,58,34,0.22), 0 1px 3px rgba(0,0,0,0.1) !important;
+    border-bottom: none !important;
 }
 
 /* ── Dataframes ── */
@@ -178,19 +242,15 @@ h1 {
     border: 1px solid #bbf7d0;
 }
 
-/* ── Alerts ── */
-[data-testid="stAlert"] {
-    border-radius: 10px !important;
-    font-family: 'DM Sans', sans-serif !important;
-    font-size: 0.84rem !important;
-    border: none !important;
-}
+/* ── Alerts — hide native Streamlit ones (replaced by note() helper) ── */
+[data-testid="stAlert"] { display: none !important; }
 
 /* ── Captions ── */
 .stCaption, [data-testid="stCaptionContainer"] {
-    font-size: 0.75rem !important;
-    color: #7a9e82 !important;
+    font-size: 0.68rem !important;
+    color: #8aaa8a !important;
     font-family: 'DM Sans', sans-serif !important;
+    opacity: 0.8 !important;
 }
 
 /* ── Selectbox / inputs ── */
@@ -214,18 +274,25 @@ COLOR = {
     "success": "#1a5c2a",       # deep success green
     "danger": "#c0392b",        # clean red
     "warning": "#d97706",       # amber
+    "accent": "#d97706",        # amber — replaces purple for ROE/secondary charts
     "text": "#0f1f0f",          # near-black
     "text_secondary": "#52725a",# medium green-grey
     "card_bg": "#ffffff",       # pure white cards
     "border": "#e4ede6",        # soft green border
-    "chart_bg": "#ffffff",      # white chart background
+    "chart_bg": "#f8faf8",      # off-white chart background
 }
 
-PERIOD_ORDER = ["FY2021", "FY2022", "FY2023", "FY2024", "FY2025", "9MFY26 (Ann.)"]
+PERIOD_ORDER = ["FY2021", "FY2022", "FY2023", "FY2024", "FY2025", "9MFY26"]
 PERIOD_SHORT = {
     "FY2021": "FY21", "FY2022": "FY22", "FY2023": "FY23",
-    "FY2024": "FY24", "FY2025": "FY25", "9MFY26 (Ann.)": "9MFY26",
+    "FY2024": "FY24", "FY2025": "FY25", "9MFY26": "9MFY26",
 }
+
+# ── Ensure DB exists ─────────────────────────────────────────────────────────
+import os as _os
+if not _os.path.exists("data/nbfc_full.db"):
+    import build_db as _build_db
+    _build_db.build()
 
 # ── Data loaders ─────────────────────────────────────────────────────────────
 
@@ -262,19 +329,50 @@ def truncate_name(name, n=24):
 
 def annualise_9m(df):
     """
-    Build annualised 9MFY26 rows from FY2026-Q3 data.
-    Flow metrics (NII, PAT, credit_losses_cr) are multiplied ×4/3.
-    Stock/ratio metrics use Q3 point-in-time value as-is.
+    Build 9MFY26 rows from FY2026-Q3 data.
+    - NII, PAT, credit_losses_cr: raw 9-month values (not scaled).
+    - ROA/ROE: recalculated using annualised PAT (×4/3) ÷ avg assets/equity.
+    - credit_loss_rate_pct: annualised credit losses (×4/3) ÷ avg loan book
+      (avg of FY2025 closing and Q3 closing).
     """
-    FLOW = ["net_interest_income_cr", "pat_cr", "credit_losses_cr"]
     q3 = df[df["period"] == "FY2026-Q3"].copy()
     if q3.empty:
         return pd.DataFrame()
     ann = q3.copy()
-    ann["period"] = "9MFY26 (Ann.)"
-    for col in FLOW:
-        if col in ann.columns:
-            ann[col] = ann[col] * (4 / 3)
+    ann["period"] = "9MFY26"
+
+    fy25 = df[df["period"] == "FY2025"]
+
+    # ROA: annualised PAT ÷ avg total assets (FY25 + Q3) / 2
+    if "pat_cr" in ann.columns and "total_assets_cr" in ann.columns and not fy25.empty:
+        ann_pat = ann["pat_cr"] * (4 / 3)
+        fy25_assets = fy25.set_index("nbfc_id")["total_assets_cr"]
+        avg_assets = ann.apply(
+            lambda r: (fy25_assets.get(r["nbfc_id"], r["total_assets_cr"]) + r["total_assets_cr"]) / 2,
+            axis=1,
+        )
+        ann["roa_pct"] = (ann_pat.values / avg_assets.values * 100)
+
+    # ROE: annualised PAT ÷ avg equity (FY25 + Q3) / 2
+    if "pat_cr" in ann.columns and "equity_cr" in ann.columns and not fy25.empty:
+        ann_pat = ann["pat_cr"] * (4 / 3)
+        fy25_equity = fy25.set_index("nbfc_id")["equity_cr"]
+        avg_equity = ann.apply(
+            lambda r: (fy25_equity.get(r["nbfc_id"], r["equity_cr"]) + r["equity_cr"]) / 2,
+            axis=1,
+        )
+        ann["roe_pct"] = (ann_pat.values / avg_equity.values * 100)
+
+    # Credit loss rate: annualised credit losses (×4/3) ÷ avg loan book (FY25 + Q3) / 2
+    if "credit_losses_cr" in ann.columns and "loan_book_cr" in ann.columns and not fy25.empty:
+        ann_cl = ann["credit_losses_cr"] * (4 / 3)
+        fy25_lb = fy25.set_index("nbfc_id")["loan_book_cr"]
+        avg_lb = ann.apply(
+            lambda r: (fy25_lb.get(r["nbfc_id"], r["loan_book_cr"]) + r["loan_book_cr"]) / 2,
+            axis=1,
+        )
+        ann["credit_loss_rate_pct"] = (ann_cl.values / avg_lb.values * 100)
+
     return ann
 
 
@@ -289,7 +387,7 @@ def get_chart_periods(df):
 
 def get_latest_period_data(df):
     """
-    Per company: use 9MFY26 (Ann.) if FY2026-Q3 exists, else FY2025.
+    Per company: use 9MFY26 if FY2026-Q3 exists, else FY2025.
     """
     ann_9m = annualise_9m(df)
     annual = annual_only(df)
@@ -302,7 +400,7 @@ def get_latest_period_data(df):
 
 
 def latest_period_label(df):
-    return "FY25 / 9MFY26 (Ann.)" if "FY2026-Q3" in df["period"].values else "FY25"
+    return "FY25 / 9MFY26" if "FY2026-Q3" in df["period"].values else "FY25"
 
 
 def compute_cagr(df, metric_col, start_year="FY2021", end_year="FY2025"):
@@ -322,7 +420,7 @@ def compute_cagr(df, metric_col, start_year="FY2021", end_year="FY2025"):
 def compute_latest_growth(df, metric_col):
     """
     Per-company 1-year AUM growth using the most recent pair available:
-      - If 9MFY26 (Ann.) exists → (9MFY26 Ann. − FY2025) / FY2025
+      - If 9MFY26 exists → (9MFY26 − FY2025) / FY2025
       - Otherwise             → (FY2025 − FY2024) / FY2024
     Returns DataFrame with columns: name, growth_pct, period_label
     """
@@ -339,7 +437,7 @@ def compute_latest_growth(df, metric_col):
         merged = ann.merge(fy25, on=["nbfc_id", "name"], how="inner")
         merged = merged[(merged["recent"] > 0) & (merged["fy25"] > 0)]
         merged["growth_pct"] = (merged["recent"] / merged["fy25"] - 1) * 100
-        merged["period_label"] = "9MFY26 Ann. vs FY25"
+        merged["period_label"] = "9MFY26 vs FY25"
         rows.append(merged[["name", "growth_pct", "period_label"]])
 
     # Companies without Q3 data use FY25 vs FY24
@@ -363,8 +461,13 @@ def bar_chart_height(n, min_h=340, max_h=800, px_per_row=30):
 
 CHART_FONT = "DM Sans"
 CHART_MONO = "DM Mono"
-CHART_BG = "#ffffff"
-CHART_GRID = "#f0f4f1"
+CHART_BG = "#f8faf8"
+CHART_GRID = "#eaf0ea"
+HOVER_LABEL = dict(
+    bgcolor="#0f1f0f", bordercolor="#0f1f0f",
+    font=dict(family=CHART_MONO, size=11, color="#c8dfc4"),
+    align="left",
+)
 
 
 def wrap_title(title, max_len=32):
@@ -381,7 +484,23 @@ def wrap_title(title, max_len=32):
     return title
 
 
-def make_hbar(df, x_col, y_col, color, title, height=None):
+def note(text, kind="info"):
+    """Render a minimal, elegant disclosure note with a left-border accent."""
+    palette = {
+        "info":    {"border": "#3d8b6e", "color": "#2d5a45"},
+        "warning": {"border": "#d97706", "color": "#7c4a00"},
+        "error":   {"border": "#c0392b", "color": "#7f1d1d"},
+    }
+    p = palette.get(kind, palette["info"])
+    st.markdown(
+        f'<div style="border-left:2px solid {p["border"]};padding:0.28rem 0.85rem;'
+        f'margin:0.6rem 0;font-family:\'DM Sans\',sans-serif;font-size:0.7rem;'
+        f'color:{p["color"]};line-height:1.55;opacity:0.82;">{text}</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None):
     """Standard horizontal bar chart — pass data sorted DESCENDING (chart reverses y-axis)."""
     df = df.copy()
     df[y_col] = df[y_col].apply(lambda n: truncate_name(str(n)))
@@ -412,9 +531,14 @@ def make_hbar(df, x_col, y_col, color, title, height=None):
         xaxis=dict(showgrid=True, gridcolor=CHART_GRID, showticklabels=False,
                    range=x_range, zeroline=False, tickcolor="rgba(0,0,0,0)", title=""),
         margin=dict(l=10, r=130, t=82, b=20),
-        hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6",
-                        font=dict(family=CHART_FONT, size=12)),
+        hoverlabel=HOVER_LABEL,
     )
+    if hover_text is not None:
+        import numpy as np
+        fig.update_traces(customdata=np.array(hover_text).reshape(-1, 1),
+                          hovertemplate="%{customdata[0]}<extra></extra>")
+    else:
+        fig.update_traces(hovertemplate="<extra></extra>")
     return fig
 
 
@@ -451,19 +575,19 @@ def chart_layout(fig, title=None):
             xanchor="left", x=0,
             title_text="",
         ),
-        hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6",
-                        font=dict(family=CHART_FONT, size=12)),
+        hoverlabel=HOVER_LABEL,
     )
+    fig.update_traces(hovertemplate="%{x}<extra></extra>")
     return fig
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 
 st.sidebar.markdown("""
 <div style="padding: 0.3rem 0 1rem 0;">
-  <div style="font-family:'Fraunces',serif; font-size:1.15rem; font-weight:600; color:#0f1f0f; letter-spacing:-0.02em;">NBFC Intelligence</div>
-  <div style="font-family:'DM Sans',sans-serif; font-size:0.7rem; color:#52725a; letter-spacing:0.06em; text-transform:uppercase; margin-top:2px;">India · FY2021–9MFY26</div>
+  <div style="font-family:'Fraunces',serif; font-size:1.15rem; font-weight:600; color:#e8f0e8; letter-spacing:-0.02em;">NBFC Intelligence</div>
+  <div style="font-family:'DM Sans',sans-serif; font-size:0.7rem; color:#6a8f6a; letter-spacing:0.06em; text-transform:uppercase; margin-top:2px;">India · FY2021–9MFY26</div>
 </div>
-<hr style="border:none; border-top:1px solid #e4ede6; margin:0 0 1rem 0;">
+<hr style="border:none; border-top:1px solid #1e3a1e; margin:0 0 1rem 0;">
 """, unsafe_allow_html=True)
 
 nbfc_df = load_nbfc_table()
@@ -537,16 +661,16 @@ c5.metric("Avg GNPA", f"{avg_gnpa:.2f}%", help="FY25")
 # ── Tabs ──────────────────────────────────────────────────────────────────────
 
 tabs = st.tabs([
-    "📈 Growth", "💰 Profitability", "🏥 Asset Quality",
-    "⚠️ Credit Losses", "🔍 Deep Dive",
-    "💹 Valuation", "🌐 Universe", "🗃️ Data", "📊 Trends",
+    "Growth", "Profitability", "Asset Quality",
+    "Credit Losses", "NBFC Specific",
+    "Valuation", "Data", "Trends",
 ])
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 1: GROWTH
 # ─────────────────────────────────────────────────────────────────────────────
 with tabs[0]:
-    st.markdown('<div class="section-header">AUM Growth — Latest 1 Year (9MFY26 Ann. vs FY25 where available, else FY25 vs FY24)</div>',
+    st.markdown('<div class="section-header">AUM Growth — Latest 1 Year (9MFY26 vs FY25 where available, else FY25 vs FY24)</div>',
                 unsafe_allow_html=True)
 
     growth_df = compute_latest_growth(fin_filtered, "loan_book_cr").dropna(subset=["growth_pct"])
@@ -564,11 +688,13 @@ with tabs[0]:
     col1, col2 = st.columns(2)
     with col1:
         fig = make_hbar(top_growers, "growth_pct", "display_name",
-                        COLOR["success"], f"Top {min(20, len(top_growers))} Fastest Growing")
+                        COLOR["success"], f"Top {min(20, len(top_growers))} Fastest Growing",
+                        hover_text=top_growers["period_label"].values)
         st.plotly_chart(fig, use_container_width=True)
     with col2:
         fig = make_hbar(bottom_growers, "growth_pct", "display_name",
-                        COLOR["danger"], "Slowest Growing / Contracting")
+                        COLOR["danger"], "Slowest Growing / Contracting",
+                        hover_text=bottom_growers["period_label"].values)
         st.plotly_chart(fig, use_container_width=True)
 
     st.caption("★ = estimated data. Where 9MFY26 data exists: growth vs FY25. Otherwise: FY25 vs FY24.")
@@ -596,6 +722,7 @@ with tabs[0]:
         fig.add_vline(x=median_growth, line_dash="dot", line_color=COLOR["text_secondary"],
                       annotation_text=f"Median: {median_growth:.1f}%")
         chart_layout(fig)
+        fig.update_traces(hovertemplate="%{hovertext}<extra></extra>")
         st.plotly_chart(fig, use_container_width=True)
 
     # Growth by sector
@@ -604,7 +731,8 @@ with tabs[0]:
         fin_filtered[["name", "sector"]].drop_duplicates(), on="name", how="left"
     ).groupby("sector")["growth_pct"].mean().reset_index().sort_values("growth_pct", ascending=False)
     fig = make_hbar(sector_growth, "growth_pct", "sector", COLOR["primary"],
-                    "Avg AUM Growth % by Sector")
+                    "Avg AUM Growth % by Sector",
+                    hover_text=[lbl] * len(sector_growth))
     st.plotly_chart(fig, use_container_width=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -620,15 +748,17 @@ with tabs[1]:
     with col1:
         top_roa = latest_snap.nlargest(top_n, "roa_pct").sort_values("roa_pct", ascending=False)
         fig = make_hbar(top_roa, "roa_pct", "name", COLOR["primary"],
-                        f"Top {top_n} by ROA %")
+                        f"Top {top_n} by ROA %",
+                        hover_text=top_roa["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values)
         st.plotly_chart(fig, use_container_width=True)
     with col2:
         top_roe = latest_snap.nlargest(top_n, "roe_pct").sort_values("roe_pct", ascending=False)
-        fig = make_hbar(top_roe, "roe_pct", "name", "#7c3aed",
-                        f"Top {top_n} by ROE %")
+        fig = make_hbar(top_roe, "roe_pct", "name", COLOR["accent"],
+                        f"Top {top_n} by ROE %",
+                        hover_text=top_roe["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values)
         st.plotly_chart(fig, use_container_width=True)
 
-    st.caption(f"Where 9MFY26 data exists: 9MFY26 Ann. ROA/ROE used. Otherwise FY25. "
+    st.caption(f"Where 9MFY26 data exists: 9MFY26 ROA/ROE used. Otherwise FY25. "
                f"★ = estimated data.")
 
     # Sector breakdown — latest period
@@ -644,7 +774,7 @@ with tabs[1]:
                          text=sector_avg["roa"].round(1), textposition="outside",
                          textfont=dict(family=CHART_MONO, size=10)))
     fig.add_trace(go.Bar(name="ROE %", x=sector_avg["sector"], y=sector_avg["roe"],
-                         marker_color="#7c3aed",
+                         marker_color=COLOR["accent"],
                          text=sector_avg["roe"].round(1), textposition="outside",
                          textfont=dict(family=CHART_MONO, size=10)))
     fig.update_layout(barmode="group", paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
@@ -663,8 +793,7 @@ with tabs[1]:
                                  tickcolor="rgba(0,0,0,0)", linecolor="rgba(0,0,0,0)", title=""),
                       yaxis=dict(gridcolor=CHART_GRID,
                                  tickcolor="rgba(0,0,0,0)", title=""),
-                      hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6",
-                                      font=dict(family=CHART_FONT, size=12)),
+                      hoverlabel=HOVER_LABEL,
                       uniformtext_minsize=8, uniformtext_mode="hide")
     st.plotly_chart(fig, use_container_width=True)
 
@@ -681,7 +810,7 @@ with tabs[1]:
                   category_orders={"period": PERIOD_ORDER})
     chart_layout(fig)
     st.plotly_chart(fig, use_container_width=True)
-    st.caption("9MFY26 (Ann.) = Q3 FY26 nine-month PAT annualised (×4/3).")
+    st.caption("9MFY26 = Q3 FY26 nine-month PAT (raw, not annualised).")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 3: ASSET QUALITY
@@ -695,15 +824,17 @@ with tabs[2]:
     with col1:
         cleanest = latest_snap.nsmallest(20, "gnpa_pct").sort_values("gnpa_pct", ascending=False)
         fig = make_hbar(cleanest, "gnpa_pct", "name", COLOR["success"],
-                        f"Lowest GNPA % ({lbl})")
+                        f"Lowest GNPA % ({lbl})",
+                        hover_text=cleanest["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values)
         st.plotly_chart(fig, use_container_width=True)
     with col2:
         stressed = latest_snap.nlargest(20, "gnpa_pct").sort_values("gnpa_pct", ascending=False)
         fig = make_hbar(stressed, "gnpa_pct", "name", COLOR["danger"],
-                        f"Highest GNPA % ({lbl})")
+                        f"Highest GNPA % ({lbl})",
+                        hover_text=stressed["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values)
         st.plotly_chart(fig, use_container_width=True)
 
-    st.caption(f"GNPA % is a stock/point-in-time metric — 9MFY26 (Ann.) uses Q3 value directly, no annualisation.")
+    st.caption(f"GNPA % is a stock/point-in-time metric — 9MFY26 uses Q3 value directly, no annualisation.")
 
     # Trend by sector
     st.markdown(f'<div class="section-header">GNPA Trend by Sector — FY2021 to {lbl}</div>',
@@ -747,16 +878,17 @@ with tabs[2]:
         margin=dict(t=82, b=30, l=10, r=30),
         xaxis=dict(title=""),
         yaxis=dict(title=""),
-        hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6", font=dict(family=CHART_FONT, size=12)),
+        hoverlabel=HOVER_LABEL,
     )
+    fig.update_traces(hovertemplate="%{x}<extra></extra>")
     st.plotly_chart(fig, use_container_width=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 4: CREDIT LOSSES
 # ─────────────────────────────────────────────────────────────────────────────
 with tabs[3]:
-    st.info("**Credit Loss Rate** = (Net Provisions + Write-offs − Recoveries) ÷ Loan Book. "
-            "This is the actual P&L cost of defaults — different from GNPA which is a stock measure.")
+    note("Credit Loss Rate = (Net Provisions + Write-offs − Recoveries) ÷ Loan Book. "
+         "This is the actual P&L cost of defaults — different from GNPA which is a stock measure.")
 
     lbl = latest_period_label(fin_filtered)
     latest_snap = get_latest_period_data(fin_filtered).dropna(subset=["credit_loss_rate_pct"])
@@ -766,16 +898,18 @@ with tabs[3]:
         lowest = latest_snap.nsmallest(20, "credit_loss_rate_pct").sort_values(
             "credit_loss_rate_pct", ascending=False)
         fig = make_hbar(lowest, "credit_loss_rate_pct", "name", COLOR["success"],
-                        f"Lowest Credit Loss Rate ({lbl})")
+                        f"Lowest Credit Loss Rate ({lbl})",
+                        hover_text=lowest["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values)
         st.plotly_chart(fig, use_container_width=True)
     with col2:
         highest = latest_snap.nlargest(20, "credit_loss_rate_pct").sort_values(
             "credit_loss_rate_pct", ascending=False)
         fig = make_hbar(highest, "credit_loss_rate_pct", "name", COLOR["danger"],
-                        f"Highest Credit Loss Rate ({lbl})")
+                        f"Highest Credit Loss Rate ({lbl})",
+                        hover_text=highest["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values)
         st.plotly_chart(fig, use_container_width=True)
 
-    st.caption(f"Credit loss rate % shown as of {lbl}. 9MFY26 (Ann.) uses Q3 ratio — not annualised.")
+    st.caption(f"Credit loss rate % shown as of {lbl}. 9MFY26 uses Q3 ratio — not annualised.")
 
     # Trend for top stressed
     st.markdown(f'<div class="section-header">Credit Loss Rate Trend — FY2021 to {lbl}</div>',
@@ -802,6 +936,7 @@ with tabs[3]:
                          labels={"gnpa_pct": "GNPA %", "credit_loss_rate_pct": "Credit Loss Rate %"},
                          title=f"Credit Loss Rate vs GNPA — {lbl} (bubble = loan book)", height=520)
         chart_layout(fig)
+        fig.update_traces(hovertemplate="%{hovertext}<extra></extra>")
         st.plotly_chart(fig, use_container_width=True)
 
     # Waterfall: FY2021 → FY2025 (annual only)
@@ -869,14 +1004,14 @@ with tabs[3]:
         margin=dict(t=82, b=30, l=10, r=30),
         xaxis=dict(title=""),
         yaxis=dict(title=""),
-        hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6", font=dict(family=CHART_FONT, size=12)),
+        hoverlabel=HOVER_LABEL,
     )
     st.plotly_chart(fig, use_container_width=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TAB 9: TRENDS
+# TAB 8: TRENDS
 # ─────────────────────────────────────────────────────────────────────────────
-with tabs[8]:
+with tabs[7]:
     lbl = latest_period_label(fin_filtered)
     latest_snap = get_latest_period_data(fin_filtered)
     top10 = latest_snap.nlargest(10, "loan_book_cr")["name"].tolist()
@@ -891,7 +1026,7 @@ with tabs[8]:
                   category_orders={"period": PERIOD_ORDER})
     chart_layout(fig)
     st.plotly_chart(fig, use_container_width=True)
-    st.caption("9MFY26 (Ann.) loan book = Q3 FY26 closing loan book (point-in-time, not annualised).")
+    st.caption("9MFY26 loan book = Q3 FY26 closing loan book (point-in-time, not annualised).")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -903,7 +1038,7 @@ with tabs[8]:
                       category_orders={"period": PERIOD_ORDER})
         chart_layout(fig)
         st.plotly_chart(fig, use_container_width=True)
-        st.caption("9MFY26 (Ann.) NII = 9-month NII annualised (×4/3).")
+        st.caption("9MFY26 NII = raw 9-month NII (not annualised).")
 
     with col2:
         st.markdown(f'<div class="section-header">Industry Assets by RBI Layer (to {lbl})</div>',
@@ -914,7 +1049,7 @@ with tabs[8]:
                       category_orders={"period": PERIOD_ORDER})
         chart_layout(fig)
         st.plotly_chart(fig, use_container_width=True)
-        st.caption("9MFY26 (Ann.) assets = Q3 FY26 closing total assets (point-in-time).")
+        st.caption("9MFY26 assets = Q3 FY26 closing total assets (point-in-time).")
 
     # ROA trend
     st.markdown(f'<div class="section-header">Return on Assets Trend (to {lbl})</div>',
@@ -933,8 +1068,9 @@ with tabs[8]:
     # filter out extreme negatives (loss → profit)
     pat_cagr = pat_cagr[pat_cagr["cagr_pct"].between(-50, 200)]
     top_pat = pat_cagr.head(top_n).sort_values("cagr_pct", ascending=False)
-    fig = make_hbar(top_pat, "cagr_pct", "name", "#7c3aed",
-                    f"PAT CAGR % (FY21–25) — Top {top_n}")
+    fig = make_hbar(top_pat, "cagr_pct", "name", COLOR["accent"],
+                    f"PAT CAGR % (FY21–25) — Top {top_n}",
+                    hover_text=["FY21–FY25"] * len(top_pat))
     st.plotly_chart(fig, use_container_width=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -977,16 +1113,16 @@ with tabs[4]:
             st.markdown("")
 
         if company_info is not None and company_info.get("data_quality") in ["estimated", "unverified"]:
-            st.warning("⚠️ This company's data includes estimated or unverified figures.")
+            note("This company's data includes estimated or unverified figures.", "warning")
 
         has_q3 = "FY2026-Q3" in company_fin["period"].values
         if has_q3:
-            st.info("ℹ️ FY2026-Q3 data available. Charts show annualised 9MFY26 as latest period. "
-                    "Annual averages use FY2021–FY2025 only.")
+            note("FY2026-Q3 data available. Charts show 9MFY26 (raw 9-month figures) as latest period. "
+                 "Annual averages use FY2021–FY2025 only.")
 
         # Check for Fibe Q2/Q3 gap
         if "Fibe" in selected or "EarlySalary" in selected:
-            st.warning("ℹ️ Fibe (EarlySalary): FY2026 Q2 and Q3 data unavailable — showing FY2025 as latest.")
+            note("Fibe (EarlySalary): FY2026 Q2 and Q3 data unavailable — showing FY2025 as latest.", "warning")
 
         # Key metrics
         lbl = latest_period_label(company_fin)
@@ -1021,6 +1157,7 @@ with tabs[4]:
                               cliponaxis=False)
             chart_layout(fig)
             fig.update_layout(margin=DD_MARGIN, legend=DD_LEGEND)
+            fig.update_traces(hovertemplate="₹%{y:,.0f} Cr<extra></extra>")
             st.plotly_chart(fig, use_container_width=True)
         with col2:
             nii_pat = chart_df[["period", "net_interest_income_cr", "pat_cr"]].dropna().rename(
@@ -1030,6 +1167,7 @@ with tabs[4]:
                           category_orders={"period": PERIOD_ORDER}, markers=True)
             chart_layout(fig)
             fig.update_layout(margin=DD_MARGIN, legend=DD_LEGEND)
+            fig.update_traces(hovertemplate="₹%{y:,.0f} Cr<extra></extra>")
             st.plotly_chart(fig, use_container_width=True)
 
         col3, col4 = st.columns(2)
@@ -1041,6 +1179,7 @@ with tabs[4]:
             fig.update_traces(line_color=COLOR["danger"], marker_color=COLOR["danger"])
             chart_layout(fig)
             fig.update_layout(margin=DD_MARGIN, showlegend=False)
+            fig.update_traces(hovertemplate="%{y:.2f}%<extra></extra>")
             st.plotly_chart(fig, use_container_width=True)
         with col4:
             ror_df = chart_df[["period", "roa_pct", "roe_pct"]].dropna().rename(
@@ -1050,6 +1189,7 @@ with tabs[4]:
                           category_orders={"period": PERIOD_ORDER})
             chart_layout(fig)
             fig.update_layout(margin=DD_MARGIN, legend=DD_LEGEND)
+            fig.update_traces(hovertemplate="%{y:.2f}%<extra></extra>")
             st.plotly_chart(fig, use_container_width=True)
 
         cl_df = chart_df[["period", "credit_loss_rate_pct"]].dropna()
@@ -1060,6 +1200,7 @@ with tabs[4]:
                       annotation_text="2% reference")
         chart_layout(fig)
         fig.update_layout(margin=DD_MARGIN, showlegend=False)
+        fig.update_traces(hovertemplate="%{y:.2f}%<extra></extra>")
         st.plotly_chart(fig, use_container_width=True)
 
         # Financial table
@@ -1073,14 +1214,13 @@ with tabs[4]:
                           "GNPA %", "ROA %", "ROE %"][:len(table_df)]
         st.dataframe(table_df.style.format("{:.1f}", na_rep="N/A"), use_container_width=True)
         if has_q3:
-            st.caption("9MFY26 (Ann.): flow metrics (NII, PAT) annualised ×4/3. "
-                       "Stock/ratio metrics (assets, loan book, GNPA, ROA, ROE) shown as Q3 point-in-time.")
+            st.caption("9MFY26: all figures are raw 9-month / Q3 point-in-time values.")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 7: VALUATION
 # ─────────────────────────────────────────────────────────────────────────────
 with tabs[5]:
-    st.info("📡 Live data from Yahoo Finance. P/E is trailing twelve months. Refreshes every hour.")
+    note("Live data from Yahoo Finance. P/E is trailing twelve months. Refreshes every hour.")
 
     TICKER_MAP = {
         "Bajaj Finance": "BAJFINANCE.NS",
@@ -1202,14 +1342,14 @@ with tabs[5]:
             val_with_price = val_df.dropna(subset=["price"])
             using_cache = True
         else:
-            st.error("Could not fetch live data and no cached data available. Try again later.")
+            note("Could not fetch live data and no cached data available. Try again later.", "error")
             st.stop()
     else:
         # Successful fetch — save to disk cache for next time
         save_val_cache(val_with_price)
 
     if using_cache:
-        st.warning(f"⚠️ Live fetch failed (Yahoo Finance rate limit). Showing last cached data from **{cache_ts}**.")
+        note(f"Live fetch failed (Yahoo Finance rate limit). Showing cached data from {cache_ts}.", "warning")
     else:
         st.caption(f"Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
 
@@ -1227,12 +1367,14 @@ with tabs[5]:
         with col1:
             pe_df = val_with_price.dropna(subset=["pe"]).sort_values("pe", ascending=False)
             fig = make_hbar(pe_df, "pe", "company", COLOR["primary"], "P/E Ratio (TTM)",
-                            height=bar_chart_height(len(pe_df)))
+                            height=bar_chart_height(len(pe_df)),
+                            hover_text=["TTM"] * len(pe_df))
             st.plotly_chart(fig, use_container_width=True)
         with col2:
             pb_df = val_with_price.dropna(subset=["pb"]).sort_values("pb", ascending=False)
-            fig = make_hbar(pb_df, "pb", "company", "#7c3aed", "P/B Ratio",
-                            height=bar_chart_height(len(pb_df)))
+            fig = make_hbar(pb_df, "pb", "company", COLOR["accent"], "P/B Ratio",
+                            height=bar_chart_height(len(pb_df)),
+                            hover_text=["Latest"] * len(pb_df))
             st.plotly_chart(fig, use_container_width=True)
 
         # 12M price change
@@ -1281,79 +1423,9 @@ with tabs[5]:
         )
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TAB 8: UNIVERSE
+# TAB 8: DATA
 # ─────────────────────────────────────────────────────────────────────────────
 with tabs[6]:
-    lbl = latest_period_label(fin_filtered)
-
-    st.markdown('<div class="section-header">RBI Layer Distribution (Full 9,359 Registry)</div>',
-                unsafe_allow_html=True)
-    layer_counts = pd.DataFrame({
-        "Layer": ["Upper", "Middle", "Base"],
-        "Count": [16, 100, 9243],
-    })
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        fig = px.pie(layer_counts, values="Count", names="Layer", hole=0.5,
-                     color_discrete_map={"Upper": COLOR["primary"], "Middle": "#0891b2", "Base": "#64748b"})
-        fig.update_layout(
-            paper_bgcolor=CHART_BG,
-            font=dict(family=CHART_FONT, color=COLOR["text_secondary"]),
-            title=dict(text="NBFCs by RBI Layer",
-                       font=dict(color=COLOR["text"], family=CHART_FONT, size=14, weight="bold"),
-                       x=0, xanchor="left", xref="paper", pad=dict(t=6, b=10)),
-            margin=dict(t=82, b=20, l=10, r=10),
-            legend=dict(font=dict(family=CHART_FONT, size=12),
-                        bgcolor="rgba(255,255,255,0)", borderwidth=0),
-            hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6",
-                            font=dict(family=CHART_FONT, size=12)),
-        )
-        st.plotly_chart(fig, use_container_width=True)
-    with col2:
-        st.dataframe(layer_counts, hide_index=True, use_container_width=True)
-
-    # Sector coverage
-    st.markdown('<div class="section-header">Financial Data Coverage by Sector</div>',
-                unsafe_allow_html=True)
-    sector_counts = (
-        nbfc_filtered[nbfc_filtered["has_financials"] == 1]
-        .groupby("sector").size().reset_index(name="count")
-        .sort_values("count", ascending=False)
-    )
-    fig = make_hbar(sector_counts, "count", "sector", COLOR["primary"],
-                    "Companies with Financial Data by Sector")
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Full sortable table
-    st.markdown(f'<div class="section-header">All Companies — Key Metrics as of {lbl}</div>',
-                unsafe_allow_html=True)
-    latest_snap = get_latest_period_data(fin_filtered)[
-        ["name", "total_assets_cr", "loan_book_cr", "gnpa_pct", "roa_pct", "roe_pct", "data_quality"]
-    ]
-    universe_table = nbfc_filtered.merge(latest_snap, on="name", how="left",
-                                         suffixes=("", "_fin"))
-
-    dq_col = "data_quality_fin" if "data_quality_fin" in universe_table.columns else "data_quality"
-    universe_table["⚠️"] = universe_table[dq_col].apply(
-        lambda x: "⚠️ Est." if x == "estimated" else ("❌ Unverified" if x == "unverified" else "✓")
-    )
-    universe_table = universe_table.sort_values("total_assets_cr", ascending=False, na_position="last")
-
-    st.dataframe(universe_table[[
-        "name", "rbi_layer", "sector", "listed", "total_assets_cr",
-        "loan_book_cr", "gnpa_pct", "roa_pct", "roe_pct", "⚠️",
-    ]].rename(columns={
-        "name": "Company", "rbi_layer": "Layer", "sector": "Sector",
-        "listed": "Listed", "total_assets_cr": f"Assets (₹ Cr, {lbl})",
-        "loan_book_cr": f"Loan Book (₹ Cr, {lbl})", "gnpa_pct": f"GNPA % ({lbl})",
-        "roa_pct": f"ROA % ({lbl})", "roe_pct": f"ROE % ({lbl})",
-    }), use_container_width=True, hide_index=True)
-    st.caption(f"Metrics as of {lbl}. 9MFY26 (Ann.): flow metrics annualised ×4/3; ratios/stock metrics are Q3 point-in-time.")
-
-# ─────────────────────────────────────────────────────────────────────────────
-# TAB 9: DATA
-# ─────────────────────────────────────────────────────────────────────────────
-with tabs[7]:
     search = st.text_input("Search companies", placeholder="Type company name…")
     lbl = latest_period_label(fin_filtered)
 
@@ -1378,7 +1450,7 @@ with tabs[7]:
     }), use_container_width=True, hide_index=True)
     st.caption(
         f"Showing most recent available period per company. "
-        f"Where FY2026-Q3 data exists, 9MFY26 (Ann.) is shown. "
+        f"Where FY2026-Q3 data exists, 9MFY26 is shown. "
         f"Flow metrics annualised ×4/3. Ratios/stock metrics are Q3 point-in-time."
     )
 
@@ -1387,7 +1459,7 @@ with tabs[7]:
     st.download_button("⬇️ Download CSV", csv, "nbfc_metrics.csv", "text/csv")
 
     # Full history
-    st.markdown('<div class="section-header">Full Financial History (Annual + 9MFY26 Ann.)</div>',
+    st.markdown('<div class="section-header">Full Financial History (Annual + 9MFY26)</div>',
                 unsafe_allow_html=True)
     raw = get_chart_periods(fin_filtered).copy()
     if search:
