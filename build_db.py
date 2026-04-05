@@ -104,6 +104,7 @@ COMPANIES = [
     ("Capital Float (Axio)", "Middle", "Consumer Finance", 0, 0, None, "unverified", None, "RBI Registry"),
     ("Slice NBFC", "Middle", "Consumer Finance", 0, 0, None, "unverified", None, "RBI Registry"),
     ("Tata Motors Finance", "Upper", "Vehicle Finance", 0, 0, None, "unverified", None, "RBI Registry"),
+    ("SBI Cards and Payment Services", "Upper", "Consumer Finance", 1, 1, 62000, "audited", "SBICARD.NS", "SBI Cards Annual Reports"),
 ]
 
 # ── Financial data ────────────────────────────────────────────────────────────
@@ -407,6 +408,13 @@ FINANCIALS = [
     ("Jio Financial Services", "FY2026-Q3", 18000, 160000, 152000, 780, 1520, 5, 0.04, 0.0, 1.3, 1.4, "estimated", "Jio Financial Services Q3FY26 - estimated from FY25 run-rate"),
     ("PayU Finance", "FY2026-Q3", 3800, 4900, 1520, 380, 85, 108, 3.8, 4.50, 2.7, 8.2, "unverified", "PayU Finance Q3FY26 - unverified"),
     ("WhizDM Finance", "FY2026-Q3", 9800, 12200, 3200, 990, 300, 228, 3.2, 3.45, 4.0, 14.0, "unverified", "WhizDM Finance Q3FY26 - unverified, needs verification"),
+    # ── SBI Cards and Payment Services ────────────────────────────────────────
+    ("SBI Cards and Payment Services", "FY2021", 26027, 31261, 9213, 3804, 985, 1752, 6.7, 4.99, 3.4, 11.8, "audited", "SBI Cards AR FY21"),
+    ("SBI Cards and Payment Services", "FY2022", 31190, 38009, 10085, 4474, 1616, 1621, 5.2, 2.22, 4.7, 17.1, "audited", "SBI Cards AR FY22"),
+    ("SBI Cards and Payment Services", "FY2023", 40628, 49300, 11627, 5633, 2258, 1952, 4.8, 2.52, 5.0, 20.9, "audited", "SBI Cards AR FY23"),
+    ("SBI Cards and Payment Services", "FY2024", 49299, 59424, 13212, 6392, 2407, 3064, 6.2, 3.06, 4.3, 19.9, "audited", "SBI Cards AR FY24"),
+    ("SBI Cards and Payment Services", "FY2025", 53534, 62000, 14800, 6840, 2411, 3600, 6.7, 3.82, 4.1, 17.4, "audited", "SBI Cards AR FY25"),
+    ("SBI Cards and Payment Services", "FY2026-Q3", 55100, 64200, 15400, 5020, 1480, 2590, 7.0, 4.20, 3.7, 15.8, "audited", "SBI Cards Q3FY26 Results"),
 ]
 
 
