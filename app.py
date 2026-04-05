@@ -343,15 +343,15 @@ def annualise_9m(df):
 
     fy25 = df[df["period"] == "FY2025"]
 
-    # ROA: annualised PAT ÷ avg total assets (FY25 + Q3) / 2
-    if "pat_cr" in ann.columns and "total_assets_cr" in ann.columns and not fy25.empty:
+    # ROA: annualised PAT ÷ avg loan book (FY25 + Q3) / 2
+    if "pat_cr" in ann.columns and "loan_book_cr" in ann.columns and not fy25.empty:
         ann_pat = ann["pat_cr"] * (4 / 3)
-        fy25_assets = fy25.set_index("nbfc_id")["total_assets_cr"]
-        avg_assets = ann.apply(
-            lambda r: (fy25_assets.get(r["nbfc_id"], r["total_assets_cr"]) + r["total_assets_cr"]) / 2,
+        fy25_lb = fy25.set_index("nbfc_id")["loan_book_cr"]
+        avg_lb = ann.apply(
+            lambda r: (fy25_lb.get(r["nbfc_id"], r["loan_book_cr"]) + r["loan_book_cr"]) / 2,
             axis=1,
         )
-        ann["roa_pct"] = (ann_pat.values / avg_assets.values * 100)
+        ann["roa_pct"] = (ann_pat.values / avg_lb.values * 100)
 
     # ROE: annualised PAT ÷ avg equity (FY25 + Q3) / 2
     if "pat_cr" in ann.columns and "equity_cr" in ann.columns and not fy25.empty:
