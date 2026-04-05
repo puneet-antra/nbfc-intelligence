@@ -331,7 +331,8 @@ def annualise_9m(df):
     """
     Build 9MFY26 rows from FY2026-Q3 data.
     - NII, PAT, credit_losses_cr: raw 9-month values (not scaled).
-    - ROA/ROE: recalculated using annualised PAT (×4/3) ÷ avg assets/equity.
+    - ROA: recalculated using annualised PAT (×4/3) ÷ avg loan book.
+    - ROE: recalculated using annualised PAT (×4/3) ÷ avg equity.
     - credit_loss_rate_pct: annualised credit losses (×4/3) ÷ avg loan book
       (avg of FY2025 closing and Q3 closing).
     """
