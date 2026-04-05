@@ -430,16 +430,20 @@ def chart_layout(fig, title=None):
         ),
         xaxis=dict(gridcolor=CHART_GRID, tickfont=dict(family=CHART_MONO, size=11),
                    showgrid=True, zeroline=False, tickcolor="rgba(0,0,0,0)",
-                   linecolor="rgba(0,0,0,0)"),
+                   linecolor="rgba(0,0,0,0)", title=""),
         yaxis=dict(gridcolor=CHART_GRID, tickfont=dict(family=CHART_FONT, size=12),
-                   zeroline=False, tickcolor="rgba(0,0,0,0)", linecolor="rgba(0,0,0,0)"),
-        margin=dict(t=82, b=44, l=10, r=24),
+                   zeroline=False, tickcolor="rgba(0,0,0,0)", linecolor="rgba(0,0,0,0)",
+                   title=""),
+        margin=dict(t=82, b=60, l=10, r=24),
         legend=dict(
-            font=dict(family=CHART_FONT, size=12),
-            bgcolor="rgba(255,255,255,0.9)",
-            bordercolor="#e4ede6",
-            borderwidth=1,
-                    ),
+            font=dict(family=CHART_FONT, size=11),
+            bgcolor="rgba(255,255,255,0)",
+            bordercolor="rgba(0,0,0,0)",
+            borderwidth=0,
+            orientation="h",
+            yanchor="bottom", y=-0.22,
+            xanchor="left", x=0,
+        ),
         hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6",
                         font=dict(family=CHART_FONT, size=12)),
     )
@@ -638,18 +642,20 @@ with tabs[1]:
                          textfont=dict(family=CHART_MONO, size=10)))
     fig.update_layout(barmode="group", paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
                       title=dict(text=wrap_title(f"ROA & ROE by Sector ({lbl})"),
-                                 font=dict(color=COLOR["text"], family=CHART_FONT, size=13, weight="bold"),
+                                 font=dict(color=COLOR["text"], family=CHART_FONT, size=14, weight="bold"),
                                  x=0, xanchor="left", xref="paper",
                                  pad=dict(t=6, b=10)),
                       font=dict(color=COLOR["text_secondary"], family=CHART_FONT),
                       height=380,
-                      margin=dict(t=82, b=60, l=10, r=24),
-                      legend=dict(font=dict(family=CHART_FONT, size=11), bgcolor="rgba(255,255,255,0.9)",
-                                  bordercolor="#e4ede6", borderwidth=1),
-                      xaxis=dict(tickfont=dict(family=CHART_FONT, size=11), gridcolor=CHART_GRID,
-                                 tickcolor="rgba(0,0,0,0)", linecolor="rgba(0,0,0,0)"),
-                      yaxis=dict(gridcolor=CHART_GRID, tickfont=dict(family=CHART_MONO, size=10),
-                                 tickcolor="rgba(0,0,0,0)"),
+                      margin=dict(t=82, b=70, l=10, r=24),
+                      legend=dict(font=dict(family=CHART_FONT, size=11),
+                                  bgcolor="rgba(255,255,255,0)", borderwidth=0,
+                                  orientation="h", yanchor="bottom", y=-0.25,
+                                  xanchor="left", x=0),
+                      xaxis=dict(tickfont=dict(family=CHART_FONT, size=12), gridcolor=CHART_GRID,
+                                 tickcolor="rgba(0,0,0,0)", linecolor="rgba(0,0,0,0)", title=""),
+                      yaxis=dict(gridcolor=CHART_GRID, tickfont=dict(family=CHART_MONO, size=11),
+                                 tickcolor="rgba(0,0,0,0)", title=""),
                       hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6",
                                       font=dict(family=CHART_FONT, size=12)),
                       uniformtext_minsize=8, uniformtext_mode="hide")
@@ -726,12 +732,14 @@ with tabs[2]:
     ))
     fig.update_layout(
         title=dict(text=wrap_title(f"GNPA % Heatmap (to {lbl})"),
-                   font=dict(color=COLOR["text"], family=CHART_FONT, size=13),
+                   font=dict(color=COLOR["text"], family=CHART_FONT, size=14, weight="bold"),
                    x=0, xanchor="left", xref="paper", pad=dict(t=6, b=8)),
         paper_bgcolor=CHART_BG,
         height=max(340, len(stressed_35) * 26),
-        font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=11),
+        font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
         margin=dict(t=82, b=30, l=10, r=30),
+        xaxis=dict(title=""),
+        yaxis=dict(title=""),
         hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6", font=dict(family=CHART_FONT, size=12)),
     )
     st.plotly_chart(fig, use_container_width=True)
@@ -812,17 +820,17 @@ with tabs[3]:
     wf_max = wf["change"].abs().max() if not wf.empty else 1
     fig.update_layout(
         title=dict(text=wrap_title("Change in Credit Loss Rate: FY2021 → FY2025 (green = improved)"),
-                   font=dict(color=COLOR["text"], family=CHART_FONT, size=13, weight="bold"),
+                   font=dict(color=COLOR["text"], family=CHART_FONT, size=14, weight="bold"),
                    x=0, xanchor="left", xref="paper", pad=dict(t=6, b=10)),
         paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT),
         height=bar_chart_height(len(wf)),
-        xaxis=dict(title="Change in Credit Loss Rate (pp)", gridcolor=CHART_GRID,
-                   tickfont=dict(family=CHART_MONO, size=10),
+        xaxis=dict(title="", gridcolor=CHART_GRID,
+                   tickfont=dict(family=CHART_MONO, size=11),
                    range=[-(wf_max * 1.5), wf_max * 1.5], zeroline=True,
                    zerolinecolor="#c8dfc4", zerolinewidth=1.5, tickcolor="rgba(0,0,0,0)"),
-        yaxis=dict(tickfont=dict(family=CHART_FONT, size=11.5), showgrid=False,
-                   tickcolor="rgba(0,0,0,0)"),
+        yaxis=dict(tickfont=dict(family=CHART_FONT, size=12), showgrid=False,
+                   tickcolor="rgba(0,0,0,0)", title=""),
         margin=dict(t=82, b=20, l=10, r=130),
         hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6",
                         font=dict(family=CHART_FONT, size=12)),
@@ -848,11 +856,13 @@ with tabs[3]:
     ))
     fig.update_layout(
         title=dict(text=wrap_title(f"Credit Loss Rate % Heatmap (to {lbl})"),
-                   font=dict(color=COLOR["text"], family=CHART_FONT, size=13),
+                   font=dict(color=COLOR["text"], family=CHART_FONT, size=14, weight="bold"),
                    x=0, xanchor="left", xref="paper", pad=dict(t=6, b=8)),
         paper_bgcolor=CHART_BG, height=max(340, len(top40) * 26),
-        font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=11),
+        font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
         margin=dict(t=82, b=30, l=10, r=30),
+        xaxis=dict(title=""),
+        yaxis=dict(title=""),
         hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6", font=dict(family=CHART_FONT, size=12)),
     )
     st.plotly_chart(fig, use_container_width=True)
@@ -987,21 +997,35 @@ with tabs[5]:
         chart_df = get_chart_periods(company_fin)
 
         col1, col2 = st.columns(2)
+        LABEL_MAP = {
+            "total_assets_cr": "Total Assets",
+            "loan_book_cr": "Loan Book",
+            "net_interest_income_cr": "NII",
+            "pat_cr": "PAT",
+            "roa_pct": "ROA %",
+            "roe_pct": "ROE %",
+            "gnpa_pct": "GNPA %",
+            "credit_loss_rate_pct": "Credit Loss Rate %",
+        }
         with col1:
             fig = px.bar(chart_df, x="period", y=["total_assets_cr", "loan_book_cr"],
-                         barmode="group", text_auto=".4s",
+                         barmode="group", text_auto=".3s",
                          title=f"Assets & Loan Book (₹ Crore, to {lbl})", height=380,
-                         category_orders={"period": PERIOD_ORDER})
-            fig.update_traces(textposition="outside", textfont=dict(family=CHART_MONO, size=9),
+                         category_orders={"period": PERIOD_ORDER},
+                         labels=LABEL_MAP)
+            fig.update_traces(textposition="outside", textfont=dict(family=CHART_MONO, size=10),
                               cliponaxis=False)
             chart_layout(fig)
+            fig.update_layout(xaxis=dict(tickangle=-30))
             st.plotly_chart(fig, use_container_width=True)
         with col2:
             nii_pat = chart_df[["period", "net_interest_income_cr", "pat_cr"]].dropna()
             fig = px.line(nii_pat, x="period", y=["net_interest_income_cr", "pat_cr"],
                           title=f"NII & PAT (₹ Crore, to {lbl})", height=380,
-                          category_orders={"period": PERIOD_ORDER})
+                          category_orders={"period": PERIOD_ORDER},
+                          labels=LABEL_MAP, markers=True)
             chart_layout(fig)
+            fig.update_layout(xaxis=dict(tickangle=-30))
             st.plotly_chart(fig, use_container_width=True)
 
         col3, col4 = st.columns(2)
@@ -1009,25 +1033,28 @@ with tabs[5]:
             gnpa_df = chart_df[["period", "gnpa_pct"]].dropna()
             fig = px.line(gnpa_df, x="period", y="gnpa_pct",
                           title=f"GNPA % Trend (to {lbl})", markers=True, height=360,
-                          category_orders={"period": PERIOD_ORDER})
+                          category_orders={"period": PERIOD_ORDER}, labels=LABEL_MAP)
             fig.update_traces(line_color=COLOR["danger"], marker_color=COLOR["danger"])
             chart_layout(fig)
+            fig.update_layout(xaxis=dict(tickangle=-30))
             st.plotly_chart(fig, use_container_width=True)
         with col4:
             ror_df = chart_df[["period", "roa_pct", "roe_pct"]].dropna()
             fig = px.line(ror_df, x="period", y=["roa_pct", "roe_pct"],
                           title=f"ROA & ROE % (to {lbl})", markers=True, height=360,
-                          category_orders={"period": PERIOD_ORDER})
+                          category_orders={"period": PERIOD_ORDER}, labels=LABEL_MAP)
             chart_layout(fig)
+            fig.update_layout(xaxis=dict(tickangle=-30))
             st.plotly_chart(fig, use_container_width=True)
 
         cl_df = chart_df[["period", "credit_loss_rate_pct"]].dropna()
         fig = px.line(cl_df, x="period", y="credit_loss_rate_pct",
                       title=f"Credit Loss Rate % (to {lbl})", markers=True, height=360,
-                      category_orders={"period": PERIOD_ORDER})
+                      category_orders={"period": PERIOD_ORDER}, labels=LABEL_MAP)
         fig.add_hline(y=2.0, line_dash="dot", line_color=COLOR["warning"],
                       annotation_text="2% reference")
         chart_layout(fig)
+        fig.update_layout(xaxis=dict(tickangle=-30))
         st.plotly_chart(fig, use_container_width=True)
 
         # Financial table
@@ -1221,15 +1248,15 @@ with tabs[6]:
         chg_max = chg_df["chg_12m"].abs().max() if not chg_df.empty else 1
         fig.update_layout(
             title=dict(text="12-Month Price Change %",
-                       font=dict(color=COLOR["text"], family=CHART_FONT, size=13, weight="bold"),
+                       font=dict(color=COLOR["text"], family=CHART_FONT, size=14, weight="bold"),
                        x=0, xanchor="left", xref="paper", pad=dict(t=6, b=10)),
             paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
             font=dict(color=COLOR["text_secondary"], family=CHART_FONT),
             height=bar_chart_height(len(chg_df)),
-            yaxis=dict(autorange="reversed", tickfont=dict(family=CHART_FONT, size=11.5),
-                       showgrid=False, tickcolor="rgba(0,0,0,0)"),
-            xaxis=dict(title="12M Change %", gridcolor=CHART_GRID,
-                       tickfont=dict(family=CHART_MONO, size=10),
+            yaxis=dict(autorange="reversed", tickfont=dict(family=CHART_FONT, size=12),
+                       showgrid=False, tickcolor="rgba(0,0,0,0)", title=""),
+            xaxis=dict(title="", gridcolor=CHART_GRID,
+                       tickfont=dict(family=CHART_MONO, size=11),
                        range=[-(chg_max * 1.5), chg_max * 1.5],
                        zeroline=True, zerolinecolor="#c8dfc4", zerolinewidth=1.5,
                        tickcolor="rgba(0,0,0,0)"),
@@ -1269,11 +1296,11 @@ with tabs[7]:
             paper_bgcolor=CHART_BG,
             font=dict(family=CHART_FONT, color=COLOR["text_secondary"]),
             title=dict(text="NBFCs by RBI Layer",
-                       font=dict(color=COLOR["text"], family=CHART_FONT, size=13, weight="bold"),
+                       font=dict(color=COLOR["text"], family=CHART_FONT, size=14, weight="bold"),
                        x=0, xanchor="left", xref="paper", pad=dict(t=6, b=10)),
             margin=dict(t=82, b=20, l=10, r=10),
-            legend=dict(font=dict(family=CHART_FONT, size=11), bgcolor="rgba(255,255,255,0.9)",
-                        bordercolor="#e4ede6", borderwidth=1),
+            legend=dict(font=dict(family=CHART_FONT, size=12),
+                        bgcolor="rgba(255,255,255,0)", borderwidth=0),
             hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6",
                             font=dict(family=CHART_FONT, size=12)),
         )
