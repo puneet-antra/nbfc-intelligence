@@ -53,7 +53,7 @@ h1 {
     color: #0f1f0f !important;
     opacity: 1 !important;
     font-weight: 500 !important;
-    font-size: 1.45rem !important;
+    font-size: 1.2rem !important;
     letter-spacing: -0.01em !important;
 }
 [data-testid="stMetricLabel"] {
@@ -434,15 +434,16 @@ def chart_layout(fig, title=None):
         yaxis=dict(gridcolor=CHART_GRID, tickfont=dict(family=CHART_FONT, size=12),
                    zeroline=False, tickcolor="rgba(0,0,0,0)", linecolor="rgba(0,0,0,0)",
                    title=""),
-        margin=dict(t=82, b=60, l=10, r=24),
+        margin=dict(t=82, b=90, l=10, r=24),
         legend=dict(
             font=dict(family=CHART_FONT, size=11),
             bgcolor="rgba(255,255,255,0)",
             bordercolor="rgba(0,0,0,0)",
             borderwidth=0,
             orientation="h",
-            yanchor="bottom", y=-0.22,
+            yanchor="bottom", y=-0.32,
             xanchor="left", x=0,
+            title_text="",
         ),
         hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6",
                         font=dict(family=CHART_FONT, size=12)),
@@ -1013,10 +1014,10 @@ with tabs[5]:
                          title=f"Assets & Loan Book (₹ Crore, to {lbl})", height=380,
                          category_orders={"period": PERIOD_ORDER},
                          labels=LABEL_MAP)
-            fig.update_traces(textposition="outside", textfont=dict(family=CHART_MONO, size=10),
+            fig.update_traces(textposition="outside", textfont=dict(family=CHART_MONO, size=11),
                               cliponaxis=False)
             chart_layout(fig)
-            fig.update_layout(xaxis=dict(tickangle=-30))
+            fig.update_layout(xaxis=dict(tickangle=-30), margin=dict(b=110))
             st.plotly_chart(fig, use_container_width=True)
         with col2:
             nii_pat = chart_df[["period", "net_interest_income_cr", "pat_cr"]].dropna()
@@ -1025,7 +1026,7 @@ with tabs[5]:
                           category_orders={"period": PERIOD_ORDER},
                           labels=LABEL_MAP, markers=True)
             chart_layout(fig)
-            fig.update_layout(xaxis=dict(tickangle=-30))
+            fig.update_layout(xaxis=dict(tickangle=-30), margin=dict(b=110))
             st.plotly_chart(fig, use_container_width=True)
 
         col3, col4 = st.columns(2)
@@ -1036,7 +1037,7 @@ with tabs[5]:
                           category_orders={"period": PERIOD_ORDER}, labels=LABEL_MAP)
             fig.update_traces(line_color=COLOR["danger"], marker_color=COLOR["danger"])
             chart_layout(fig)
-            fig.update_layout(xaxis=dict(tickangle=-30))
+            fig.update_layout(xaxis=dict(tickangle=-30), margin=dict(b=110), showlegend=False)
             st.plotly_chart(fig, use_container_width=True)
         with col4:
             ror_df = chart_df[["period", "roa_pct", "roe_pct"]].dropna()
@@ -1044,7 +1045,7 @@ with tabs[5]:
                           title=f"ROA & ROE % (to {lbl})", markers=True, height=360,
                           category_orders={"period": PERIOD_ORDER}, labels=LABEL_MAP)
             chart_layout(fig)
-            fig.update_layout(xaxis=dict(tickangle=-30))
+            fig.update_layout(xaxis=dict(tickangle=-30), margin=dict(b=110))
             st.plotly_chart(fig, use_container_width=True)
 
         cl_df = chart_df[["period", "credit_loss_rate_pct"]].dropna()
@@ -1054,7 +1055,7 @@ with tabs[5]:
         fig.add_hline(y=2.0, line_dash="dot", line_color=COLOR["warning"],
                       annotation_text="2% reference")
         chart_layout(fig)
-        fig.update_layout(xaxis=dict(tickangle=-30))
+        fig.update_layout(xaxis=dict(tickangle=-30), margin=dict(b=110), showlegend=False)
         st.plotly_chart(fig, use_container_width=True)
 
         # Financial table
