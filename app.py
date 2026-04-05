@@ -421,7 +421,7 @@ def compute_cagr(df, metric_col, start_year="FY2021", end_year="FY2025"):
 def compute_latest_growth(df, metric_col):
     """
     Per-company 1-year AUM growth using the most recent pair available:
-      - If 9MFY26 exists → (9MFY26 − FY2025) / FY2025
+      - If 9MFY26 exists → annualised growth: ((9MFY26/FY2025)^(12/9) − 1)
       - Otherwise             → (FY2025 − FY2024) / FY2024
     Returns DataFrame with columns: name, growth_pct, period_label
     """
@@ -437,8 +437,9 @@ def compute_latest_growth(df, metric_col):
         ann = ann_9m[["nbfc_id", "name", metric_col]].rename(columns={metric_col: "recent"})
         merged = ann.merge(fy25, on=["nbfc_id", "name"], how="inner")
         merged = merged[(merged["recent"] > 0) & (merged["fy25"] > 0)]
-        merged["growth_pct"] = (merged["recent"] / merged["fy25"] - 1) * 100
-        merged["period_label"] = "9MFY26 vs FY25"
+        # Annualise: 9MFY26 covers 9 months vs FY25's 12 months
+        merged["growth_pct"] = ((merged["recent"] / merged["fy25"]) ** (12 / 9) - 1) * 100
+        merged["period_label"] = "9MFY26 vs FY25 (ann.)"
         rows.append(merged[["name", "growth_pct", "period_label"]])
 
     # Companies without Q3 data use FY25 vs FY24
@@ -698,7 +699,7 @@ with tabs[0]:
                         hover_text=bottom_growers["period_label"].values)
         st.plotly_chart(fig, use_container_width=True)
 
-    st.caption("★ = estimated data. Where 9MFY26 data exists: growth vs FY25. Otherwise: FY25 vs FY24.")
+    st.caption("★ = estimated data. Where 9MFY26 data exists: growth is annualised ((9M AUM / FY25 AUM)^(12/9) − 1) to make it comparable to a full year. Otherwise: FY25 vs FY24.")
 
     # Bubble: growth vs profitability
     st.markdown('<div class="section-header">Growth vs Profitability</div>', unsafe_allow_html=True)
