@@ -21,15 +21,28 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,0,600;9..144,0,700;9..144,1,300;9..144,1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
 /* ── Base ── */
 html, body, [class*="css"] {
     font-family: 'DM Sans', sans-serif !important;
-    background-color: #f3f6f3 !important;
+    background-color: #eef2ee !important;
     background-image:
-        radial-gradient(ellipse at 15% 40%, rgba(45,106,45,0.05) 0%, transparent 55%),
-        radial-gradient(ellipse at 85% 15%, rgba(45,106,45,0.04) 0%, transparent 50%) !important;
+        radial-gradient(ellipse at 10% 50%, rgba(35,107,53,0.09) 0%, transparent 50%),
+        radial-gradient(ellipse at 90% 10%, rgba(35,107,53,0.07) 0%, transparent 45%),
+        radial-gradient(ellipse at 55% 90%, rgba(217,119,6,0.05) 0%, transparent 40%) !important;
+}
+
+/* ── Grain texture overlay ── */
+html::before {
+    content: '' !important;
+    position: fixed !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    z-index: 9999 !important;
+    opacity: 0.025 !important;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E") !important;
+    background-size: 200px 200px !important;
 }
 
 /* ── Remove default Streamlit padding ── */
@@ -73,35 +86,39 @@ h1 {
 }
 [data-testid="stMetricDelta"] { opacity: 1 !important; }
 
-/* ── Metric card entry animation ── */
+/* ── Metric card animations ── */
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(18px); }
     to   { opacity: 1; transform: translateY(0); }
 }
+@keyframes shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+}
 
 /* ── Metric cards ── */
 [data-testid="metric-container"] {
-    background: #ffffff !important;
-    border: 1px solid #e4ede6 !important;
-    border-radius: 12px !important;
+    background: linear-gradient(145deg, #ffffff 0%, #f7fbf7 100%) !important;
+    border: 1px solid #dde8de !important;
+    border-radius: 14px !important;
     padding: 1.2rem 1.4rem 1.1rem !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03) !important;
-    transition: box-shadow 0.2s ease, transform 0.2s ease !important;
+    box-shadow: 0 2px 8px rgba(35,107,53,0.06), 0 1px 2px rgba(0,0,0,0.04) !important;
+    transition: box-shadow 0.25s ease, transform 0.25s ease !important;
     position: relative !important;
     overflow: hidden !important;
     animation: fadeInUp 0.45s ease both !important;
 }
-[data-testid="metric-container"]::after {
+[data-testid="metric-container"]::before {
     content: '' !important;
     position: absolute !important;
     top: 0 !important; left: 0 !important; right: 0 !important;
     height: 3px !important;
-    background: linear-gradient(90deg, #2d6a2d, #4a9e4a) !important;
-    border-radius: 12px 12px 0 0 !important;
+    background: linear-gradient(90deg, #236b35, #4a9e4a, #d97706) !important;
+    border-radius: 14px 14px 0 0 !important;
 }
 [data-testid="metric-container"]:hover {
-    box-shadow: 0 8px 24px rgba(45,106,45,0.12), 0 2px 8px rgba(0,0,0,0.04) !important;
-    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 30px rgba(35,107,53,0.14), 0 3px 10px rgba(0,0,0,0.05) !important;
+    transform: translateY(-3px) !important;
 }
 /* Stagger each metric card by column position */
 [data-testid="stColumns"] > div:nth-child(1) [data-testid="metric-container"] { animation-delay: 0.05s !important; }
@@ -112,15 +129,17 @@ h1 {
 
 /* ── Section headers ── */
 .section-header {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 1.0rem;
+    font-family: 'Fraunces', serif;
+    font-size: 1.05rem;
     font-weight: 600;
-    letter-spacing: -0.01em;
+    font-style: italic;
+    letter-spacing: -0.02em;
     color: #0f1f0f;
-    margin: 2.5rem 0 1.1rem 0;
-    padding: 0.35rem 0 0.35rem 0.85rem;
-    border-left: 4px solid #2d6a2d;
-    border-bottom: none;
+    margin: 2.8rem 0 1.2rem 0;
+    padding: 0.5rem 1rem 0.5rem 1rem;
+    background: linear-gradient(90deg, rgba(35,107,53,0.07) 0%, transparent 100%);
+    border-left: 3px solid #236b35;
+    border-radius: 0 6px 6px 0;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -129,39 +148,55 @@ h1 {
 
 /* ── Sidebar ── */
 [data-testid="stSidebar"] {
-    background: #0f1f0f !important;
-    border-right: none !important;
+    background: #0b1a0b !important;
+    border-right: 1px solid #1a2e1a !important;
+}
+/* Sidebar brand header */
+[data-testid="stSidebar"] > div:first-child::before {
+    content: 'NBFC\A Intelligence' !important;
+    white-space: pre !important;
+    display: block !important;
+    font-family: 'Fraunces', serif !important;
+    font-size: 1.5rem !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.03em !important;
+    line-height: 1.1 !important;
+    color: #c8dfc4 !important;
+    padding: 1.6rem 1.2rem 1.4rem !important;
+    border-bottom: 1px solid #1e3a1e !important;
+    margin-bottom: 0.5rem !important;
 }
 [data-testid="stSidebar"] [data-testid="stWidgetLabel"],
 [data-testid="stSidebar"] label {
     font-family: 'DM Sans', sans-serif !important;
-    color: #a8c4a8 !important;
-    font-size: 0.72rem !important;
+    color: #7aa87a !important;
+    font-size: 0.7rem !important;
     font-weight: 600 !important;
-    letter-spacing: 0.08em !important;
+    letter-spacing: 0.09em !important;
     text-transform: uppercase !important;
 }
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] span,
 [data-testid="stSidebar"] .stCaption,
 [data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
-    color: #6a8f6a !important;
+    color: #5a7a5a !important;
 }
 [data-testid="stSidebar"] hr {
     border-color: #1e3a1e !important;
+    margin: 1rem 0 !important;
 }
 [data-testid="stSidebar"] [data-baseweb="select"] > div,
 [data-testid="stSidebar"] [data-testid="stSelectbox"] > div > div {
-    background: #1a2e1a !important;
-    border-color: #2d4a2d !important;
-    color: #e0ede0 !important;
+    background: #152415 !important;
+    border-color: #2a402a !important;
+    color: #d8ead8 !important;
 }
 [data-testid="stSidebar"] [data-baseweb="radio"] label span,
 [data-testid="stSidebar"] [data-baseweb="checkbox"] label span {
-    color: #c8dfc4 !important;
+    color: #b8d4b8 !important;
 }
 [data-testid="stSidebar"] [data-testid="stSlider"] [data-testid="stTickBar"] {
-    color: #6a8f6a !important;
+    color: #5a7a5a !important;
 }
 [data-testid="stSidebar"] [role="slider"] {
     background: #2d6a2d !important;
@@ -173,12 +208,12 @@ h1 {
     margin-bottom: 1.5rem !important;
 }
 [data-baseweb="tab-list"] {
-    background: #e8ede9 !important;
+    background: rgba(35,107,53,0.08) !important;
     border-radius: 12px !important;
     padding: 4px !important;
     gap: 2px !important;
-    border: none !important;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.06) !important;
+    border: 1px solid rgba(35,107,53,0.12) !important;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05) !important;
 }
 [data-baseweb="tab-border"] {
     display: none !important;
@@ -187,8 +222,8 @@ h1 {
     font-family: 'DM Sans', sans-serif !important;
     font-weight: 500 !important;
     font-size: 0.82rem !important;
-    color: #52725a !important;
-    padding: 0.45rem 1.05rem !important;
+    color: #4a6a50 !important;
+    padding: 0.45rem 1.1rem !important;
     border-radius: 9px !important;
     background: transparent !important;
     border: none !important;
@@ -198,13 +233,13 @@ h1 {
 }
 [data-testid="stTabs"] [data-baseweb="tab"]:hover {
     color: #1e3a22 !important;
-    background: rgba(255,255,255,0.55) !important;
+    background: rgba(255,255,255,0.6) !important;
 }
 [data-testid="stTabs"] [aria-selected="true"] {
     color: #ffffff !important;
     font-weight: 600 !important;
-    background: #1e3a22 !important;
-    box-shadow: 0 2px 8px rgba(30,58,34,0.22), 0 1px 3px rgba(0,0,0,0.1) !important;
+    background: linear-gradient(135deg, #1e3a22 0%, #236b35 100%) !important;
+    box-shadow: 0 2px 10px rgba(30,58,34,0.3), 0 1px 3px rgba(0,0,0,0.12) !important;
     border-bottom: none !important;
 }
 
@@ -212,18 +247,23 @@ h1 {
 [data-testid="stDataFrame"] {
     font-family: 'DM Mono', monospace !important;
     font-size: 0.8rem !important;
-    border-radius: 10px !important;
-    border: 1px solid #e4ede6 !important;
+    border-radius: 12px !important;
+    border: 1px solid #dde8de !important;
     overflow: hidden !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05) !important;
 }
 
 /* ── Chart containers ── */
 [data-testid="stPlotlyChart"] > div {
-    border-radius: 12px !important;
-    border: 1px solid #e8ede9 !important;
+    border-radius: 14px !important;
+    border: 1px solid #dde8de !important;
     overflow: hidden !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+    box-shadow: 0 2px 8px rgba(35,107,53,0.06), 0 1px 3px rgba(0,0,0,0.04) !important;
     background: #ffffff !important;
+    transition: box-shadow 0.25s ease !important;
+}
+[data-testid="stPlotlyChart"] > div:hover {
+    box-shadow: 0 6px 20px rgba(35,107,53,0.10), 0 2px 6px rgba(0,0,0,0.05) !important;
 }
 
 /* ── Badges ── */
@@ -250,14 +290,14 @@ h1 {
     font-size: 0.68rem !important;
     color: #8aaa8a !important;
     font-family: 'DM Sans', sans-serif !important;
-    opacity: 0.8 !important;
+    opacity: 0.85 !important;
 }
 
 /* ── Selectbox / inputs ── */
 [data-testid="stSelectbox"] > div > div,
 [data-testid="stTextInput"] input {
     border-radius: 8px !important;
-    border: 1px solid #d4e4d6 !important;
+    border: 1px solid #ccdacd !important;
     font-family: 'DM Sans', sans-serif !important;
     font-size: 0.85rem !important;
 }
@@ -265,7 +305,7 @@ h1 {
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #c8dfc4; border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: #b0ccb0; border-radius: 10px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -633,13 +673,71 @@ nbfc_filtered = apply_filters(nbfc_df)
 # ── Page header ───────────────────────────────────────────────────────────────
 
 st.markdown("""
-<div style="display:flex; align-items:baseline; gap:0.9rem; margin-bottom:0.2rem; padding-top:0.5rem;">
-  <span style="font-family:'Fraunces',serif; font-weight:600; font-size:2rem; color:#0f1f0f; letter-spacing:-0.03em; line-height:1.2;">NBFC Intelligence</span>
-  <span style="font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:500; color:#ffffff; background:#236b35; padding:3px 10px; border-radius:20px; letter-spacing:0.04em;">INDIA</span>
+<style>
+@keyframes headerFadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes subtitleFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.page-header-wrap {
+    animation: headerFadeIn 0.55s cubic-bezier(0.22,1,0.36,1) both;
+    padding-top: 0.5rem;
+    margin-bottom: 1.6rem;
+}
+.page-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 2.2rem;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #0f1f0f 0%, #236b35 60%, #4a9e4a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline;
+}
+.page-badge {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #d97706;
+    background: rgba(217,119,6,0.1);
+    border: 1px solid rgba(217,119,6,0.25);
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.07em;
+    vertical-align: middle;
+    position: relative;
+    top: -4px;
+}
+.page-subtitle {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: #52725a;
+    margin: 0.4rem 0 0 0;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    animation: subtitleFadeIn 0.8s 0.3s ease both;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+.header-rule {
+    border: none;
+    border-top: 1px solid rgba(35,107,53,0.15);
+    margin: 1rem 0 1.4rem 0;
+}
+</style>
+<div class="page-header-wrap">
+  <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;">
+    <span class="page-title">NBFC Intelligence</span>
+    <span class="page-badge">INDIA</span>
+  </div>
+  <p class="page-subtitle">Non-Banking Financial Companies &mdash; Growth &middot; Profitability &middot; Asset Quality &middot; Valuation</p>
+  <hr class="header-rule"/>
 </div>
-<p style="font-family:'DM Sans',sans-serif; font-size:0.88rem; color:#52725a; margin:0 0 1.4rem 0; font-weight:400; letter-spacing:0.01em;">
-  Non-Banking Financial Companies — Growth · Profitability · Asset Quality · Valuation
-</p>
 """, unsafe_allow_html=True)
 
 annual_fin = annual_only(fin_filtered)
