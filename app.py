@@ -147,20 +147,6 @@ h1 {
     background: #101012 !important;
     border-right: 1px solid #1e1e20 !important;
 }
-[data-testid="stSidebar"] > div:first-child::before {
-    content: 'NBFC\A Intelligence' !important;
-    white-space: pre !important;
-    display: block !important;
-    font-family: 'Inter', sans-serif !important;
-    font-size: 1.25rem !important;
-    font-weight: 700 !important;
-    letter-spacing: -0.03em !important;
-    line-height: 1.15 !important;
-    color: #D7F4E9 !important;
-    padding: 1.6rem 1.2rem 1.4rem !important;
-    border-bottom: 1px solid #1e1e20 !important;
-    margin-bottom: 0.5rem !important;
-}
 [data-testid="stSidebar"] [data-testid="stWidgetLabel"],
 [data-testid="stSidebar"] label {
     font-family: 'Inter', sans-serif !important;
@@ -171,7 +157,6 @@ h1 {
     text-transform: uppercase !important;
 }
 [data-testid="stSidebar"] p,
-[data-testid="stSidebar"] span,
 [data-testid="stSidebar"] .stCaption,
 [data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
     font-family: 'Inter', sans-serif !important;
