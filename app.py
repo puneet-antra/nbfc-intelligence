@@ -1231,7 +1231,7 @@ with tabs[4]:
         company_info = company_info_rows.iloc[0] if not company_info_rows.empty else None
         company_fin = fin_filtered[fin_filtered["name"] == selected].sort_values("period")
 
-        # Badges
+        # Header: badges + data source
         if company_info is not None:
             layer_colors = {"Upper": "#144835", "Middle": "#217858", "Base": "#73757A"}
             layer = company_info.get("rbi_layer", "Unknown")
@@ -1243,16 +1243,32 @@ with tabs[4]:
                 f'color:white;padding:3px 10px;border-radius:4px;font-size:12px;'
                 f'font-weight:600">{layer} Layer</span>'
             )
-            if dq == "estimated":
+            if dq == "audited":
+                badges.append(
+                    '<span style="background:#D7F4E9;color:#144835;padding:3px 10px;'
+                    'border-radius:4px;font-size:12px;font-weight:600;'
+                    'border:1px solid #a7f3d0">✓ Audited</span>'
+                )
+            elif dq == "estimated":
                 badges.append('<span class="estimated-badge">⚠️ Estimated Data</span>')
             elif dq == "unverified":
                 badges.append('<span class="unverified-badge">❌ Unverified</span>')
             if listed_val:
                 badges.append(
-                    '<span style="background:#D7F4E9;color:#144835;padding:3px 10px;'
-                    'border-radius:4px;font-size:12px;font-weight:600">Listed</span>'
+                    '<span style="background:#EFF6FF;color:#1e40af;padding:3px 10px;'
+                    'border-radius:4px;font-size:12px;font-weight:600;'
+                    'border:1px solid #bfdbfe">Listed</span>'
                 )
             st.markdown(" &nbsp; ".join(badges), unsafe_allow_html=True)
+
+            # Data source line
+            src = company_info.get("source", "")
+            if src:
+                st.markdown(
+                    f'<div style="font-size:0.7rem;color:#6b7280;margin-top:4px;'
+                    f'font-family:\'Inter\',sans-serif;">Source: {src}</div>',
+                    unsafe_allow_html=True,
+                )
             st.markdown("")
 
         if company_info is not None and company_info.get("data_quality") in ["estimated", "unverified"]:
@@ -1260,24 +1276,26 @@ with tabs[4]:
 
         has_q3 = "FY2026-Q3" in company_fin["period"].values
         if has_q3:
-            note("FY2026-Q3 data available. Charts show 9MFY26 (raw 9-month figures) as latest period. "
-                 "Annual averages use FY2021–FY2025 only.")
-
-        # Check for Fibe Q2/Q3 gap
-        if "Fibe" in selected or "EarlySalary" in selected:
-            note("Fibe (EarlySalary): FY2026 Q2 and Q3 data unavailable — showing FY2025 as latest.", "warning")
+            note("Latest data: 9MFY26 (9 months ended Dec-2025). Figures shown are raw 9-month values; "
+                 "ROA/ROE are annualised at ×4/3.")
 
         # Key metrics
         lbl = latest_period_label(company_fin)
         latest_snap = get_latest_period_data(company_fin)
         if not latest_snap.empty:
             r = latest_snap.iloc[0]
-            m1, m2, m3, m4, m5 = st.columns(5)
-            m1.metric("Total Assets", f"₹{r['total_assets_cr']:,.0f} Cr" if pd.notna(r.get("total_assets_cr")) else "N/A", help=lbl)
-            m2.metric("Loan Book", f"₹{r['loan_book_cr']:,.0f} Cr" if pd.notna(r.get("loan_book_cr")) else "N/A", help=lbl)
-            m3.metric("PAT", f"₹{r['pat_cr']:,.0f} Cr" if pd.notna(r.get("pat_cr")) else "N/A", help=lbl)
-            m4.metric("GNPA %", f"{r['gnpa_pct']:.2f}%" if pd.notna(r.get("gnpa_pct")) else "N/A", help=lbl)
-            m5.metric("ROA %", f"{r['roa_pct']:.2f}%" if pd.notna(r.get("roa_pct")) else "N/A", help=lbl)
+            st.markdown(
+                f'<div style="font-size:0.72rem;color:#6b7280;font-family:\'Inter\',sans-serif;'
+                f'margin-bottom:0.25rem;">Key metrics as of <strong>{lbl}</strong></div>',
+                unsafe_allow_html=True,
+            )
+            m1, m2, m3, m4, m5, m6 = st.columns(6)
+            m1.metric("Loan Book", f"₹{r['loan_book_cr']:,.0f} Cr" if pd.notna(r.get("loan_book_cr")) else "N/A")
+            m2.metric("Total Assets", f"₹{r['total_assets_cr']:,.0f} Cr" if pd.notna(r.get("total_assets_cr")) else "N/A")
+            m3.metric("NII", f"₹{r['net_interest_income_cr']:,.0f} Cr" if pd.notna(r.get("net_interest_income_cr")) else "N/A")
+            m4.metric("PAT", f"₹{r['pat_cr']:,.0f} Cr" if pd.notna(r.get("pat_cr")) else "N/A")
+            m5.metric("GNPA %", f"{r['gnpa_pct']:.2f}%" if pd.notna(r.get("gnpa_pct")) else "N/A")
+            m6.metric("ROA %", f"{r['roa_pct']:.2f}%" if pd.notna(r.get("roa_pct")) else "N/A")
 
         chart_df = get_chart_periods(company_fin)
 
