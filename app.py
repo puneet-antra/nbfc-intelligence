@@ -529,7 +529,7 @@ def compute_latest_growth(df, metric_col):
         merged = merged[(merged["recent"] > 0) & (merged["fy25"] > 0)]
         # Annualise: 9MFY26 covers 9 months vs FY25's 12 months
         merged["growth_pct"] = ((merged["recent"] / merged["fy25"]) ** (12 / 9) - 1) * 100
-        merged["period_label"] = "9MFY26 vs FY25 (ann.)"
+        merged["period_label"] = "9MFY26 (Ann.) vs FY25"
         rows.append(merged[["name", "growth_pct", "period_label"]])
 
     # Companies without Q3 data use FY25 vs FY24
