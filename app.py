@@ -21,28 +21,12 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,0,600;9..144,0,700;9..144,1,300;9..144,1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 /* ── Base ── */
 html, body, [class*="css"] {
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
-    background-color: #eef2ee !important;
-    background-image:
-        radial-gradient(ellipse at 10% 50%, rgba(35,107,53,0.09) 0%, transparent 50%),
-        radial-gradient(ellipse at 90% 10%, rgba(35,107,53,0.07) 0%, transparent 45%),
-        radial-gradient(ellipse at 55% 90%, rgba(217,119,6,0.05) 0%, transparent 40%) !important;
-}
-
-/* ── Grain texture overlay ── */
-html::before {
-    content: '' !important;
-    position: fixed !important;
-    inset: 0 !important;
-    pointer-events: none !important;
-    z-index: 9999 !important;
-    opacity: 0.025 !important;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E") !important;
-    background-size: 200px 200px !important;
+    font-family: 'Inter', sans-serif !important;
+    background-color: #F6F6F6 !important;
 }
 
 /* ── Remove default Streamlit padding ── */
@@ -52,94 +36,93 @@ html::before {
     max-width: 1460px !important;
 }
 
-/* ── Page title ── */
+/* ── Page title (h1 fallback) ── */
 h1 {
-    font-family: 'Fraunces', serif !important;
-    font-weight: 600 !important;
-    font-size: 2rem !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 2.0rem !important;
     letter-spacing: -0.03em !important;
-    color: #0f1f0f !important;
+    color: #28292D !important;
     line-height: 1.1 !important;
     margin-bottom: 0 !important;
 }
 
 /* ── Metric values ── */
 [data-testid="stMetricValue"] {
-    font-family: 'DM Mono', monospace !important;
-    color: #0f1f0f !important;
+    font-family: 'Inter', sans-serif !important;
+    color: #28292D !important;
     opacity: 1 !important;
-    font-weight: 600 !important;
-    font-size: 1.6rem !important;
+    font-weight: 700 !important;
+    font-size: 1.4rem !important;
     letter-spacing: -0.02em !important;
+    line-height: 1.1 !important;
 }
 [data-testid="stMetricLabel"] {
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
-    color: #52725a !important;
+    font-family: 'Inter', sans-serif !important;
+    color: #73757A !important;
     opacity: 1 !important;
-    font-weight: 600 !important;
-    font-size: 0.68rem !important;
-    letter-spacing: 0.07em !important;
+    font-weight: 500 !important;
+    font-size: 0.65rem !important;
+    letter-spacing: 0.06em !important;
     text-transform: uppercase !important;
     white-space: normal !important;
     overflow: visible !important;
     line-height: 1.5 !important;
 }
-[data-testid="stMetricDelta"] { opacity: 1 !important; }
+[data-testid="stMetricDelta"] {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.72rem !important;
+    opacity: 1 !important;
+}
 
 /* ── Metric card animations ── */
 @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(18px); }
+    from { opacity: 0; transform: translateY(14px); }
     to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes shimmer {
-    0%   { background-position: -400px 0; }
-    100% { background-position: 400px 0; }
 }
 
 /* ── Metric cards ── */
 [data-testid="metric-container"] {
-    background: linear-gradient(145deg, #ffffff 0%, #f7fbf7 100%) !important;
-    border: 1px solid #dde8de !important;
-    border-radius: 14px !important;
+    background: #ffffff !important;
+    border: 1px solid #EAEAEA !important;
+    border-radius: 16px !important;
     padding: 1.2rem 1.4rem 1.1rem !important;
-    box-shadow: 0 2px 8px rgba(35,107,53,0.06), 0 1px 2px rgba(0,0,0,0.04) !important;
+    box-shadow: 0px 2px 8px 0px rgba(16, 16, 18, 0.08) !important;
     transition: box-shadow 0.25s ease, transform 0.25s ease !important;
     position: relative !important;
     overflow: hidden !important;
-    animation: fadeInUp 0.45s ease both !important;
+    animation: fadeInUp 0.4s ease both !important;
 }
 [data-testid="metric-container"]::before {
     content: '' !important;
     position: absolute !important;
     top: 0 !important; left: 0 !important; right: 0 !important;
     height: 3px !important;
-    background: linear-gradient(90deg, #236b35, #4a9e4a, #d97706) !important;
-    border-radius: 14px 14px 0 0 !important;
+    background: #144835 !important;
+    border-radius: 16px 16px 0 0 !important;
 }
 [data-testid="metric-container"]:hover {
-    box-shadow: 0 10px 30px rgba(35,107,53,0.14), 0 3px 10px rgba(0,0,0,0.05) !important;
-    transform: translateY(-3px) !important;
+    box-shadow: 0px 4px 16px 0px rgba(16, 16, 18, 0.12) !important;
+    transform: translateY(-2px) !important;
 }
-/* Stagger each metric card by column position */
 [data-testid="stColumns"] > div:nth-child(1) [data-testid="metric-container"] { animation-delay: 0.05s !important; }
-[data-testid="stColumns"] > div:nth-child(2) [data-testid="metric-container"] { animation-delay: 0.13s !important; }
-[data-testid="stColumns"] > div:nth-child(3) [data-testid="metric-container"] { animation-delay: 0.21s !important; }
-[data-testid="stColumns"] > div:nth-child(4) [data-testid="metric-container"] { animation-delay: 0.29s !important; }
-[data-testid="stColumns"] > div:nth-child(5) [data-testid="metric-container"] { animation-delay: 0.37s !important; }
+[data-testid="stColumns"] > div:nth-child(2) [data-testid="metric-container"] { animation-delay: 0.10s !important; }
+[data-testid="stColumns"] > div:nth-child(3) [data-testid="metric-container"] { animation-delay: 0.15s !important; }
+[data-testid="stColumns"] > div:nth-child(4) [data-testid="metric-container"] { animation-delay: 0.20s !important; }
+[data-testid="stColumns"] > div:nth-child(5) [data-testid="metric-container"] { animation-delay: 0.25s !important; }
 
 /* ── Section headers ── */
 .section-header {
-    font-family: 'Fraunces', serif;
-    font-size: 1.05rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
     font-weight: 600;
-    font-style: italic;
-    letter-spacing: -0.02em;
-    color: #0f1f0f;
-    margin: 2.8rem 0 1.2rem 0;
-    padding: 0.5rem 1rem 0.5rem 1rem;
-    background: linear-gradient(90deg, rgba(35,107,53,0.07) 0%, transparent 100%);
-    border-left: 3px solid #236b35;
-    border-radius: 0 6px 6px 0;
+    letter-spacing: 0.01em;
+    color: #28292D;
+    margin: 2.4rem 0 1.0rem 0;
+    padding: 0.45rem 0.9rem 0.45rem 0.9rem;
+    background: #D7F4E9;
+    border-left: 3px solid #144835;
+    border-radius: 0 4px 4px 0;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -148,58 +131,64 @@ h1 {
 
 /* ── Sidebar ── */
 [data-testid="stSidebar"] {
-    background: #0b1a0b !important;
-    border-right: 1px solid #1a2e1a !important;
+    background: #101012 !important;
+    border-right: 1px solid #1e1e20 !important;
 }
-/* Sidebar brand header */
 [data-testid="stSidebar"] > div:first-child::before {
     content: 'NBFC\A Intelligence' !important;
     white-space: pre !important;
     display: block !important;
-    font-family: 'Fraunces', serif !important;
-    font-size: 1.5rem !important;
-    font-weight: 600 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
     letter-spacing: -0.03em !important;
-    line-height: 1.1 !important;
-    color: #c8dfc4 !important;
+    line-height: 1.15 !important;
+    color: #D7F4E9 !important;
     padding: 1.6rem 1.2rem 1.4rem !important;
-    border-bottom: 1px solid #1e3a1e !important;
+    border-bottom: 1px solid #1e1e20 !important;
     margin-bottom: 0.5rem !important;
 }
 [data-testid="stSidebar"] [data-testid="stWidgetLabel"],
 [data-testid="stSidebar"] label {
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
-    color: #7aa87a !important;
-    font-size: 0.7rem !important;
+    font-family: 'Inter', sans-serif !important;
+    color: #73757A !important;
+    font-size: 0.70rem !important;
     font-weight: 600 !important;
-    letter-spacing: 0.09em !important;
+    letter-spacing: 0.07em !important;
     text-transform: uppercase !important;
 }
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] span,
 [data-testid="stSidebar"] .stCaption,
 [data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
-    color: #5a7a5a !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.70rem !important;
+    color: #73757A !important;
 }
 [data-testid="stSidebar"] hr {
-    border-color: #1e3a1e !important;
+    border-color: #1e1e20 !important;
     margin: 1rem 0 !important;
 }
 [data-testid="stSidebar"] [data-baseweb="select"] > div,
 [data-testid="stSidebar"] [data-testid="stSelectbox"] > div > div {
-    background: #152415 !important;
-    border-color: #2a402a !important;
-    color: #d8ead8 !important;
+    background: #1a1a1c !important;
+    border-color: #2a2a2e !important;
+    color: #e8e8e8 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.84rem !important;
 }
 [data-testid="stSidebar"] [data-baseweb="radio"] label span,
 [data-testid="stSidebar"] [data-baseweb="checkbox"] label span {
-    color: #b8d4b8 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.84rem !important;
+    color: #B9BABD !important;
 }
 [data-testid="stSidebar"] [data-testid="stSlider"] [data-testid="stTickBar"] {
-    color: #5a7a5a !important;
+    color: #73757A !important;
+    font-size: 0.70rem !important;
 }
 [data-testid="stSidebar"] [role="slider"] {
-    background: #2d6a2d !important;
+    background: #144835 !important;
 }
 
 /* ── Tabs ── */
@@ -208,78 +197,77 @@ h1 {
     margin-bottom: 1.5rem !important;
 }
 [data-baseweb="tab-list"] {
-    background: rgba(35,107,53,0.08) !important;
-    border-radius: 12px !important;
+    background: #EDEDEE !important;
+    border-radius: 8px !important;
     padding: 4px !important;
     gap: 2px !important;
-    border: 1px solid rgba(35,107,53,0.12) !important;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05) !important;
+    border: 1px solid #DCDCDE !important;
 }
-[data-baseweb="tab-border"] {
-    display: none !important;
-}
+[data-baseweb="tab-border"] { display: none !important; }
 [data-testid="stTabs"] [data-baseweb="tab"] {
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-family: 'Inter', sans-serif !important;
     font-weight: 500 !important;
-    font-size: 0.82rem !important;
-    color: #4a6a50 !important;
-    padding: 0.45rem 1.1rem !important;
-    border-radius: 9px !important;
+    font-size: 0.80rem !important;
+    color: #73757A !important;
+    padding: 0.42rem 1.0rem !important;
+    border-radius: 6px !important;
     background: transparent !important;
     border: none !important;
-    transition: color 0.18s ease, background 0.18s ease !important;
-    letter-spacing: 0.01em !important;
+    transition: color 0.15s ease, background 0.15s ease !important;
+    letter-spacing: 0.005em !important;
     white-space: nowrap !important;
 }
 [data-testid="stTabs"] [data-baseweb="tab"]:hover {
-    color: #1e3a22 !important;
-    background: rgba(255,255,255,0.6) !important;
+    color: #28292D !important;
+    background: #D7F4E9 !important;
 }
 [data-testid="stTabs"] [aria-selected="true"] {
     color: #ffffff !important;
     font-weight: 600 !important;
-    background: linear-gradient(135deg, #1e3a22 0%, #236b35 100%) !important;
-    box-shadow: 0 2px 10px rgba(30,58,34,0.3), 0 1px 3px rgba(0,0,0,0.12) !important;
+    background: #144835 !important;
+    box-shadow: 0px 2px 8px rgba(20, 72, 53, 0.3) !important;
     border-bottom: none !important;
 }
 
 /* ── Dataframes ── */
 [data-testid="stDataFrame"] {
-    font-family: 'DM Mono', monospace !important;
-    font-size: 0.8rem !important;
-    border-radius: 12px !important;
-    border: 1px solid #dde8de !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.80rem !important;
+    border-radius: 16px !important;
+    border: 1px solid #EAEAEA !important;
     overflow: hidden !important;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05) !important;
+    box-shadow: 0px 2px 8px 0px rgba(16, 16, 18, 0.06) !important;
 }
 
 /* ── Chart containers ── */
 [data-testid="stPlotlyChart"] > div {
-    border-radius: 14px !important;
-    border: 1px solid #dde8de !important;
+    border-radius: 16px !important;
+    border: 1px solid #EAEAEA !important;
     overflow: hidden !important;
-    box-shadow: 0 2px 8px rgba(35,107,53,0.06), 0 1px 3px rgba(0,0,0,0.04) !important;
+    box-shadow: 0px 2px 8px 0px rgba(16, 16, 18, 0.08) !important;
     background: #ffffff !important;
-    transition: box-shadow 0.25s ease !important;
+    transition: box-shadow 0.2s ease !important;
 }
 [data-testid="stPlotlyChart"] > div:hover {
-    box-shadow: 0 6px 20px rgba(35,107,53,0.10), 0 2px 6px rgba(0,0,0,0.05) !important;
+    box-shadow: 0px 4px 16px 0px rgba(16, 16, 18, 0.12) !important;
 }
 
 /* ── Badges ── */
 .unverified-badge {
     background: #fff5ed; color: #9a3412;
-    padding: 3px 10px; border-radius: 20px;
-    font-size: 11px; font-weight: 600;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    padding: 2px 9px; border-radius: 4px;
+    font-size: 10px; font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.03em;
     border: 1px solid #fed7aa;
 }
 .estimated-badge {
-    background: #f0fdf4; color: #15803d;
-    padding: 3px 10px; border-radius: 20px;
-    font-size: 11px; font-weight: 500;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    border: 1px solid #bbf7d0;
+    background: #D7F4E9; color: #144835;
+    padding: 2px 9px; border-radius: 4px;
+    font-size: 10px; font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.03em;
+    border: 1px solid #AFE9D4;
 }
 
 /* ── Alerts — hide native Streamlit ones (replaced by note() helper) ── */
@@ -287,34 +275,34 @@ h1 {
 
 /* ── Captions ── */
 .stCaption, [data-testid="stCaptionContainer"] {
-    font-size: 0.68rem !important;
-    color: #8aaa8a !important;
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
-    opacity: 0.85 !important;
+    font-size: 0.70rem !important;
+    font-weight: 400 !important;
+    color: #B9BABD !important;
+    font-family: 'Inter', sans-serif !important;
 }
 
 /* ── Selectbox / inputs ── */
 [data-testid="stSelectbox"] > div > div,
 [data-testid="stTextInput"] input {
-    border-radius: 8px !important;
-    border: 1px solid #ccdacd !important;
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
-    font-size: 0.85rem !important;
+    border-radius: 4px !important;
+    border: 1px solid #DCDCDE !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.84rem !important;
 }
 
 /* ── Tab panel fade-in ── */
 @keyframes tabFadeIn {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 [data-testid="stTabsContent"] > div[role="tabpanel"] {
-    animation: tabFadeIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+    animation: tabFadeIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both !important;
 }
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #b0ccb0; border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: #DCDCDE; border-radius: 10px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -346,16 +334,16 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 COLOR = {
-    "primary": "#236b35",       # rich forest green
-    "success": "#1a5c2a",       # deep success green
+    "primary": "#144835",       # MoneyView primary green
+    "success": "#217858",       # MoneyView hover/success green
     "danger": "#c0392b",        # clean red
     "warning": "#d97706",       # amber
-    "accent": "#d97706",        # amber — replaces purple for ROE/secondary charts
-    "text": "#0f1f0f",          # near-black
-    "text_secondary": "#52725a",# medium green-grey
+    "accent": "#d97706",        # amber
+    "text": "#28292D",          # MoneyView primary text
+    "text_secondary": "#73757A",# MoneyView secondary text
     "card_bg": "#ffffff",       # pure white cards
-    "border": "#e4ede6",        # soft green border
-    "chart_bg": "#f8faf8",      # off-white chart background
+    "border": "#EAEAEA",        # MoneyView border
+    "chart_bg": "#ffffff",      # white chart background
 }
 
 PERIOD_ORDER = ["FY2021", "FY2022", "FY2023", "FY2024", "FY2025", "9MFY26"]
@@ -537,15 +525,15 @@ def bar_chart_height(n, min_h=340, max_h=800, px_per_row=30):
     return max(min_h, min(max_h, n * px_per_row))
 
 
-CHART_FONT  = "Plus Jakarta Sans"
-CHART_TITLE_FONT = "Fraunces"
-CHART_MONO  = "DM Mono"
-CHART_BG    = "#f9fbf9"
+CHART_FONT  = "Inter"
+CHART_TITLE_FONT = "Inter"
+CHART_MONO  = "Inter"
+CHART_BG    = "#ffffff"
 CHART_PAPER = "#ffffff"
-CHART_GRID  = "#e8efe8"
+CHART_GRID  = "#EAEAEA"
 HOVER_LABEL = dict(
-    bgcolor="#0d1a0d", bordercolor="#236b35",
-    font=dict(family=CHART_MONO, size=11, color="#b8d4b8"),
+    bgcolor="#101012", bordercolor="#144835",
+    font=dict(family=CHART_FONT, size=11, color="#e8e8e8"),
     align="left",
     namelength=0,
 )
@@ -568,15 +556,15 @@ def wrap_title(title, max_len=32):
 def note(text, kind="info"):
     """Render a minimal, elegant disclosure note with a left-border accent."""
     palette = {
-        "info":    {"border": "#3d8b6e", "color": "#2d5a45"},
+        "info":    {"border": "#144835", "color": "#217858"},
         "warning": {"border": "#d97706", "color": "#7c4a00"},
         "error":   {"border": "#c0392b", "color": "#7f1d1d"},
     }
     p = palette.get(kind, palette["info"])
     st.markdown(
         f'<div style="border-left:2px solid {p["border"]};padding:0.28rem 0.85rem;'
-        f'margin:0.6rem 0;font-family:\'DM Sans\',sans-serif;font-size:0.7rem;'
-        f'color:{p["color"]};line-height:1.55;opacity:0.82;">{text}</div>',
+        f'margin:0.6rem 0;font-family:\'Inter\',sans-serif;font-size:0.7rem;'
+        f'color:{p["color"]};line-height:1.55;opacity:0.85;">{text}</div>',
         unsafe_allow_html=True,
     )
 
@@ -601,7 +589,7 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None):
     fig.update_layout(
         title=dict(
             text=wrap_title(title),
-            font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT, weight=600),
+            font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT, weight="bold"),
             x=0.5, xanchor="center", xref="paper",
             pad=dict(t=8, b=12),
         ),
@@ -634,13 +622,13 @@ def chart_layout(fig, title=None):
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
         title=dict(
             text=t,
-            font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT, weight=600),
+            font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT, weight="bold"),
             x=0.5, xanchor="center", xref="paper",
             pad=dict(t=8, b=12),
         ),
         xaxis=dict(
             gridcolor=CHART_GRID, gridwidth=1,
-            tickfont=dict(family=CHART_MONO, size=11, color="#52725a"),
+            tickfont=dict(family=CHART_MONO, size=11, color="#73757A"),
             showgrid=True, zeroline=False,
             tickcolor="rgba(0,0,0,0)", linecolor="rgba(0,0,0,0)", title="",
             tickvals=list(PERIOD_SHORT.keys()),
@@ -648,13 +636,13 @@ def chart_layout(fig, title=None):
         ),
         yaxis=dict(
             gridcolor=CHART_GRID, gridwidth=1,
-            tickfont=dict(family=CHART_MONO, size=11, color="#52725a"),
+            tickfont=dict(family=CHART_MONO, size=11, color="#73757A"),
             zeroline=True, zerolinecolor="#d0ddd0", zerolinewidth=1.5,
             tickcolor="rgba(0,0,0,0)", linecolor="rgba(0,0,0,0)", title="",
         ),
         margin=dict(t=86, b=90, l=10, r=24),
         legend=dict(
-            font=dict(family=CHART_FONT, size=11, color="#52725a"),
+            font=dict(family=CHART_FONT, size=11, color="#73757A"),
             bgcolor="rgba(249,251,249,0.85)",
             bordercolor="rgba(35,107,53,0.12)",
             borderwidth=1,
@@ -672,17 +660,16 @@ def chart_layout(fig, title=None):
 
 st.sidebar.markdown("""
 <div style="padding:1.4rem 0.2rem 1.2rem 0.2rem; margin-bottom:0.4rem;">
-  <div style="font-family:'Fraunces',serif; font-size:1.4rem; font-weight:700; letter-spacing:-0.03em; line-height:1.1;
-              background:linear-gradient(135deg,#c8dfc4 0%,#7ab87a 100%);
-              -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">
+  <div style="font-family:'Inter',sans-serif; font-size:1.3rem; font-weight:700; letter-spacing:-0.03em; line-height:1.15;
+              color:#D7F4E9;">
     NBFC<br>Intelligence
   </div>
-  <div style="font-family:'Plus Jakarta Sans',sans-serif; font-size:0.65rem; color:#4a6a4a;
-              letter-spacing:0.1em; text-transform:uppercase; margin-top:6px; font-weight:600;">
+  <div style="font-family:'Inter',sans-serif; font-size:0.62rem; color:#73757A;
+              letter-spacing:0.09em; text-transform:uppercase; margin-top:8px; font-weight:500;">
     India &nbsp;·&nbsp; FY21 – 9MFY26
   </div>
 </div>
-<div style="height:1px; background:linear-gradient(90deg, #2a4a2a, transparent); margin:0 0 1.2rem 0;"></div>
+<div style="height:1px; background:#1e1e20; margin:0 0 1.2rem 0;"></div>
 """, unsafe_allow_html=True)
 
 nbfc_df = load_nbfc_table()
@@ -728,58 +715,48 @@ nbfc_filtered = apply_filters(nbfc_df)
 st.markdown("""
 <style>
 @keyframes headerFadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
+    from { opacity: 0; transform: translateY(-8px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes subtitleFadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-}
 .page-header-wrap {
-    animation: headerFadeIn 0.55s cubic-bezier(0.22,1,0.36,1) both;
+    animation: headerFadeIn 0.4s cubic-bezier(0.22,1,0.36,1) both;
     padding-top: 0.5rem;
     margin-bottom: 1.6rem;
 }
 .page-title {
-    font-family: 'Fraunces', serif;
+    font-family: 'Inter', sans-serif;
     font-weight: 700;
-    font-size: 2.2rem;
-    letter-spacing: -0.04em;
+    font-size: 2.0rem;
+    letter-spacing: -0.03em;
     line-height: 1.1;
-    background: linear-gradient(135deg, #0f1f0f 0%, #236b35 60%, #4a9e4a 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #28292D;
     display: inline;
 }
 .page-badge {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 0.72rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.68rem;
     font-weight: 600;
-    color: #d97706;
-    background: rgba(217,119,6,0.1);
-    border: 1px solid rgba(217,119,6,0.25);
+    color: #144835;
+    background: #D7F4E9;
+    border: 1px solid #AFE9D4;
     padding: 3px 10px;
-    border-radius: 20px;
+    border-radius: 4px;
     letter-spacing: 0.07em;
     vertical-align: middle;
     position: relative;
     top: -4px;
 }
 .page-subtitle {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 0.85rem;
-    color: #52725a;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.84rem;
+    color: #73757A;
     margin: 0.4rem 0 0 0;
     font-weight: 400;
-    letter-spacing: 0.02em;
-    animation: subtitleFadeIn 0.8s 0.3s ease both;
-    opacity: 0;
-    animation-fill-mode: forwards;
+    letter-spacing: 0.01em;
 }
 .header-rule {
     border: none;
-    border-top: 1px solid rgba(35,107,53,0.15);
+    border-top: 1px solid #EAEAEA;
     margin: 1rem 0 1.4rem 0;
 }
 </style>
@@ -1122,7 +1099,7 @@ with tabs[3]:
         height=bar_chart_height(len(wf)),
         xaxis=dict(title="", gridcolor=CHART_GRID, showticklabels=False,
                    range=[-(wf_max * 1.5), wf_max * 1.5], zeroline=True,
-                   zerolinecolor="#c8dfc4", zerolinewidth=1.5, tickcolor="rgba(0,0,0,0)"),
+                   zerolinecolor="#D7F4E9", zerolinewidth=1.5, tickcolor="rgba(0,0,0,0)"),
         yaxis=dict(showgrid=False,
                    tickcolor="rgba(0,0,0,0)", title=""),
         margin=dict(t=82, b=20, l=10, r=130),
@@ -1243,7 +1220,7 @@ with tabs[4]:
 
         # Badges
         if company_info is not None:
-            layer_colors = {"Upper": "#4f46e5", "Middle": "#0891b2", "Base": "#64748b"}
+            layer_colors = {"Upper": "#144835", "Middle": "#217858", "Base": "#73757A"}
             layer = company_info.get("rbi_layer", "Unknown")
             dq = company_info.get("data_quality", "")
             listed_val = company_info.get("listed", 0)
@@ -1259,7 +1236,7 @@ with tabs[4]:
                 badges.append('<span class="unverified-badge">❌ Unverified</span>')
             if listed_val:
                 badges.append(
-                    '<span style="background:#dcfce7;color:#166534;padding:3px 10px;'
+                    '<span style="background:#D7F4E9;color:#144835;padding:3px 10px;'
                     'border-radius:4px;font-size:12px;font-weight:600">Listed</span>'
                 )
             st.markdown(" &nbsp; ".join(badges), unsafe_allow_html=True)
@@ -1557,7 +1534,7 @@ with tabs[5]:
                        showgrid=False, tickcolor="rgba(0,0,0,0)", title=""),
             xaxis=dict(title="", gridcolor=CHART_GRID, showticklabels=False,
                        range=[-(chg_max * 1.5), chg_max * 1.5],
-                       zeroline=True, zerolinecolor="#c8dfc4", zerolinewidth=1.5,
+                       zeroline=True, zerolinecolor="#D7F4E9", zerolinewidth=1.5,
                        tickcolor="rgba(0,0,0,0)"),
             margin=dict(t=82, b=20, l=10, r=130),
             hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6",
