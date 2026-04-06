@@ -329,6 +329,52 @@ h1 {
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #DCDCDE; border-radius: 10px; }
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+    /* Tighter container padding */
+    .block-container {
+        padding-left: 0.8rem !important;
+        padding-right: 0.8rem !important;
+        padding-top: 0.8rem !important;
+    }
+    /* Smaller page title */
+    .page-title { font-size: 1.35rem !important; }
+    .page-subtitle { font-size: 0.72rem !important; }
+    /* Stack ALL multi-column layouts vertically */
+    [data-testid="stHorizontalBlock"] {
+        flex-wrap: wrap !important;
+    }
+    [data-testid="stColumn"] {
+        flex: 1 1 100% !important;
+        min-width: 100% !important;
+        width: 100% !important;
+    }
+    /* Tabs: smaller text + horizontal scroll instead of overflow */
+    [data-baseweb="tab-list"] {
+        overflow-x: auto !important;
+        flex-wrap: nowrap !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding-bottom: 4px !important;
+    }
+    [data-baseweb="tab"] {
+        font-size: 0.72rem !important;
+        padding: 0.3rem 0.65rem !important;
+        white-space: nowrap !important;
+    }
+    /* Metric cards: tighter padding */
+    [data-testid="metric-container"] {
+        padding: 0.75rem 0.9rem 0.9rem !important;
+        border-radius: 10px !important;
+    }
+    [data-testid="stMetricValue"] {
+        font-size: 1.1rem !important;
+    }
+    /* Charts full width */
+    [data-testid="stPlotlyChart"] > div {
+        border-radius: 10px !important;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
 
