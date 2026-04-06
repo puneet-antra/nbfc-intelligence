@@ -29,7 +29,7 @@ st.set_page_config(
     page_title="NBFC Intelligence",
     page_icon=_make_favicon(),
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 st.markdown("""
@@ -671,19 +671,6 @@ def chart_layout(fig, title=None):
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 
-st.sidebar.markdown("""
-<div style="padding:1.4rem 0.2rem 1.2rem 0.2rem; margin-bottom:0.4rem;">
-  <div style="font-family:'Inter',sans-serif; font-size:1.3rem; font-weight:700; letter-spacing:-0.03em; line-height:1.15;
-              color:#D7F4E9;">
-    NBFC<br>Intelligence
-  </div>
-  <div style="font-family:'Inter',sans-serif; font-size:0.62rem; color:#73757A;
-              letter-spacing:0.09em; text-transform:uppercase; margin-top:8px; font-weight:500;">
-    India &nbsp;·&nbsp; FY21 – 9MFY26
-  </div>
-</div>
-<div style="height:1px; background:#1e1e20; margin:0 0 1.2rem 0;"></div>
-""", unsafe_allow_html=True)
 
 nbfc_df = load_nbfc_table()
 fin_df = load_financials()
