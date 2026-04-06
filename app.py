@@ -147,9 +147,12 @@ h1 {
     background: #101012 !important;
     border-right: 1px solid #1e1e20 !important;
 }
+/* Collapse button (‹) inside open sidebar */
 [data-testid="stSidebarCollapseButton"] {
     background: #1a1a1c !important;
     border-radius: 6px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 [data-testid="stSidebarCollapseButton"] svg {
     color: #D7F4E9 !important;
@@ -157,6 +160,20 @@ h1 {
 }
 [data-testid="stSidebarCollapseButton"]:hover {
     background: #217858 !important;
+}
+/* Expand button (›) on main page when sidebar is collapsed */
+[data-testid="stSidebarCollapsedControl"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    background: #f0f0f0 !important;
+    border-radius: 6px !important;
+}
+[data-testid="stSidebarCollapsedControl"] svg {
+    color: #144835 !important;
+    fill: #144835 !important;
+}
+[data-testid="stSidebarCollapsedControl"]:hover {
+    background: #D7F4E9 !important;
 }
 [data-testid="stSidebar"] [data-testid="stWidgetLabel"],
 [data-testid="stSidebar"] label {
