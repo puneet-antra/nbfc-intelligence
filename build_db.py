@@ -279,7 +279,16 @@ FINANCIALS = [
     ("Ugro Capital", "FY2026-Q3", 15454, 18500, 2700, 1250, 130, 112, 1.00, 2.20, 1.00, 7.00, "audited", "Ugro Capital Q3FY26 - AUM ₹15,454 Cr (+40% YoY); Q3 PAT ₹46.3 Cr (+23%); GNPA 2.2%"),
     ("Muthoot Microfin", "FY2026-Q3", 10000, 13000, 2600, 1500, 50, 700, 7.00, 4.40, 0.50, 2.60, "audited", "Muthoot Microfin Q3FY26 - Q3 PAT surged 1544%; GNPA 4.40% (improved from 4.61% in Q2)"),
     # ── KreditBee ─────────────────────────────────────────────────────────────
-    # FY23/FY24 excluded — no verified source data available
+    # FY2021 & FY2022: ICRA rating report Oct-2022 citing IndAS standalone audited financials.
+    # total_assets = "Total Managed Assets" per ICRA (includes off-balance-sheet co-lending);
+    # NII and credit losses not separately disclosed in that report.
+    ("KreditBee", "FY2021",   652,  1091,  538, None,  28, None,  None, 7.30, 2.57,  5.20, "unverified", "KreditBee FY21 - ICRA Oct-2022 rating report (IndAS standalone). Managed portfolio ₹652 Cr; PAT ₹28 Cr; GNPA 7.3%. Total assets = managed assets incl. off-book"),
+    ("KreditBee", "FY2022",  1162,  1539,  607, None,  29, None,  None, 2.90, 2.21,  5.07, "unverified", "KreditBee FY22 - ICRA Oct-2022 rating report (IndAS standalone). Managed portfolio ₹1,162 Cr; PAT ₹29 Cr; GNPA 2.9%. Total assets = managed assets incl. off-book"),
+    # FY2023 & FY2024: BSE Annual Report FY2024 standalone audited Ind AS financials.
+    # Source: bseindia.com/xml-data/corpfiling/AttachHis//90d9d6b0-c206-4454-8780-c3f70220053c.pdf
+    # NII = Interest Income minus Finance Costs. Credit losses FY24 include ₹47 Cr DLG provision.
+    ("KreditBee", "FY2023",  2417,  2927, 1591,  313,  65,  249, 10.30, 2.29, 2.91,  5.91, "audited", "KreditBee FY23 actual - BSE Annual Report FY24 (KrazyBee Services Ltd standalone). Loan book ₹2,417 Cr; PAT ₹65 Cr; NII ₹313 Cr; Impairment ₹249 Cr; GNPA 2.29%"),
+    ("KreditBee", "FY2024",  4824,  5041, 2050,  991, 200,  432,  8.96, 2.29, 5.02, 10.99, "audited", "KreditBee FY24 actual - BSE Annual Report FY24 (KrazyBee Services Ltd standalone). Loan book ₹4,824 Cr; PAT ₹200 Cr; NII ₹991 Cr; Impairment ₹432 Cr; GNPA 2.29%"),
     ("KreditBee", "FY2025", 5649, 6250, 2347, 1214, 221, 762, 13.49, 2.83, 3.94, 9.44, "audited", "KreditBee FY25 actual - BSE filing (KrazyBee Services Ltd). Loan book ₹5,649 Cr; PAT ₹221 Cr; NII ₹1,214 Cr; Impairment ₹762 Cr; GNPA 2.83%"),
     ("KreditBee", "FY2026-Q3", 8448, 9281, 2707, 978, 341, 612, 7.25, 1.79, 6.45, 17.96, "audited", "KreditBee 9MFY26 actual - BSE filing Feb-2026. Loan book ₹8,448 Cr; 9M PAT ₹341 Cr; 9M NII ₹978 Cr; 9M Impairment ₹612 Cr; GNPA 1.79%"),
     # ── Fibe ──────────────────────────────────────────────────────────────────
