@@ -77,9 +77,9 @@ COMPANIES = [
     ("Ugro Capital", "Middle", "SME Finance", 1, 1, 13200, "audited", "UGROCAP.NS", "Ugro Capital Annual Reports"),
     ("Muthoot Microfin", "Middle", "Microfinance", 1, 1, 14000, "audited", "MUTHOOTMF.NS", "Muthoot Microfin Annual Reports"),
     ("SBI Cards and Payment Services", "Upper", "Consumer Finance", 1, 1, 62000, "audited", "SBICARD.NS", "SBI Cards Annual Reports"),
-    # Unlisted fintechs
-    ("KreditBee", "Middle", "Consumer Finance", 0, 1, 10800, "estimated", None, "KreditBee (Krazybee Services) - MCA filings"),
-    ("Fibe", "Middle", "Consumer Finance", 0, 1, 7900, "estimated", None, "Fibe (EarlySalary) standalone NBFC - MCA filings"),
+    # Unlisted fintechs (BSE-listed NCDs, so quarterly filings available)
+    ("KreditBee", "Middle", "Consumer Finance", 0, 1, 9281, "audited", None, "KreditBee (KrazyBee Services Ltd) - BSE NCD filings"),
+    # Fibe excluded — no verified source data available
 ]
 
 # ── Financial data ────────────────────────────────────────────────────────────
@@ -279,15 +279,11 @@ FINANCIALS = [
     ("Ugro Capital", "FY2026-Q3", 15454, 18500, 2700, 1250, 130, 112, 1.00, 2.20, 1.00, 7.00, "audited", "Ugro Capital Q3FY26 - AUM ₹15,454 Cr (+40% YoY); Q3 PAT ₹46.3 Cr (+23%); GNPA 2.2%"),
     ("Muthoot Microfin", "FY2026-Q3", 10000, 13000, 2600, 1500, 50, 700, 7.00, 4.40, 0.50, 2.60, "audited", "Muthoot Microfin Q3FY26 - Q3 PAT surged 1544%; GNPA 4.40% (improved from 4.61% in Q2)"),
     # ── KreditBee ─────────────────────────────────────────────────────────────
-    ("KreditBee", "FY2023", 4800, 6000, 1500, 780, 280, 120, 2.5, 2.80, 5.83, 18.67, "estimated", "KreditBee MCA filings FY23 - estimated"),
-    ("KreditBee", "FY2024", 7200, 9000, 2200, 1200, 420, 202, 2.8, 3.20, 7.0, 22.7, "estimated", "KreditBee MCA filings FY24 - estimated"),
-    ("KreditBee", "FY2025", 8500, 10800, 2800, 1450, 380, 298, 3.5, 4.50, 4.84, 15.0, "estimated", "KreditBee MCA filings FY25 - estimated"),
-    ("KreditBee", "FY2026-Q3", 9800, 12400, 3100, 1120, 290, 255, 3.8, 4.80, 3.5, 13.5, "estimated", "KreditBee Q3FY26 - estimated from FY25 run-rate"),
+    # FY23/FY24 excluded — no verified source data available
+    ("KreditBee", "FY2025", 5649, 6250, 2347, 1214, 221, 762, 13.49, 2.83, 3.94, 9.44, "audited", "KreditBee FY25 actual - BSE filing (KrazyBee Services Ltd). Loan book ₹5,649 Cr; PAT ₹221 Cr; NII ₹1,214 Cr; Impairment ₹762 Cr; GNPA 2.83%"),
+    ("KreditBee", "FY2026-Q3", 8448, 9281, 2707, 978, 341, 612, 7.25, 1.79, 6.45, 17.96, "audited", "KreditBee 9MFY26 actual - BSE filing Feb-2026. Loan book ₹8,448 Cr; 9M PAT ₹341 Cr; 9M NII ₹978 Cr; 9M Impairment ₹612 Cr; GNPA 1.79%"),
     # ── Fibe ──────────────────────────────────────────────────────────────────
-    ("Fibe", "FY2023", 3200, 4100, 900, 520, 145, 64, 2.0, 2.50, 4.53, 16.11, "estimated", "Fibe MCA filings FY23 - estimated"),
-    ("Fibe", "FY2024", 5500, 7000, 1400, 890, 195, 165, 3.0, 3.80, 4.48, 16.96, "estimated", "Fibe MCA filings FY24 - estimated"),
-    ("Fibe", "FY2025", 6200, 7900, 1700, 1020, 165, 248, 4.0, 5.20, 2.82, 10.8, "estimated", "Fibe MCA filings FY25 - estimated"),
-    ("Fibe", "FY2026-Q3", 6500, 8300, 1820, 790, 120, 200, 4.2, 5.50, 2.1, 9.5, "estimated", "Fibe Q3FY26 - estimated from FY25 run-rate"),
+    # Fibe excluded — no verified source data available (unlisted, no BSE filings)
 ]
 
 
