@@ -11,10 +11,23 @@ import sqlite3
 import yfinance as yf
 import numpy as np
 from datetime import datetime
+from PIL import Image, ImageDraw
+
+def _make_favicon():
+    size = 64
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.rounded_rectangle([0, 0, 63, 63], radius=12, fill=(20, 72, 53, 255))
+    light = (215, 244, 233, 255)   # #D7F4E9
+    white = (255, 255, 255, 255)
+    draw.rectangle([11, 40, 21, 50], fill=light)   # short bar
+    draw.rectangle([26, 30, 36, 50], fill=light)   # medium bar
+    draw.rectangle([41, 16, 51, 50], fill=white)   # tall bar (accent)
+    return img
 
 st.set_page_config(
     page_title="NBFC Intelligence",
-    page_icon="🏦",
+    page_icon=_make_favicon(),
     layout="wide",
     initial_sidebar_state="expanded",
 )
