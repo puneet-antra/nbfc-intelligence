@@ -406,17 +406,35 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 COLOR = {
-    "primary": "#144835",       # MoneyView primary green
-    "success": "#217858",       # MoneyView hover/success green
-    "danger": "#c0392b",        # clean red
-    "warning": "#d97706",       # amber
-    "accent": "#d97706",        # amber
-    "text": "#28292D",          # MoneyView primary text
-    "text_secondary": "#73757A",# MoneyView secondary text
-    "card_bg": "#ffffff",       # pure white cards
-    "border": "#EAEAEA",        # MoneyView border
-    "chart_bg": "#ffffff",      # white chart background
+    "primary":        "#144835",   # MoneyView primary green
+    "success":        "#217858",   # MoneyView mid green
+    "teal":           "#2CA076",   # MoneyView teal accent
+    "accent":         "#2CA076",   # MoneyView teal (replaces amber)
+    "danger":         "#E7554A",   # MoneyView red
+    "warning":        "#DE5E2B",   # MoneyView rust orange
+    "blue":           "#2562BD",   # MoneyView blue
+    "yellow":         "#FCC945",   # MoneyView yellow
+    "purple":         "#9769B2",   # MoneyView purple
+    "text":           "#28292D",   # MoneyView primary text
+    "text_secondary": "#73757A",   # MoneyView secondary text
+    "card_bg":        "#ffffff",
+    "border":         "#EAEAEA",
+    "chart_bg":       "#ffffff",
 }
+
+# Ordered palette for multi-series charts — MoneyView brand sequence
+MV_PALETTE = [
+    "#144835",  # deep forest green
+    "#2CA076",  # teal
+    "#DE5E2B",  # rust orange
+    "#2562BD",  # blue
+    "#FCC945",  # yellow
+    "#9769B2",  # purple
+    "#37C893",  # bright green
+    "#E7554A",  # red
+    "#505259",  # charcoal
+    "#73757A",  # grey
+]
 
 PERIOD_ORDER = ["FY2021", "FY2022", "FY2023", "FY2024", "FY2025", "9MFY26"]
 PERIOD_SHORT = {
@@ -903,6 +921,7 @@ with tabs[0]:
         fig = px.scatter(
             bubble_df, x="growth_pct", y="roa_pct",
             size="loan_book_cr", color="sector",
+            color_discrete_sequence=MV_PALETTE,
             hover_name="name",
             labels={"growth_pct": "AUM Growth % (Latest 1Y)", "roa_pct": f"ROA % ({lbl})"},
             title=f"Growth vs Profitability — ROA as of {lbl} (bubble = loan book)",
@@ -996,6 +1015,7 @@ with tabs[1]:
     pat_trend = chart_df[chart_df["name"].isin(top10_names)][["name", "period", "pat_cr"]].dropna()
 
     fig = px.line(pat_trend, x="period", y="pat_cr", color="name",
+                  color_discrete_sequence=MV_PALETTE,
                   labels={"pat_cr": "PAT (₹ Crore)", "period": "Period"},
                   title=f"Profit After Tax Trend — incl. {lbl} (₹ Crore)", height=460,
                   category_orders={"period": PERIOD_ORDER})
@@ -1033,6 +1053,7 @@ with tabs[2]:
     chart_df = get_chart_periods(fin_filtered)
     sector_gnpa = chart_df.groupby(["period", "sector"])["gnpa_pct"].mean().reset_index()
     fig = px.line(sector_gnpa, x="period", y="gnpa_pct", color="sector",
+                  color_discrete_sequence=MV_PALETTE,
                   labels={"gnpa_pct": "Avg GNPA %", "period": "Period"},
                   title=f"Average GNPA % by Sector (FY2021–{lbl})", height=460,
                   category_orders={"period": PERIOD_ORDER})
@@ -1054,7 +1075,7 @@ with tabs[2]:
         z=hm_df.values,
         x=hm_df.columns.tolist(),
         y=hm_df.index.tolist(),
-        colorscale=[[0, COLOR["success"]], [0.5, "#fbbf24"], [1, COLOR["danger"]]],
+        colorscale=[[0, COLOR["success"]], [0.5, "#FCC945"], [1, COLOR["danger"]]],
         text=[[f"{v:.1f}%" if not np.isnan(v) else "N/A" for v in row] for row in hm_df.values],
         texttemplate="%{text}",
         showscale=True,
@@ -1111,6 +1132,7 @@ with tabs[3]:
         ["name", "period", "credit_loss_rate_pct"]].dropna()
 
     fig = px.line(trend_df, x="period", y="credit_loss_rate_pct", color="name",
+                  color_discrete_sequence=MV_PALETTE,
                   title=f"Credit Loss Rate % Trend (to {lbl})", height=460,
                   category_orders={"period": PERIOD_ORDER})
     fig.add_hline(y=2.0, line_dash="dot", line_color=COLOR["warning"],
@@ -1124,6 +1146,7 @@ with tabs[3]:
     if not scatter_df.empty:
         fig = px.scatter(scatter_df, x="gnpa_pct", y="credit_loss_rate_pct",
                          size="loan_book_cr", color="sector", hover_name="name",
+                         color_discrete_sequence=MV_PALETTE,
                          labels={"gnpa_pct": "GNPA %", "credit_loss_rate_pct": "Credit Loss Rate %"},
                          title=f"Credit Loss Rate vs GNPA — {lbl} (bubble = loan book)", height=520)
         chart_layout(fig)
@@ -1182,7 +1205,7 @@ with tabs[3]:
 
     fig = go.Figure(data=go.Heatmap(
         z=hm_df.values, x=hm_df.columns.tolist(), y=hm_df.index.tolist(),
-        colorscale=[[0, COLOR["success"]], [0.5, "#fbbf24"], [1, COLOR["danger"]]],
+        colorscale=[[0, COLOR["success"]], [0.5, "#FCC945"], [1, COLOR["danger"]]],
         text=[[f"{v:.1f}%" if not np.isnan(v) else "N/A" for v in row] for row in hm_df.values],
         texttemplate="%{text}", showscale=True,
     ))
@@ -1213,6 +1236,7 @@ with tabs[7]:
                 unsafe_allow_html=True)
     area_df = chart_df[chart_df["name"].isin(top10)][["name", "period", "loan_book_cr"]].dropna()
     fig = px.area(area_df, x="period", y="loan_book_cr", color="name",
+                  color_discrete_sequence=MV_PALETTE,
                   title=f"Loan Book Growth — Top 10 NBFCs (₹ Crore, to {lbl})", height=460,
                   category_orders={"period": PERIOD_ORDER})
     chart_layout(fig)
@@ -1225,6 +1249,7 @@ with tabs[7]:
         nii_df = chart_df[chart_df["name"].isin(top10)][
             ["name", "period", "net_interest_income_cr"]].dropna()
         fig = px.line(nii_df, x="period", y="net_interest_income_cr", color="name",
+                      color_discrete_sequence=MV_PALETTE,
                       title=f"Net Interest Income (₹ Crore, to {lbl})", height=420,
                       category_orders={"period": PERIOD_ORDER})
         chart_layout(fig)
@@ -1236,6 +1261,7 @@ with tabs[7]:
                     unsafe_allow_html=True)
         layer_df = chart_df.groupby(["period", "rbi_layer"])["total_assets_cr"].sum().reset_index()
         fig = px.area(layer_df, x="period", y="total_assets_cr", color="rbi_layer",
+                      color_discrete_map={"Upper": "#144835", "Middle": "#2CA076", "Base": "#73757A"},
                       title=f"Total Industry Assets by RBI Layer (₹ Crore, to {lbl})", height=420,
                       category_orders={"period": PERIOD_ORDER})
         chart_layout(fig)
@@ -1247,6 +1273,7 @@ with tabs[7]:
                 unsafe_allow_html=True)
     roa_df = chart_df[chart_df["name"].isin(top10)][["name", "period", "roa_pct"]].dropna()
     fig = px.line(roa_df, x="period", y="roa_pct", color="name",
+                  color_discrete_sequence=MV_PALETTE,
                   title=f"ROA % Trend — Top 10 NBFCs (to {lbl})", height=460,
                   category_orders={"period": PERIOD_ORDER})
     chart_layout(fig)
@@ -1360,6 +1387,7 @@ with tabs[4]:
                 columns={"total_assets_cr": "Total Assets", "loan_book_cr": "Loan Book"})
             fig = px.bar(bar_df, x="period", y=["Total Assets", "Loan Book"],
                          barmode="group", text_auto=".3s",
+                         color_discrete_sequence=["#144835", "#2CA076"],
                          title=f"Assets & Loan Book (₹ Crore, to {lbl})", height=400,
                          category_orders={"period": PERIOD_ORDER})
             fig.update_traces(textposition="outside", textfont=dict(family=CHART_MONO, size=11),
@@ -1372,6 +1400,7 @@ with tabs[4]:
             nii_pat = chart_df[["period", "net_interest_income_cr", "pat_cr"]].dropna().rename(
                 columns={"net_interest_income_cr": "NII", "pat_cr": "PAT"})
             fig = px.line(nii_pat, x="period", y=["NII", "PAT"],
+                          color_discrete_sequence=["#144835", "#DE5E2B"],
                           title=f"NII & PAT (₹ Crore, to {lbl})", height=400,
                           category_orders={"period": PERIOD_ORDER}, markers=True)
             chart_layout(fig)
@@ -1394,6 +1423,7 @@ with tabs[4]:
             ror_df = chart_df[["period", "roa_pct", "roe_pct"]].dropna().rename(
                 columns={"roa_pct": "ROA %", "roe_pct": "ROE %"})
             fig = px.line(ror_df, x="period", y=["ROA %", "ROE %"],
+                          color_discrete_sequence=["#144835", "#2CA076"],
                           title=f"ROA & ROE % (to {lbl})", markers=True, height=380,
                           category_orders={"period": PERIOD_ORDER})
             chart_layout(fig)
