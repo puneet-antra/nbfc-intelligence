@@ -147,6 +147,17 @@ h1 {
     background: #101012 !important;
     border-right: 1px solid #1e1e20 !important;
 }
+[data-testid="stSidebarCollapseButton"] {
+    background: #1a1a1c !important;
+    border-radius: 6px !important;
+}
+[data-testid="stSidebarCollapseButton"] svg {
+    color: #D7F4E9 !important;
+    fill: #D7F4E9 !important;
+}
+[data-testid="stSidebarCollapseButton"]:hover {
+    background: #217858 !important;
+}
 [data-testid="stSidebar"] [data-testid="stWidgetLabel"],
 [data-testid="stSidebar"] label {
     font-family: 'Inter', sans-serif !important;
