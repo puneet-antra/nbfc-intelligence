@@ -290,7 +290,7 @@ FINANCIALS = [
     ("KreditBee", "FY2023",  2417,  2927, 1591,  313,  65,  249, 10.30, 2.29, 2.91,  5.91, "audited", "KreditBee FY23 actual - BSE Annual Report FY24 (KrazyBee Services Ltd standalone). Loan book ₹2,417 Cr; PAT ₹65 Cr; NII ₹313 Cr; Impairment ₹249 Cr; GNPA 2.29%"),
     ("KreditBee", "FY2024",  4824,  5041, 2050,  991, 200,  432,  8.96, 2.29, 5.02, 10.99, "audited", "KreditBee FY24 actual - BSE Annual Report FY24 (KrazyBee Services Ltd standalone). Loan book ₹4,824 Cr; PAT ₹200 Cr; NII ₹991 Cr; Impairment ₹432 Cr; GNPA 2.29%"),
     ("KreditBee", "FY2025", 5649, 6250, 2347, 1214, 221, 762, 13.49, 2.83, 3.94, 9.44, "audited", "KreditBee FY25 actual - BSE filing (KrazyBee Services Ltd). Loan book ₹5,649 Cr; PAT ₹221 Cr; NII ₹1,214 Cr; Impairment ₹762 Cr; GNPA 2.83%"),
-    ("KreditBee", "FY2026-Q3", 8448, 9281, 2707, 978, 341, 612, 7.25, 1.79, 6.45, 17.96, "audited", "KreditBee 9MFY26 actual - BSE filing Feb-2026. Loan book ₹8,448 Cr; 9M PAT ₹341 Cr; 9M NII ₹978 Cr; 9M Impairment ₹612 Cr; GNPA 1.79%"),
+    ("KreditBee", "FY2026-Q3", 8448, 9281, 2707, 978, 189, 612, 7.25, 1.79, 3.60, 10.00, "audited", "KreditBee 9MFY26 adjusted - Reported PAT 341 Cr adjusted to 189 Cr ex one-times: GST SCN reversal +104 Cr + DTA +48 Cr. Adj ROA 3.6%, Adj ROE 10.0%."),
     # ── Fibe ──────────────────────────────────────────────────────────────────
     # Fibe excluded — no verified source data available (unlisted, no BSE filings)
 ]
