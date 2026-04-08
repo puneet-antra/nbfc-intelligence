@@ -1511,11 +1511,6 @@ with tabs[4]:
             key="dd_company_select",
             label_visibility="collapsed",
         )
-        st.markdown(
-            '<p style="font-size:0.72rem;color:#A0A2A8;margin:-0.35rem 0 0 0.1rem;">'
-            'Search or select any NBFC to explore its full financial profile</p>',
-            unsafe_allow_html=True,
-        )
     with filter_col:
         st.markdown("<div style='margin-top:1.85rem'></div>", unsafe_allow_html=True)
         with st.popover(" ", use_container_width=True):
@@ -1753,6 +1748,12 @@ with tabs[4]:
             note("ROA, ROE & PAT exclude ~₹152 Cr post-tax one-time items: ₹104 Cr GST provision reversal "
                  "(Karnataka HC ruling, Dec 2025) + ₹48 Cr DTA recognition. "
                  "Reported 9M PAT: ₹341 Cr → Adjusted: ~₹189 Cr.", "warning")
+
+    st.markdown(
+        '<p style="font-size:0.72rem;color:#B0B2B8;margin-top:2.5rem;text-align:center;">'
+        'Search or select any NBFC from the dropdown above to explore its full financial profile</p>',
+        unsafe_allow_html=True,
+    )
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 7: VALUATION
