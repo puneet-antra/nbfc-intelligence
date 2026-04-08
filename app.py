@@ -1420,15 +1420,15 @@ with tabs[4]:
         filtered_companies = sorted(companies_with_data)
 
     # ── Quick-select shortcut chips ──────────────────────────────────────────
-    # (full_name, display_label) — full_name must match the DB exactly
+    # (full_name, display_label, col_width) — width sized to label length
     QUICK_NBFCS = [
-        ("KreditBee",                      "KreditBee"),
-        ("Fibe",                           "Fibe"),
-        ("Bajaj Finance",                  "Bajaj Finance"),
-        ("SBI Cards and Payment Services", "SBI Cards"),
+        ("KreditBee",                      "KreditBee",     2.0),
+        ("Fibe",                           "Fibe",          1.2),
+        ("Bajaj Finance",                  "Bajaj Finance", 2.6),
+        ("SBI Cards and Payment Services", "SBI Cards",     2.0),
     ]
     # Only show chips for companies that exist in the current data
-    available_quick = [(n, lbl) for n, lbl in QUICK_NBFCS if n in companies_with_data]
+    available_quick = [(n, lbl, w) for n, lbl, w in QUICK_NBFCS if n in companies_with_data]
 
     if available_quick:
         st.markdown(
@@ -1437,9 +1437,10 @@ with tabs[4]:
             'Featured</p>',
             unsafe_allow_html=True,
         )
-        # Chip columns start at x=0 (aligned with selectbox); spacer fills the rest
-        chip_cols = st.columns([1.6] * len(available_quick) + [10], gap="small")
-        for i, (name, label) in enumerate(available_quick):
+        # Each chip column is sized to its label; spacer fills the rest
+        chip_widths = [w for _, _, w in available_quick] + [10]
+        chip_cols = st.columns(chip_widths, gap="small")
+        for i, (name, label, _) in enumerate(available_quick):
             with chip_cols[i]:
                 is_active = st.session_state.get("dd_company_select") == name
                 marker_class = "qs-chip-marker qs-active" if is_active else "qs-chip-marker"
