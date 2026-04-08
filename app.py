@@ -363,43 +363,38 @@ h1 {
     user-select: none;
 }
 
-/* ── Deep Dive: quick-select chip buttons ── */
-/* Streamlit wraps st.markdown output in .stMarkdown > p, so the marker
-   span is NOT a direct sibling of stButton — use :has() on the wrapper. */
-
-/* Pill shape & default style for every chip button */
-.stMarkdown:has(.qs-chip-marker) ~ div[data-testid="stButton"] button,
-.stMarkdown:has(.qs-chip-marker) ~ div[data-testid="stButton"] button:focus {
-    border-radius: 999px !important;
-    padding: 0.18rem 0.7rem !important;
-    min-height: 1.85rem !important;
-    height: 1.85rem !important;
-    font-size: 0.76rem !important;
-    font-weight: 500 !important;
-    border: 1.5px solid #D0D2D8 !important;
-    background: #FFFFFF !important;
-    color: #28292D !important;
-    box-shadow: none !important;
-    transition: background 0.15s, border-color 0.15s, color 0.15s !important;
+/* ── Deep Dive: quick-select chip anchors ── */
+.qs-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 1.1rem;
+    border-radius: 999px;
+    border: 1.5px solid #D0D2D8;
+    background: #FFFFFF;
+    color: #28292D;
+    font-size: 0.78rem;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+    line-height: 1.5;
 }
-.stMarkdown:has(.qs-chip-marker) ~ div[data-testid="stButton"] button:hover {
-    background: #F0FBF5 !important;
-    border-color: #2CA076 !important;
-    color: #144835 !important;
-    box-shadow: 0 1px 4px rgba(20,72,53,0.10) !important;
+.qs-chip:hover {
+    background: #F0FBF5;
+    border-color: #2CA076;
+    color: #144835;
+    box-shadow: 0 1px 4px rgba(20,72,53,0.10);
+    text-decoration: none;
 }
-.stMarkdown:has(.qs-chip-marker) ~ div[data-testid="stButton"] button:active {
-    background: #DBEFD9 !important;
-    border-color: #144835 !important;
-}
-/* Active / selected chip */
-.stMarkdown:has(.qs-chip-marker.qs-active) ~ div[data-testid="stButton"] button,
-.stMarkdown:has(.qs-chip-marker.qs-active) ~ div[data-testid="stButton"] button:focus {
-    background: #E8F5EE !important;
-    border-color: #2CA076 !important;
-    color: #144835 !important;
-    font-weight: 600 !important;
-    box-shadow: 0 0 0 2px rgba(44,160,118,0.20) !important;
+.qs-chip.qs-active {
+    background: #E8F5EE;
+    border-color: #2CA076;
+    color: #144835;
+    font-weight: 600;
+    box-shadow: 0 0 0 2px rgba(44,160,118,0.20);
 }
 
 /* ── Scrollbar ── */
@@ -1438,25 +1433,29 @@ with tabs[4]:
     # Only show chips for companies that exist in the current data
     available_quick = [(n, lbl) for n, lbl in QUICK_NBFCS if n in companies_with_data]
 
+    # Handle chip click via query param (set before widgets render)
+    _qs_click = st.query_params.get("qs_select")
+    if _qs_click and _qs_click in companies_with_data:
+        st.session_state["dd_company_select"] = _qs_click
+        st.session_state["dd_layer_filter"] = "All"
+        st.session_state["dd_sector_filter"] = "All"
+        st.query_params.pop("qs_select", None)
+
     if available_quick:
-        st.markdown(
+        _current = st.session_state.get("dd_company_select", "")
+        chips_html = (
             '<p style="font-size:0.68rem;font-weight:600;color:#A0A2A8;'
-            'text-transform:uppercase;letter-spacing:0.05em;margin:0 0 0.3rem 0;">'
-            'Featured</p>',
-            unsafe_allow_html=True,
+            'text-transform:uppercase;letter-spacing:0.05em;margin:0 0 0.45rem 0;">'
+            'Featured</p>'
+            '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.6rem;">'
         )
-        # Equal-width chip columns (sized to longest label) + spacer
-        chip_cols = st.columns([2.6] * len(available_quick) + [10], gap="small")
-        for i, (name, label) in enumerate(available_quick):
-            with chip_cols[i]:
-                is_active = st.session_state.get("dd_company_select") == name
-                marker_class = "qs-chip-marker qs-active" if is_active else "qs-chip-marker"
-                st.markdown(f'<span class="{marker_class}"></span>', unsafe_allow_html=True)
-                if st.button(label, key=f"qs_btn_{name}", use_container_width=True):
-                    st.session_state["dd_company_select"] = name
-                    st.session_state["dd_layer_filter"] = "All"
-                    st.session_state["dd_sector_filter"] = "All"
-                    st.rerun()
+        for name, label in available_quick:
+            active_cls = " qs-active" if _current == name else ""
+            chips_html += (
+                f'<a href="?qs_select={name}" class="qs-chip{active_cls}">{label}</a>'
+            )
+        chips_html += "</div>"
+        st.markdown(chips_html, unsafe_allow_html=True)
 
     sel_col, filter_col = st.columns([14, 1])
     with sel_col:
