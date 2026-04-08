@@ -376,7 +376,7 @@ h1 {
     font-size: 0.78rem;
     font-weight: 500;
     font-family: 'Inter', sans-serif;
-    text-decoration: none;
+    text-decoration: none !important;
     cursor: pointer;
     white-space: nowrap;
     transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
@@ -387,7 +387,7 @@ h1 {
     border-color: #2CA076;
     color: #144835;
     box-shadow: 0 1px 4px rgba(20,72,53,0.10);
-    text-decoration: none;
+    text-decoration: none !important;
 }
 .qs-chip.qs-active {
     background: #E8F5EE;
