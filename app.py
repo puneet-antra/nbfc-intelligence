@@ -318,6 +318,15 @@ h1 {
     font-size: 0.84rem !important;
 }
 
+/* ── NBFC company selector: bold prominent selected value ── */
+[data-testid="stSelectbox"]:has(label:has(p:-webkit-any(*, :first-child))) div[data-baseweb="select"] div[class*="singleValue"],
+[data-testid="stSelectbox"] div[data-baseweb="select"] div[class*="singleValue"] {
+    font-weight: 700 !important;
+    font-size: 0.97rem !important;
+    color: #1C1E23 !important;
+    letter-spacing: -0.01em !important;
+}
+
 /* ── Tab panel fade-in ── */
 @keyframes tabFadeIn {
     from { opacity: 0; transform: translateY(8px); }
