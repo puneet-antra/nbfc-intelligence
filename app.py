@@ -634,6 +634,7 @@ def annualise_9m(df):
     return ann
 
 
+@st.cache_data(ttl=3600)
 def get_chart_periods(df):
     """Annual FY2021–FY2025 plus annualised 9MFY26, sorted."""
     annual = annual_only(df)
@@ -643,6 +644,7 @@ def get_chart_periods(df):
     return combined.sort_values(["name", "period"])
 
 
+@st.cache_data(ttl=3600)
 def get_latest_period_data(df):
     """
     Per company: use 9MFY26 if FY2026-Q3 exists, else FY2025.
@@ -1459,49 +1461,6 @@ with tabs[4]:
                     st.session_state["dd_sector_filter"] = "All"
                     st.rerun()
 
-        # Inject JS to style the active chip — targets by button text content
-        _active_label = dict(available_quick).get(
-            st.session_state.get("dd_company_select", ""), ""
-        )
-        _all_labels = json.dumps([lbl for _, lbl in available_quick])
-        components.html(f"""
-<script>
-(function() {{
-  var activeLabel = {json.dumps(_active_label)};
-  var chipLabels  = {_all_labels};
-  function styleChips() {{
-    var doc = window.parent.document;
-    doc.querySelectorAll('button[data-testid="stBaseButton-secondary"],'
-      + 'button[data-testid="stBaseButton-primary"]').forEach(function(btn) {{
-      var txt = (btn.querySelector('p') || btn).textContent.trim();
-      if (!chipLabels.includes(txt)) return;
-      // pill shape for all chips
-      btn.style.borderRadius  = '999px';
-      btn.style.minHeight     = '1.85rem';
-      btn.style.fontSize      = '0.76rem';
-      btn.style.transition    = 'background 0.15s, border-color 0.15s';
-      if (txt === activeLabel) {{
-        btn.style.background  = '#E8F5EE';
-        btn.style.border      = '1.5px solid #2CA076';
-        btn.style.color       = '#144835';
-        btn.style.fontWeight  = '600';
-        btn.style.boxShadow   = '0 0 0 2px rgba(44,160,118,0.20)';
-      }} else {{
-        btn.style.background  = '#FFFFFF';
-        btn.style.border      = '1.5px solid #D0D2D8';
-        btn.style.color       = '#28292D';
-        btn.style.fontWeight  = '500';
-        btn.style.boxShadow   = 'none';
-      }}
-    }});
-  }}
-  styleChips();
-  setTimeout(styleChips, 80);
-  setTimeout(styleChips, 300);
-}})();
-</script>
-""", height=0, scrolling=False)
-
     sel_col, filter_col = st.columns([14, 1])
     with sel_col:
         _default = st.session_state.get("dd_company_select")
@@ -1523,7 +1482,6 @@ with tabs[4]:
             unsafe_allow_html=True,
         )
     with filter_col:
-        st.markdown("<div style='margin-top:1.85rem'></div>", unsafe_allow_html=True)
         with st.popover(" ", use_container_width=True):
             st.markdown(
                 "<div style='font-size:0.75rem;font-weight:600;color:#28292D;"
@@ -1533,32 +1491,65 @@ with tabs[4]:
             st.selectbox("RBI Layer", ["All"] + avail_layers, key="dd_layer_filter")
             st.selectbox("Sector",    ["All"] + avail_sectors, key="dd_sector_filter")
 
-    # JS: make the selected value in the dropdown bold & prominent
-    components.html("""
+    # Single combined JS injection: chip highlight + selectbox bold value
+    _active_label = dict(available_quick).get(
+        st.session_state.get("dd_company_select", ""), ""
+    ) if available_quick else ""
+    _all_labels = json.dumps([lbl for _, lbl in available_quick]) if available_quick else "[]"
+    components.html(f"""
 <script>
-(function() {
-  function styleSelectValue() {
+(function() {{
+  var activeLabel = {json.dumps(_active_label)};
+  var chipLabels  = {_all_labels};
+
+  function applyStyles() {{
     var doc = window.parent.document;
-    doc.querySelectorAll('[data-testid="stSelectbox"]').forEach(function(box) {
+
+    // 1. Chip button highlight
+    doc.querySelectorAll('button[data-testid="stBaseButton-secondary"],'
+      + 'button[data-testid="stBaseButton-primary"]').forEach(function(btn) {{
+      var txt = (btn.querySelector('p') || btn).textContent.trim();
+      if (!chipLabels.includes(txt)) return;
+      btn.style.borderRadius = '999px';
+      btn.style.minHeight    = '1.85rem';
+      btn.style.fontSize     = '0.76rem';
+      btn.style.transition   = 'background 0.15s, border-color 0.15s';
+      if (txt === activeLabel) {{
+        btn.style.background = '#E8F5EE';
+        btn.style.border     = '1.5px solid #2CA076';
+        btn.style.color      = '#144835';
+        btn.style.fontWeight = '600';
+        btn.style.boxShadow  = '0 0 0 2px rgba(44,160,118,0.20)';
+      }} else {{
+        btn.style.background = '#FFFFFF';
+        btn.style.border     = '1.5px solid #D0D2D8';
+        btn.style.color      = '#28292D';
+        btn.style.fontWeight = '500';
+        btn.style.boxShadow  = 'none';
+      }}
+    }});
+
+    // 2. Bold selected value in the NBFC dropdown
+    doc.querySelectorAll('[data-testid="stSelectbox"]').forEach(function(box) {{
       var lbl = box.querySelector('[data-testid="stWidgetLabel"] p');
       if (!lbl || lbl.textContent.trim() !== 'Select an NBFC to explore') return;
       var sel = box.querySelector('[data-baseweb="select"]');
       if (!sel) return;
-      // Walk all leaf divs inside the value area (first child of the control)
-      sel.querySelectorAll('div').forEach(function(d) {
-        if (d.children.length === 0 && d.textContent.trim().length > 1) {
-          d.style.fontWeight  = '700';
-          d.style.fontSize    = '1.0rem';
-          d.style.color       = '#1C1E23';
+      sel.querySelectorAll('div').forEach(function(d) {{
+        if (d.children.length === 0 && d.textContent.trim().length > 1) {{
+          d.style.fontWeight    = '700';
+          d.style.fontSize      = '1.0rem';
+          d.style.color         = '#1C1E23';
           d.style.letterSpacing = '-0.01em';
-        }
-      });
-    });
-  }
-  styleSelectValue();
-  setTimeout(styleSelectValue, 100);
-  setTimeout(styleSelectValue, 400);
-})();
+        }}
+      }});
+    }});
+  }}
+
+  applyStyles();
+  setTimeout(applyStyles, 100);
+  setTimeout(applyStyles, 400);
+}})();
 </script>
 """, height=0, scrolling=False)
 
