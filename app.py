@@ -325,6 +325,44 @@ h1 {
     animation: tabFadeIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both !important;
 }
 
+/* ── Deep Dive: filter popover icon button ── */
+[data-testid="stPopover"] button,
+[data-testid="stPopoverButton"] {
+    min-height: 2.45rem !important;
+    width: 100% !important;
+    padding: 0 !important;
+    background: #ffffff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%2328292D' stroke-width='1.7' stroke-linecap='round'%3E%3Cline x1='3' y1='5' x2='17' y2='5'/%3E%3Cline x1='5.5' y1='10' x2='14.5' y2='10'/%3E%3Cline x1='8' y1='15' x2='12' y2='15'/%3E%3C/svg%3E") no-repeat center / 18px !important;
+    border: 1px solid #DCDCDE !important;
+    border-radius: 8px !important;
+    color: transparent !important;
+    font-size: 0 !important;
+    cursor: pointer !important;
+    transition: background-color 0.18s ease, border-color 0.18s ease !important;
+}
+[data-testid="stPopover"] button:hover,
+[data-testid="stPopoverButton"]:hover {
+    background-color: #f0faf4 !important;
+    border-color: #217858 !important;
+}
+
+/* ── Deep Dive: "pick a company" animated hint ── */
+@keyframes hintFloat {
+    0%, 100% { transform: translateY(0px); opacity: 0.75; }
+    50%       { transform: translateY(-5px); opacity: 1; }
+}
+.nbfc-select-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #217858;
+    font-size: 0.82rem;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    padding: 0.55rem 0 0.1rem;
+    animation: hintFloat 2.2s ease-in-out infinite;
+    user-select: none;
+}
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1346,10 +1384,6 @@ with tabs[4]:
     if not filtered_companies:
         filtered_companies = sorted(companies_with_data)
 
-    # Active filter dot indicator
-    active_filters = [x for x in [dd_layer, dd_sect] if x != "All"]
-    filter_btn_label = "🔧" if not active_filters else f"🔧 {len(active_filters)}"
-
     sel_col, filter_col = st.columns([14, 1])
     with sel_col:
         selected = st.selectbox(
@@ -1361,7 +1395,7 @@ with tabs[4]:
         )
     with filter_col:
         st.markdown("<div style='margin-top:1.85rem'></div>", unsafe_allow_html=True)
-        with st.popover(filter_btn_label, use_container_width=True):
+        with st.popover(" ", use_container_width=True):
             st.markdown(
                 "<div style='font-size:0.75rem;font-weight:600;color:#28292D;"
                 "margin-bottom:0.6rem;'>Narrow the list</div>",
@@ -1369,6 +1403,12 @@ with tabs[4]:
             )
             st.selectbox("RBI Layer", ["All"] + avail_layers, key="dd_layer_filter")
             st.selectbox("Sector",    ["All"] + avail_sectors, key="dd_sector_filter")
+
+    if selected is None:
+        st.markdown(
+            '<div class="nbfc-select-hint">&#8593;&nbsp; Pick a company above to explore its full financial profile</div>',
+            unsafe_allow_html=True,
+        )
 
     if selected:
         company_info_rows = nbfc_filtered[nbfc_filtered["name"] == selected]
