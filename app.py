@@ -1503,15 +1503,42 @@ with tabs[4]:
             fig.update_traces(hovertemplate="₹%{y:,.0f} Cr<extra></extra>")
             st.plotly_chart(fig, use_container_width=True)
         with col2:
-            nii_pat = chart_df[["period", "net_interest_income_cr", "pat_cr"]].dropna().rename(
-                columns={"net_interest_income_cr": "NII", "pat_cr": "PAT"})
-            fig = px.line(nii_pat, x="period", y=["NII", "PAT"],
-                          color_discrete_sequence=["#144835", "#DE5E2B"],
-                          title=f"NII & PAT (₹ Crore, to {lbl})", height=400,
-                          category_orders={"period": PERIOD_ORDER}, markers=True)
+            # Require PAT; NII is optional — plot whichever series has data
+            pat_df = chart_df[["period", "pat_cr"]].dropna(subset=["pat_cr"])
+            nii_df = chart_df[["period", "net_interest_income_cr"]].dropna(subset=["net_interest_income_cr"])
+            has_nii = not nii_df.empty
+            fig = go.Figure()
+            if has_nii:
+                fig.add_trace(go.Scatter(
+                    x=nii_df["period"], y=nii_df["net_interest_income_cr"],
+                    mode="lines+markers", name="NII",
+                    line=dict(color="#144835", width=2),
+                    marker=dict(size=6),
+                    hovertemplate="₹%{y:,.0f} Cr<extra>NII</extra>",
+                ))
+            fig.add_trace(go.Scatter(
+                x=pat_df["period"], y=pat_df["pat_cr"],
+                mode="lines+markers", name="PAT",
+                line=dict(color="#DE5E2B", width=2),
+                marker=dict(size=6),
+                hovertemplate="₹%{y:,.0f} Cr<extra>PAT</extra>",
+            ))
+            title_txt = f"NII & PAT (₹ Crore, to {lbl})" if has_nii else f"PAT (₹ Crore, to {lbl}) — NII not disclosed"
+            fig.update_layout(
+                title=dict(text=wrap_title(title_txt),
+                           font=dict(color=COLOR["text"], family=CHART_FONT, size=14, weight="bold"),
+                           x=0.5, xanchor="center", xref="paper", pad=dict(t=6, b=10)),
+                height=400,
+                xaxis=dict(categoryorder="array", categoryarray=PERIOD_ORDER,
+                           showgrid=False, tickcolor="rgba(0,0,0,0)",
+                           linecolor="rgba(0,0,0,0)", tickfont=dict(family=CHART_FONT, size=11)),
+                yaxis=dict(showgrid=False, tickcolor="rgba(0,0,0,0)"),
+                paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
+                font=dict(color=COLOR["text_secondary"], family=CHART_FONT),
+                hoverlabel=HOVER_LABEL,
+            )
             chart_layout(fig)
             fig.update_layout(margin=DD_MARGIN, legend=DD_LEGEND)
-            fig.update_traces(hovertemplate="₹%{y:,.0f} Cr<extra></extra>")
             st.plotly_chart(fig, use_container_width=True)
             if selected == "KreditBee" and has_q3:
                 note("9MFY26 PAT adjusted to ~₹189 Cr (ex ~₹152 Cr one-time items). "
