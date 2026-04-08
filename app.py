@@ -481,6 +481,13 @@ def truncate_name(name, n=24):
     return name[:n] + "…" if len(name) > n else name
 
 
+# Post-tax one-time exceptional items excluded from ROA/ROE calculations (₹ Crore).
+# These inflate reported PAT but do not reflect recurring earnings power.
+EXCEPTIONAL_ITEMS_ADJ = {
+    ("KreditBee", "9MFY26"): 152,  # GST provision reversal ₹104 Cr + DTA recognition ₹48 Cr
+}
+
+
 def annualise_9m(df):
     """
     Build 9MFY26 rows from FY2026-Q3 data.
@@ -489,6 +496,8 @@ def annualise_9m(df):
     - ROE: recalculated using annualised PAT (×4/3) ÷ avg equity.
     - credit_loss_rate_pct: annualised credit losses (×4/3) ÷ avg loan book
       (avg of FY2025 closing and Q3 closing).
+    - EXCEPTIONAL_ITEMS_ADJ: company-specific post-tax one-time items subtracted
+      from annualised PAT before computing ROA/ROE (pat_cr column unchanged).
     """
     q3 = df[df["period"] == "FY2026-Q3"].copy()
     if q3.empty:
@@ -498,9 +507,17 @@ def annualise_9m(df):
 
     fy25 = df[df["period"] == "FY2025"]
 
-    # ROA: annualised PAT ÷ avg loan book (FY25 + Q3) / 2
+    def _adj_9m_pat(base_9m_pat):
+        """Subtract 9M exceptional items from 9M PAT *before* annualising (×4/3 applied after)."""
+        adj = base_9m_pat.copy()
+        for (comp_name, _period_lbl), adj_cr in EXCEPTIONAL_ITEMS_ADJ.items():
+            mask = ann["name"] == comp_name
+            adj = adj.where(~mask, adj - adj_cr)
+        return adj
+
+    # ROA: annualised adjusted PAT ÷ avg loan book (FY25 + Q3) / 2
     if "pat_cr" in ann.columns and "loan_book_cr" in ann.columns and not fy25.empty:
-        ann_pat = ann["pat_cr"] * (4 / 3)
+        ann_pat = _adj_9m_pat(ann["pat_cr"]) * (4 / 3)
         fy25_lb = fy25.set_index("nbfc_id")["loan_book_cr"]
         avg_lb = ann.apply(
             lambda r: (fy25_lb.get(r["nbfc_id"], r["loan_book_cr"]) + r["loan_book_cr"]) / 2,
@@ -508,9 +525,9 @@ def annualise_9m(df):
         )
         ann["roa_pct"] = (ann_pat.values / avg_lb.values * 100)
 
-    # ROE: annualised PAT ÷ avg equity (FY25 + Q3) / 2
+    # ROE: annualised adjusted PAT ÷ avg equity (FY25 + Q3) / 2
     if "pat_cr" in ann.columns and "equity_cr" in ann.columns and not fy25.empty:
-        ann_pat = ann["pat_cr"] * (4 / 3)
+        ann_pat = _adj_9m_pat(ann["pat_cr"]) * (4 / 3)
         fy25_equity = fy25.set_index("nbfc_id")["equity_cr"]
         avg_equity = ann.apply(
             lambda r: (fy25_equity.get(r["nbfc_id"], r["equity_cr"]) + r["equity_cr"]) / 2,
@@ -968,6 +985,9 @@ with tabs[1]:
 
     st.caption(f"Where 9MFY26 data exists: 9MFY26 ROA/ROE used. Otherwise FY25. "
                f"★ = estimated data.")
+    note("KreditBee 9MFY26: ROA & ROE adjusted to exclude ~₹152 Cr post-tax one-time items "
+         "(₹104 Cr GST provision reversal after Karnataka HC ruling, Dec 2025 + ₹48 Cr DTA recognition). "
+         "Reported 9M PAT was ₹341 Cr; adjusted figure used for ratios is ~₹189 Cr.", "warning")
 
     # Sector breakdown — latest period
     st.markdown(f'<div class="section-header">By Sector — {lbl}</div>', unsafe_allow_html=True)
@@ -1353,6 +1373,10 @@ with tabs[4]:
         if has_q3:
             note("Latest data: 9MFY26 (9 months ended Dec-2025). Figures shown are raw 9-month values; "
                  "ROA/ROE are annualised at ×4/3.")
+        if has_q3 and selected == "KreditBee":
+            note("ROA & ROE exclude ~₹152 Cr post-tax one-time items: ₹104 Cr GST provision reversal "
+                 "(Karnataka HC ruling, Dec 2025) + ₹48 Cr DTA recognition. "
+                 "Reported 9M PAT: ₹341 Cr → Adjusted: ~₹189 Cr.", "warning")
 
         # Key metrics
         lbl = latest_period_label(company_fin)
