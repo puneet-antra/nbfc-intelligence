@@ -1420,9 +1420,15 @@ with tabs[4]:
         filtered_companies = sorted(companies_with_data)
 
     # ── Quick-select shortcut chips ──────────────────────────────────────────
-    QUICK_NBFCS = ["KreditBee", "Fibe", "Bajaj Finance", "SBI Card"]
+    # (full_name, display_label) — full_name must match the DB exactly
+    QUICK_NBFCS = [
+        ("KreditBee",                      "KreditBee"),
+        ("Fibe",                           "Fibe"),
+        ("Bajaj Finance",                  "Bajaj Finance"),
+        ("SBI Cards and Payment Services", "SBI Cards"),
+    ]
     # Only show chips for companies that exist in the current data
-    available_quick = [n for n in QUICK_NBFCS if n in companies_with_data]
+    available_quick = [(n, lbl) for n, lbl in QUICK_NBFCS if n in companies_with_data]
 
     if available_quick:
         # Label col + one col per chip + spacer to push chips left
@@ -1438,12 +1444,12 @@ with tabs[4]:
                 '</div>',
                 unsafe_allow_html=True,
             )
-        for i, name in enumerate(available_quick, start=1):
+        for i, (name, label) in enumerate(available_quick, start=1):
             with chip_cols[i]:
                 is_active = st.session_state.get("dd_company_select") == name
                 marker_class = "qs-chip-marker qs-active" if is_active else "qs-chip-marker"
                 st.markdown(f'<span class="{marker_class}"></span>', unsafe_allow_html=True)
-                if st.button(name, key=f"qs_btn_{name}", use_container_width=True):
+                if st.button(label, key=f"qs_btn_{name}", use_container_width=True):
                     st.session_state["dd_company_select"] = name
                     st.session_state["dd_layer_filter"] = "All"
                     st.session_state["dd_sector_filter"] = "All"
