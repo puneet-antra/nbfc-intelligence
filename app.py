@@ -1431,20 +1431,15 @@ with tabs[4]:
     available_quick = [(n, lbl) for n, lbl in QUICK_NBFCS if n in companies_with_data]
 
     if available_quick:
-        # Label col + one col per chip + spacer to push chips left
-        chip_cols = st.columns(
-            [1.1] + [1.4] * len(available_quick) + [6 - len(available_quick) * 1.4],
-            gap="small",
+        st.markdown(
+            '<p style="font-size:0.68rem;font-weight:600;color:#A0A2A8;'
+            'text-transform:uppercase;letter-spacing:0.05em;margin:0 0 0.3rem 0;">'
+            'Featured</p>',
+            unsafe_allow_html=True,
         )
-        with chip_cols[0]:
-            st.markdown(
-                '<div style="display:flex;align-items:center;height:1.85rem;">'
-                '<span style="font-size:0.68rem;font-weight:600;color:#A0A2A8;'
-                'text-transform:uppercase;letter-spacing:0.05em;">Featured</span>'
-                '</div>',
-                unsafe_allow_html=True,
-            )
-        for i, (name, label) in enumerate(available_quick, start=1):
+        # Chip columns start at x=0 (aligned with selectbox); spacer fills the rest
+        chip_cols = st.columns([1.6] * len(available_quick) + [10], gap="small")
+        for i, (name, label) in enumerate(available_quick):
             with chip_cols[i]:
                 is_active = st.session_state.get("dd_company_select") == name
                 marker_class = "qs-chip-marker qs-active" if is_active else "qs-chip-marker"
