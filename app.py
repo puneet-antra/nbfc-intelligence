@@ -1893,9 +1893,20 @@ with tabs[5]:
             axis=1,
         )
 
+        # Build title period label from periods actually in this chart
+        _periods_used = df["period"].dropna().unique() if "period" in df.columns else []
+        _has_fy25  = any("FY2025" in p for p in _periods_used)
+        _has_9m    = any("9M" in p or "Q3" in p for p in _periods_used)
+        if _has_fy25 and _has_9m:
+            _chart_lbl = "FY25 / 9MFY26"
+        elif _has_9m:
+            _chart_lbl = "9MFY26"
+        else:
+            _chart_lbl = "FY25"
+
         fig = make_hbar(
             df, metric, "name", color,
-            f"Top 20 by {label} (as of {_lbl_tr})",
+            f"Top 20 by {label} (as of {_chart_lbl})",
             hover_text=df["hover"].tolist(),
         )
         # Override bar text with formatted labels
