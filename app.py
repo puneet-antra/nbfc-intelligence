@@ -230,6 +230,8 @@ h1 {
     padding: 4px !important;
     gap: 2px !important;
     border: 1px solid #DCDCDE !important;
+    display: flex !important;
+    width: 100% !important;
 }
 [data-baseweb="tab-border"] { display: none !important; }
 [data-testid="stTabs"] [data-baseweb="tab"] {
@@ -237,13 +239,16 @@ h1 {
     font-weight: 500 !important;
     font-size: 0.80rem !important;
     color: #73757A !important;
-    padding: 0.42rem 1.0rem !important;
+    padding: 0.42rem 0.5rem !important;
     border-radius: 6px !important;
     background: transparent !important;
     border: none !important;
     transition: color 0.15s ease, background 0.15s ease !important;
     letter-spacing: 0.005em !important;
     white-space: nowrap !important;
+    flex: 1 !important;
+    text-align: center !important;
+    justify-content: center !important;
 }
 [data-testid="stTabs"] [data-baseweb="tab"]:hover {
     color: #28292D !important;
