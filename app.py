@@ -4,12 +4,14 @@ Run: streamlit run app.py
 """
 
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 import sqlite3
 import yfinance as yf
 import numpy as np
+import json
 from datetime import datetime
 from PIL import Image, ImageDraw
 
@@ -1433,29 +1435,65 @@ with tabs[4]:
     # Only show chips for companies that exist in the current data
     available_quick = [(n, lbl) for n, lbl in QUICK_NBFCS if n in companies_with_data]
 
-    # Handle chip click via query param (set before widgets render)
-    _qs_click = st.query_params.get("qs_select")
-    if _qs_click and _qs_click in companies_with_data:
-        st.session_state["dd_company_select"] = _qs_click
-        st.session_state["dd_layer_filter"] = "All"
-        st.session_state["dd_sector_filter"] = "All"
-        st.query_params.pop("qs_select", None)
-
     if available_quick:
-        _current = st.session_state.get("dd_company_select", "")
-        chips_html = (
+        st.markdown(
             '<p style="font-size:0.68rem;font-weight:600;color:#A0A2A8;'
-            'text-transform:uppercase;letter-spacing:0.05em;margin:0 0 0.45rem 0;">'
-            'Featured</p>'
-            '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.6rem;">'
+            'text-transform:uppercase;letter-spacing:0.05em;margin:0 0 0.3rem 0;">'
+            'Featured</p>',
+            unsafe_allow_html=True,
         )
-        for name, label in available_quick:
-            active_cls = " qs-active" if _current == name else ""
-            chips_html += (
-                f'<a href="?qs_select={name}" class="qs-chip{active_cls}">{label}</a>'
-            )
-        chips_html += "</div>"
-        st.markdown(chips_html, unsafe_allow_html=True)
+        # Equal-width columns for all chips + spacer
+        chip_cols = st.columns([1] * len(available_quick) + [3], gap="small")
+        for i, (name, label) in enumerate(available_quick):
+            with chip_cols[i]:
+                if st.button(label, key=f"qs_btn_{name}", use_container_width=True):
+                    st.session_state["dd_company_select"] = name
+                    st.session_state["dd_layer_filter"] = "All"
+                    st.session_state["dd_sector_filter"] = "All"
+                    st.rerun()
+
+        # Inject JS to style the active chip — targets by button text content
+        _active_label = dict(available_quick).get(
+            st.session_state.get("dd_company_select", ""), ""
+        )
+        _all_labels = json.dumps([lbl for _, lbl in available_quick])
+        components.html(f"""
+<script>
+(function() {{
+  var activeLabel = {json.dumps(_active_label)};
+  var chipLabels  = {_all_labels};
+  function styleChips() {{
+    var doc = window.parent.document;
+    doc.querySelectorAll('button[data-testid="stBaseButton-secondary"],'
+      + 'button[data-testid="stBaseButton-primary"]').forEach(function(btn) {{
+      var txt = (btn.querySelector('p') || btn).textContent.trim();
+      if (!chipLabels.includes(txt)) return;
+      // pill shape for all chips
+      btn.style.borderRadius  = '999px';
+      btn.style.minHeight     = '1.85rem';
+      btn.style.fontSize      = '0.76rem';
+      btn.style.transition    = 'background 0.15s, border-color 0.15s';
+      if (txt === activeLabel) {{
+        btn.style.background  = '#E8F5EE';
+        btn.style.border      = '1.5px solid #2CA076';
+        btn.style.color       = '#144835';
+        btn.style.fontWeight  = '600';
+        btn.style.boxShadow   = '0 0 0 2px rgba(44,160,118,0.20)';
+      }} else {{
+        btn.style.background  = '#FFFFFF';
+        btn.style.border      = '1.5px solid #D0D2D8';
+        btn.style.color       = '#28292D';
+        btn.style.fontWeight  = '500';
+        btn.style.boxShadow   = 'none';
+      }}
+    }});
+  }}
+  styleChips();
+  setTimeout(styleChips, 80);
+  setTimeout(styleChips, 300);
+}})();
+</script>
+""", height=0, scrolling=False)
 
     sel_col, filter_col = st.columns([14, 1])
     with sel_col:
