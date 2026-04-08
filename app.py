@@ -1592,6 +1592,27 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                     'border-radius:4px;font-size:12px;font-weight:600;'
                     'border:1px solid #bfdbfe">Listed</span>'
                 )
+
+            # ── Ranking badges: check if this NBFC tops any metric ──────────
+            _all_latest = get_latest_period_data(fin_filtered)
+            _rank_checks = [
+                ("loan_book_cr", "🏆 Biggest AUM"),
+                ("pat_cr",       "🏆 Highest PAT"),
+                ("roa_pct",      "🏆 Best ROA"),
+                ("roe_pct",      "🏆 Best ROE"),
+            ]
+            _rank_style = (
+                'background:#FEF9C3;color:#854D0E;padding:3px 10px;border-radius:4px;'
+                'font-size:12px;font-weight:600;border:1px solid #FDE68A;'
+            )
+            for col, label in _rank_checks:
+                if col in _all_latest.columns:
+                    _col_data = _all_latest[col].dropna()
+                    if not _col_data.empty:
+                        _best_name = _all_latest.loc[_col_data.idxmax(), "name"]
+                        if _best_name == selected:
+                            badges.append(f'<span style="{_rank_style}">{label}</span>')
+
             st.markdown(" &nbsp; ".join(badges), unsafe_allow_html=True)
 
             st.markdown("")
