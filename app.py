@@ -525,16 +525,15 @@ if not _os.path.exists("data/nbfc_full.db"):
 
 # ── Data loaders ─────────────────────────────────────────────────────────────
 
-@st.cache_data(ttl=300)
-def load_nbfc_table():
+@st.cache_resource
+def _load_nbfc_table_raw():
     conn = sqlite3.connect("data/nbfc_full.db")
     df = pd.read_sql("SELECT * FROM nbfc", conn)
     conn.close()
     return df
 
-
-@st.cache_data(ttl=300)
-def load_financials():
+@st.cache_resource
+def _load_financials_raw():
     conn = sqlite3.connect("data/nbfc_full.db")
     df = pd.read_sql("""
         SELECT f.*, n.name, n.rbi_layer, n.sector, n.listed,
@@ -544,6 +543,12 @@ def load_financials():
     """, conn)
     conn.close()
     return df
+
+def load_nbfc_table():
+    return _load_nbfc_table_raw().copy()
+
+def load_financials():
+    return _load_financials_raw().copy()
 
 # ── Helper functions ──────────────────────────────────────────────────────────
 
@@ -563,6 +568,7 @@ EXCEPTIONAL_ITEMS_ADJ = {
 }
 
 
+@st.cache_data(ttl=3600)
 def annualise_9m(df):
     """
     Build 9MFY26 rows from FY2026-Q3 data.
@@ -1511,6 +1517,11 @@ with tabs[4]:
             key="dd_company_select",
             label_visibility="collapsed",
         )
+        st.markdown(
+            '<p style="font-size:0.72rem;color:#A0A2A8;margin:-0.35rem 0 0 0.1rem;">'
+            'Search or select any NBFC to explore its full financial profile</p>',
+            unsafe_allow_html=True,
+        )
     with filter_col:
         st.markdown("<div style='margin-top:1.85rem'></div>", unsafe_allow_html=True)
         with st.popover(" ", use_container_width=True):
@@ -1592,14 +1603,6 @@ with tabs[4]:
                 )
             st.markdown(" &nbsp; ".join(badges), unsafe_allow_html=True)
 
-            # Data source line
-            src = company_info.get("source", "")
-            if src:
-                st.markdown(
-                    f'<div style="font-size:0.7rem;color:#6b7280;margin-top:4px;'
-                    f'font-family:\'Inter\',sans-serif;">Source: {src}</div>',
-                    unsafe_allow_html=True,
-                )
             st.markdown("")
 
         if company_info is not None and company_info.get("data_quality") in ["estimated", "unverified"]:
@@ -1749,11 +1752,15 @@ with tabs[4]:
                  "(Karnataka HC ruling, Dec 2025) + ₹48 Cr DTA recognition. "
                  "Reported 9M PAT: ₹341 Cr → Adjusted: ~₹189 Cr.", "warning")
 
-    st.markdown(
-        '<p style="font-size:0.72rem;color:#B0B2B8;margin-top:2.5rem;text-align:center;">'
-        'Search or select any NBFC from the dropdown above to explore its full financial profile</p>',
-        unsafe_allow_html=True,
-    )
+    if selected:
+        _src = nbfc_filtered[nbfc_filtered["name"] == selected]["source"].values
+        _src_txt = _src[0] if len(_src) and _src[0] else ""
+        if _src_txt:
+            st.markdown(
+                f'<p style="font-size:0.70rem;color:#B0B2B8;margin-top:2rem;'
+                f'font-family:\'Inter\',sans-serif;">Source: {_src_txt}</p>',
+                unsafe_allow_html=True,
+            )
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 7: VALUATION
