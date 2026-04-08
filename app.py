@@ -1860,14 +1860,34 @@ with tabs[5]:
     _lbl_tr = latest_period_label(fin_filtered)
     _snap   = get_latest_period_data(fin_filtered)
 
-    def _top20_hbar(metric, label, unit, color, fmt="{:,.0f}"):
-        df = _snap[["name", metric]].dropna().sort_values(metric, ascending=False).head(20)
-        df["display"] = df[metric].apply(lambda v: fmt.format(v))
+    # Map each company to the period used in _snap
+    _snap_period = _snap.set_index("name")["period"].to_dict() if "period" in _snap.columns else {}
+
+    def _top20_hbar(metric, label, color, bar_fmt=None, hover_fmt=None, is_inr=False):
+        cols = ["name", metric] + (["period"] if "period" in _snap.columns else [])
+        df = _snap[cols].dropna(subset=[metric]).sort_values(metric, ascending=False).head(20).copy()
+        period_col = df["period"] if "period" in df.columns else df["name"].map(_snap_period)
+
+        # Bar label: formatted value
+        if is_inr:
+            df["bar_label"] = df[metric].apply(lambda v: f"₹{v:,.0f} Cr")
+        else:
+            df["bar_label"] = df[metric].apply(lambda v: (bar_fmt or "{:.2f}%").format(v))
+
+        # Hover: value + period
+        df["hover"] = df.apply(
+            lambda r: (f"₹{r[metric]:,.0f} Cr" if is_inr else (bar_fmt or "{:.2f}%").format(r[metric]))
+                      + f"  ·  {_snap_period.get(r['name'], '')}",
+            axis=1,
+        )
+
         fig = make_hbar(
             df, metric, "name", color,
             f"Top 20 by {label} (as of {_lbl_tr})",
-            hover_text=df["display"].tolist(),
+            hover_text=df["hover"].tolist(),
         )
+        # Override bar text with formatted labels
+        fig.update_traces(text=df["bar_label"].tolist(), texttemplate="%{text}")
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown(f'<div class="section-header">Rankings as of {_lbl_tr}</div>',
@@ -1875,19 +1895,15 @@ with tabs[5]:
 
     col1, col2 = st.columns(2)
     with col1:
-        _top20_hbar("loan_book_cr", "AUM (Loan Book)", "₹ Cr",
-                    COLOR["accent"], "₹{:,.0f} Cr")
+        _top20_hbar("loan_book_cr", "AUM (Loan Book)", COLOR["accent"], is_inr=True)
     with col2:
-        _top20_hbar("pat_cr", "PAT", "₹ Cr",
-                    COLOR["success"], "₹{:,.0f} Cr")
+        _top20_hbar("pat_cr", "PAT", COLOR["success"], is_inr=True)
 
     col3, col4 = st.columns(2)
     with col3:
-        _top20_hbar("roa_pct", "Return on Assets (ROA)", "%",
-                    "#217858", "{:.2f}%")
+        _top20_hbar("roa_pct", "Return on Assets (ROA)", "#217858", bar_fmt="{:.2f}%")
     with col4:
-        _top20_hbar("roe_pct", "Return on Equity (ROE)", "%",
-                    "#2CA076", "{:.2f}%")
+        _top20_hbar("roe_pct", "Return on Equity (ROE)", "#2CA076", bar_fmt="{:.2f}%")
 
     # Market cap — live from Yahoo Finance (listed NBFCs only)
     st.markdown('<div class="section-header">Market Capitalisation (Listed NBFCs)</div>',
@@ -1901,10 +1917,12 @@ with tabs[5]:
            .head(20)
            .rename(columns={"company": "name"}))
     if not _mc.empty:
-        _mc["display"] = _mc["mktcap_cr"].apply(lambda v: f"₹{v:,.0f} Cr")
+        _mc["bar_label"] = _mc["mktcap_cr"].apply(lambda v: f"₹{v:,.0f} Cr")
+        _mc["hover"]     = _mc["mktcap_cr"].apply(lambda v: f"₹{v:,.0f} Cr  ·  Live")
         fig_mc = make_hbar(_mc, "mktcap_cr", "name", "#1e40af",
                            "Top 20 by Market Cap (Live)",
-                           hover_text=_mc["display"].tolist())
+                           hover_text=_mc["hover"].tolist())
+        fig_mc.update_traces(text=_mc["bar_label"].tolist(), texttemplate="%{text}")
         st.plotly_chart(fig_mc, use_container_width=True)
     else:
         st.info("Market cap data unavailable.")
