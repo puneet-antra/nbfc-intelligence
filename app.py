@@ -520,8 +520,9 @@ def annualise_9m(df):
         ann["pat_cr"] = _adj_9m_pat(ann["pat_cr"])
 
     # ROA: annualised adjusted PAT ÷ avg loan book (FY25 + Q3) / 2
+    # pat_cr is already adjusted above — multiply by 4/3 directly, no second adjustment
     if "pat_cr" in ann.columns and "loan_book_cr" in ann.columns and not fy25.empty:
-        ann_pat = _adj_9m_pat(ann["pat_cr"]) * (4 / 3)
+        ann_pat = ann["pat_cr"] * (4 / 3)
         fy25_lb = fy25.set_index("nbfc_id")["loan_book_cr"]
         avg_lb = ann.apply(
             lambda r: (fy25_lb.get(r["nbfc_id"], r["loan_book_cr"]) + r["loan_book_cr"]) / 2,
@@ -531,7 +532,7 @@ def annualise_9m(df):
 
     # ROE: annualised adjusted PAT ÷ avg equity (FY25 + Q3) / 2
     if "pat_cr" in ann.columns and "equity_cr" in ann.columns and not fy25.empty:
-        ann_pat = _adj_9m_pat(ann["pat_cr"]) * (4 / 3)
+        ann_pat = ann["pat_cr"] * (4 / 3)
         fy25_equity = fy25.set_index("nbfc_id")["equity_cr"]
         avg_equity = ann.apply(
             lambda r: (fy25_equity.get(r["nbfc_id"], r["equity_cr"]) + r["equity_cr"]) / 2,
