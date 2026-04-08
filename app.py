@@ -1405,7 +1405,8 @@ with tabs[7]:
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 6: DEEP DIVE
 # ─────────────────────────────────────────────────────────────────────────────
-with tabs[4]:
+@st.fragment
+def deep_dive_tab(fin_filtered, nbfc_filtered):
     companies_with_data = (
         fin_filtered[fin_filtered["has_financials"] == 1]["name"]
         .dropna().unique().tolist()
@@ -1459,7 +1460,6 @@ with tabs[4]:
                     st.session_state["dd_company_select"] = name
                     st.session_state["dd_layer_filter"] = "All"
                     st.session_state["dd_sector_filter"] = "All"
-                    st.rerun()
 
     sel_col, filter_col = st.columns([14, 1])
     with sel_col:
@@ -1752,6 +1752,9 @@ with tabs[4]:
                 f'font-family:\'Inter\',sans-serif;">Source: {_src_txt}</p>',
                 unsafe_allow_html=True,
             )
+
+with tabs[4]:
+    deep_dive_tab(fin_filtered, nbfc_filtered)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 7: VALUATION
