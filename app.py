@@ -1328,36 +1328,14 @@ with tabs[4]:
         .dropna().unique().tolist()
     )
 
-    # ── Selector card ─────────────────────────────────────────────────────────
-    st.markdown("""
-    <div style="background:linear-gradient(135deg,#f0faf4 0%,#ffffff 65%);
-         border:1.5px solid #c6dfd3;border-radius:20px;
-         padding:1.4rem 2rem 1.2rem 2rem;margin-bottom:0.75rem;
-         box-shadow:0 2px 14px rgba(20,72,53,0.07);">
-      <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;
-           color:#217858;text-transform:uppercase;margin-bottom:0.3rem;">
-        NBFC Deep Dive
-      </div>
-      <div style="font-size:1.2rem;font-weight:700;color:#1a1a1a;
-           letter-spacing:-0.01em;">
-        Select a company to explore
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Optional filters (hidden by default)
+    # ── Company selector + inline filter icon ─────────────────────────────────
     dd_base = nbfc_filtered[nbfc_filtered["name"].isin(companies_with_data)]
     avail_layers  = sorted(dd_base["rbi_layer"].dropna().unique().tolist())
     avail_sectors = sorted(dd_base["sector"].dropna().unique().tolist())
 
-    dd_layer = "All"
-    dd_sect  = "All"
-    with st.expander("⚙ Filters — narrow by Layer or Sector"):
-        fc1, fc2 = st.columns(2)
-        with fc1:
-            dd_layer = st.selectbox("RBI Layer", ["All"] + avail_layers, key="dd_layer_filter")
-        with fc2:
-            dd_sect = st.selectbox("Sector", ["All"] + avail_sectors, key="dd_sector_filter")
+    # Read persisted filter values
+    dd_layer = st.session_state.get("dd_layer_filter", "All")
+    dd_sect  = st.session_state.get("dd_sector_filter", "All")
 
     dd_filtered = dd_base.copy()
     if dd_layer != "All":
@@ -1368,8 +1346,29 @@ with tabs[4]:
     if not filtered_companies:
         filtered_companies = sorted(companies_with_data)
 
-    selected = st.selectbox("", filtered_companies, key="dd_company_select",
-                            label_visibility="collapsed")
+    # Active filter dot indicator
+    active_filters = [x for x in [dd_layer, dd_sect] if x != "All"]
+    filter_btn_label = "🔧" if not active_filters else f"🔧 {len(active_filters)}"
+
+    sel_col, filter_col = st.columns([14, 1])
+    with sel_col:
+        selected = st.selectbox(
+            "Select an NBFC to explore",
+            filtered_companies,
+            index=None,
+            placeholder="Search or type a company name…",
+            key="dd_company_select",
+        )
+    with filter_col:
+        st.markdown("<div style='margin-top:1.85rem'></div>", unsafe_allow_html=True)
+        with st.popover(filter_btn_label, use_container_width=True):
+            st.markdown(
+                "<div style='font-size:0.75rem;font-weight:600;color:#28292D;"
+                "margin-bottom:0.6rem;'>Narrow the list</div>",
+                unsafe_allow_html=True,
+            )
+            st.selectbox("RBI Layer", ["All"] + avail_layers, key="dd_layer_filter")
+            st.selectbox("Sector",    ["All"] + avail_sectors, key="dd_sector_filter")
 
     if selected:
         company_info_rows = nbfc_filtered[nbfc_filtered["name"] == selected]
