@@ -666,6 +666,18 @@ def get_latest_period_data(df):
 def latest_period_label(df):
     return "FY25 / 9MFY26" if "FY2026-Q3" in df["period"].values else "FY25"
 
+def period_label_for(df):
+    """Return a period label based only on the periods actually present in df."""
+    periods = df["period"].dropna().unique() if "period" in df.columns else []
+    has_9m  = any("9M" in str(p) or "FY2026" in str(p) for p in periods)
+    has_fy25 = any("FY2025" in str(p) for p in periods)
+    if has_9m and has_fy25:
+        return "FY25 / 9MFY26"
+    elif has_9m:
+        return "9MFY26"
+    else:
+        return "FY25"
+
 
 def compute_cagr(df, metric_col, start_year="FY2021", end_year="FY2025"):
     """CAGR between two annual periods. Never uses quarterly rows."""
@@ -1155,13 +1167,13 @@ with tabs[2]:
     with col1:
         cleanest = latest_snap.nsmallest(20, "gnpa_pct").sort_values("gnpa_pct", ascending=False)
         fig = make_hbar(cleanest, "gnpa_pct", "name", COLOR["success"],
-                        f"Lowest GNPA % ({lbl})",
+                        f"Lowest GNPA % ({period_label_for(cleanest)})",
                         hover_text=cleanest["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values)
         st.plotly_chart(fig, use_container_width=True)
     with col2:
         stressed = latest_snap.nlargest(20, "gnpa_pct").sort_values("gnpa_pct", ascending=False)
         fig = make_hbar(stressed, "gnpa_pct", "name", COLOR["danger"],
-                        f"Highest GNPA % ({lbl})",
+                        f"Highest GNPA % ({period_label_for(stressed)})",
                         hover_text=stressed["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values)
         st.plotly_chart(fig, use_container_width=True)
 
@@ -1230,14 +1242,14 @@ with tabs[3]:
         lowest = latest_snap.nsmallest(20, "credit_loss_rate_pct").sort_values(
             "credit_loss_rate_pct", ascending=False)
         fig = make_hbar(lowest, "credit_loss_rate_pct", "name", COLOR["success"],
-                        f"Lowest Credit Loss Rate ({lbl})",
+                        f"Lowest Credit Loss Rate ({period_label_for(lowest)})",
                         hover_text=lowest["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values)
         st.plotly_chart(fig, use_container_width=True)
     with col2:
         highest = latest_snap.nlargest(20, "credit_loss_rate_pct").sort_values(
             "credit_loss_rate_pct", ascending=False)
         fig = make_hbar(highest, "credit_loss_rate_pct", "name", COLOR["danger"],
-                        f"Highest Credit Loss Rate ({lbl})",
+                        f"Highest Credit Loss Rate ({period_label_for(highest)})",
                         hover_text=highest["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values)
         st.plotly_chart(fig, use_container_width=True)
 
