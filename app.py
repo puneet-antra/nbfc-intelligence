@@ -739,16 +739,24 @@ HOVER_LABEL = dict(
 
 
 def wrap_title(title, max_len=32):
-    """Insert <br> at a natural break point so long chart titles don't overflow."""
+    """Split long titles at a natural break; second line rendered smaller & muted."""
     if len(title) <= max_len:
         return title
     for sep in [" — ", " (", ": ", " - ", " vs "]:
         idx = title.find(sep)
         if 0 < idx <= max_len:
-            return title[:idx] + "<br>" + title[idx:].lstrip()
+            first = title[:idx]
+            rest  = title[idx:].lstrip()
+            return (f"{first}<br>"
+                    f"<span style='font-size:0.78em;font-weight:400;"
+                    f"color:#9CA3AF;'>{rest}</span>")
     idx = title.rfind(" ", 0, max_len)
     if idx > 0:
-        return title[:idx] + "<br>" + title[idx + 1:]
+        first = title[:idx]
+        rest  = title[idx + 1:]
+        return (f"{first}<br>"
+                f"<span style='font-size:0.78em;font-weight:400;"
+                f"color:#9CA3AF;'>{rest}</span>")
     return title
 
 
