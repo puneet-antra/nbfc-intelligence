@@ -515,6 +515,10 @@ def annualise_9m(df):
             adj = adj.where(~mask, adj - adj_cr)
         return adj
 
+    # Adjust pat_cr itself so PAT charts/tables also reflect ex-exceptional figures
+    if "pat_cr" in ann.columns:
+        ann["pat_cr"] = _adj_9m_pat(ann["pat_cr"])
+
     # ROA: annualised adjusted PAT ÷ avg loan book (FY25 + Q3) / 2
     if "pat_cr" in ann.columns and "loan_book_cr" in ann.columns and not fy25.empty:
         ann_pat = _adj_9m_pat(ann["pat_cr"]) * (4 / 3)
@@ -1042,6 +1046,9 @@ with tabs[1]:
     chart_layout(fig)
     st.plotly_chart(fig, use_container_width=True)
     st.caption("9MFY26 = Q3 FY26 nine-month PAT (raw, not annualised).")
+    note("KreditBee 9MFY26 PAT shown above is adjusted (~₹189 Cr) excluding ~₹152 Cr post-tax "
+         "one-time items (₹104 Cr GST provision reversal + ₹48 Cr DTA recognition). "
+         "Reported 9M PAT was ₹341 Cr.", "warning")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 3: ASSET QUALITY
@@ -1431,6 +1438,10 @@ with tabs[4]:
             fig.update_layout(margin=DD_MARGIN, legend=DD_LEGEND)
             fig.update_traces(hovertemplate="₹%{y:,.0f} Cr<extra></extra>")
             st.plotly_chart(fig, use_container_width=True)
+            if selected == "KreditBee" and has_q3:
+                note("9MFY26 PAT adjusted to ~₹189 Cr (ex ~₹152 Cr one-time items). "
+                     "NII (₹978 Cr) is unaffected — the GST provision reversal reduced expenses, "
+                     "not income.", "warning")
 
         col3, col4 = st.columns(2)
         with col3:
