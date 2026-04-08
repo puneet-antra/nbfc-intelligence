@@ -1509,6 +1509,12 @@ with tabs[4]:
             index=_default_idx,
             placeholder="Search or type a company name…",
             key="dd_company_select",
+            label_visibility="collapsed",
+        )
+        st.markdown(
+            '<p style="font-size:0.72rem;color:#A0A2A8;margin:-0.35rem 0 0 0.1rem;">'
+            'Search or select any NBFC to explore its full financial profile</p>',
+            unsafe_allow_html=True,
         )
     with filter_col:
         st.markdown("<div style='margin-top:1.85rem'></div>", unsafe_allow_html=True)
