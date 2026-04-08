@@ -1338,9 +1338,9 @@ with tabs[3]:
     st.plotly_chart(fig, use_container_width=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TAB 8: TRENDS
+# TAB 9: TRENDS
 # ─────────────────────────────────────────────────────────────────────────────
-with tabs[7]:
+with tabs[8]:
     lbl = latest_period_label(fin_filtered)
     latest_snap = get_latest_period_data(fin_filtered)
     top10 = latest_snap.nlargest(10, "loan_book_cr")["name"].tolist()
