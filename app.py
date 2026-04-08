@@ -974,7 +974,7 @@ c5.metric("Avg GNPA", f"{avg_gnpa:.2f}%", help="FY25")
 
 tabs = st.tabs([
     "Growth", "Profitability", "Asset Quality",
-    "Credit Losses", "NBFC Specific",
+    "Credit Losses", "NBFC Specific", "Top Ranked",
     "Valuation", "Data", "Trends",
 ])
 
@@ -1774,41 +1774,146 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
 with tabs[4]:
     deep_dive_tab(fin_filtered, nbfc_filtered)
 
+TICKER_MAP = {
+    "Bajaj Finance": "BAJFINANCE.NS",
+    "Bajaj Housing Finance": "BAJAJHFL.NS",
+    "LIC Housing Finance": "LICHSGFIN.NS",
+    "Mahindra & Mahindra Financial Services": "M&MFIN.NS",
+    "Shriram Finance": "SHRIRAMFIN.NS",
+    "Muthoot Finance": "MUTHOOTFIN.NS",
+    "Cholamandalam Investment and Finance": "CHOLAFIN.NS",
+    "L&T Finance": "LTF.NS",
+    "Poonawalla Fincorp": "POONAWALLA.NS",
+    "IIFL Finance": "IIFL.NS",
+    "CreditAccess Grameen": "CREDITACC.NS",
+    "Spandana Sphoorty": "SPANDANA.NS",
+    "Fusion Micro Finance": "FUSION.NS",
+    "Five-Star Business Finance": "FIVESTAR.NS",
+    "Home First Finance": "HOMEFIRST.NS",
+    "Aavas Financiers": "AAVAS.NS",
+    "Aptus Value Housing Finance": "APTUS.NS",
+    "India Shelter Finance": "INDIASHLTR.NS",
+    "Satin Creditcare Network": "SATIN.NS",
+    "Manappuram Finance": "MANAPPURAM.NS",
+    "MAS Financial Services": "MASFIN.NS",
+    "Repco Home Finance": "REPCOHOME.NS",
+    "SK Finance": "SKFIN.NS",
+    "Jio Financial Services": "JIOFIN.NS",
+    "Sammaan Capital": "SAMMAANCAP.NS",
+    "Ugro Capital": "UGROCAP.NS",
+    "Muthoot Microfin": "MUTHOOTMF.NS",
+    "SBI Cards and Payment Services": "SBICARD.NS",
+}
+
+@st.cache_data(ttl=3600)
+def fetch_valuation_data():
+    tickers = list(TICKER_MAP.values())
+    rows = []
+    try:
+        hist = yf.download(tickers, period="13mo", interval="1mo",
+                           auto_adjust=True, progress=False)
+        prices_hist = hist["Close"] if "Close" in hist.columns.get_level_values(0) else hist
+    except Exception:
+        prices_hist = pd.DataFrame()
+
+    for company, ticker in TICKER_MAP.items():
+        try:
+            t = yf.Ticker(ticker)
+            try:
+                fi = t.fast_info
+                pe = getattr(fi, "trailing_pe", None) or t.info.get("trailingPE")
+                pb = getattr(fi, "price_to_book", None) or t.info.get("priceToBook")
+                price = getattr(fi, "last_price", None) or t.info.get("currentPrice")
+                mktcap = getattr(fi, "market_cap", None) or t.info.get("marketCap")
+            except Exception:
+                info = t.info
+                pe = info.get("trailingPE")
+                pb = info.get("priceToBook")
+                price = info.get("currentPrice")
+                mktcap = info.get("marketCap")
+
+            chg_12m = None
+            if not prices_hist.empty and ticker in prices_hist.columns:
+                p = prices_hist[ticker].dropna()
+                if len(p) >= 2:
+                    chg_12m = round((p.iloc[-1] / p.iloc[0] - 1) * 100, 1)
+
+            mktcap_cr = round(mktcap / 1e7, 0) if mktcap else None
+            rows.append({
+                "company": company, "ticker": ticker,
+                "price": round(price, 2) if price else None,
+                "pe": round(pe, 1) if pe else None,
+                "pb": round(pb, 2) if pb else None,
+                "mktcap_cr": mktcap_cr,
+                "chg_12m": chg_12m,
+            })
+        except Exception:
+            rows.append({"company": company, "ticker": ticker,
+                         "price": None, "pe": None, "pb": None,
+                         "mktcap_cr": None, "chg_12m": None})
+    return pd.DataFrame(rows)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TAB 6: TOP RANKED
+# ─────────────────────────────────────────────────────────────────────────────
+with tabs[5]:
+    _lbl_tr = latest_period_label(fin_filtered)
+    _snap   = get_latest_period_data(fin_filtered)
+
+    def _top20_hbar(metric, label, unit, color, fmt="{:,.0f}"):
+        df = _snap[["name", metric]].dropna().sort_values(metric, ascending=False).head(20)
+        df["display"] = df[metric].apply(lambda v: fmt.format(v))
+        fig = make_hbar(
+            df, metric, "name", color,
+            f"Top 20 by {label} (as of {_lbl_tr})",
+            hover_text=df["display"].tolist(),
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown(f'<div class="section-header">Rankings as of {_lbl_tr}</div>',
+                unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        _top20_hbar("loan_book_cr", "AUM (Loan Book)", "₹ Cr",
+                    COLOR["accent"], "₹{:,.0f} Cr")
+    with col2:
+        _top20_hbar("pat_cr", "PAT", "₹ Cr",
+                    COLOR["success"], "₹{:,.0f} Cr")
+
+    col3, col4 = st.columns(2)
+    with col3:
+        _top20_hbar("roa_pct", "Return on Assets (ROA)", "%",
+                    "#217858", "{:.2f}%")
+    with col4:
+        _top20_hbar("roe_pct", "Return on Equity (ROE)", "%",
+                    "#2CA076", "{:.2f}%")
+
+    # Market cap — live from Yahoo Finance (listed NBFCs only)
+    st.markdown('<div class="section-header">Market Capitalisation (Listed NBFCs)</div>',
+                unsafe_allow_html=True)
+    note("Live market cap from Yahoo Finance. Only listed NBFCs shown. Refreshes every hour.")
+    with st.spinner("Fetching live market cap…"):
+        _val_df = fetch_valuation_data()
+    _mc = (_val_df[["company", "mktcap_cr"]]
+           .dropna(subset=["mktcap_cr"])
+           .sort_values("mktcap_cr", ascending=False)
+           .head(20)
+           .rename(columns={"company": "name"}))
+    if not _mc.empty:
+        _mc["display"] = _mc["mktcap_cr"].apply(lambda v: f"₹{v:,.0f} Cr")
+        fig_mc = make_hbar(_mc, "mktcap_cr", "name", "#1e40af",
+                           "Top 20 by Market Cap (Live)",
+                           hover_text=_mc["display"].tolist())
+        st.plotly_chart(fig_mc, use_container_width=True)
+    else:
+        st.info("Market cap data unavailable.")
+
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 7: VALUATION
 # ─────────────────────────────────────────────────────────────────────────────
-with tabs[5]:
+with tabs[6]:
     note("Live data from Yahoo Finance. P/E is trailing twelve months. Refreshes every hour.")
-
-    TICKER_MAP = {
-        "Bajaj Finance": "BAJFINANCE.NS",
-        "Bajaj Housing Finance": "BAJAJHFL.NS",
-        "LIC Housing Finance": "LICHSGFIN.NS",
-        "Mahindra & Mahindra Financial Services": "M&MFIN.NS",
-        "Shriram Finance": "SHRIRAMFIN.NS",
-        "Muthoot Finance": "MUTHOOTFIN.NS",
-        "Cholamandalam Investment and Finance": "CHOLAFIN.NS",
-        "L&T Finance": "LTF.NS",
-        "Poonawalla Fincorp": "POONAWALLA.NS",
-        "IIFL Finance": "IIFL.NS",
-        "CreditAccess Grameen": "CREDITACC.NS",
-        "Spandana Sphoorty": "SPANDANA.NS",
-        "Fusion Micro Finance": "FUSION.NS",
-        "Five-Star Business Finance": "FIVESTAR.NS",
-        "Home First Finance": "HOMEFIRST.NS",
-        "Aavas Financiers": "AAVAS.NS",
-        "Aptus Value Housing Finance": "APTUS.NS",
-        "India Shelter Finance": "INDIASHLTR.NS",
-        "Satin Creditcare Network": "SATIN.NS",
-        "Manappuram Finance": "MANAPPURAM.NS",
-        "MAS Financial Services": "MASFIN.NS",
-        "Repco Home Finance": "REPCOHOME.NS",
-        "SK Finance": "SKFIN.NS",
-        "Jio Financial Services": "JIOFIN.NS",
-        "Sammaan Capital": "SAMMAANCAP.NS",
-        "Ugro Capital": "UGROCAP.NS",
-        "Muthoot Microfin": "MUTHOOTMF.NS",
-    }
 
     VAL_CACHE_PATH = "data/valuation_cache.json"
 
@@ -1829,61 +1934,6 @@ with tabs[5]:
             return pd.DataFrame(record["data"]), record["fetched_at"]
         except Exception:
             return None, None
-
-    @st.cache_data(ttl=3600)
-    def fetch_valuation_data():
-        tickers = list(TICKER_MAP.values())
-        rows = []
-
-        # Batch price history
-        try:
-            hist = yf.download(tickers, period="13mo", interval="1mo",
-                               auto_adjust=True, progress=False)
-            if "Close" in hist.columns.get_level_values(0):
-                prices_hist = hist["Close"]
-            else:
-                prices_hist = hist
-        except Exception:
-            prices_hist = pd.DataFrame()
-
-        for company, ticker in TICKER_MAP.items():
-            try:
-                t = yf.Ticker(ticker)
-                try:
-                    fi = t.fast_info
-                    pe = getattr(fi, "trailing_pe", None) or t.info.get("trailingPE")
-                    pb = getattr(fi, "price_to_book", None) or t.info.get("priceToBook")
-                    price = getattr(fi, "last_price", None) or t.info.get("currentPrice")
-                    mktcap = getattr(fi, "market_cap", None) or t.info.get("marketCap")
-                except Exception:
-                    info = t.info
-                    pe = info.get("trailingPE")
-                    pb = info.get("priceToBook")
-                    price = info.get("currentPrice")
-                    mktcap = info.get("marketCap")
-
-                chg_12m = None
-                if not prices_hist.empty and ticker in prices_hist.columns:
-                    p = prices_hist[ticker].dropna()
-                    if len(p) >= 2:
-                        chg_12m = round((p.iloc[-1] / p.iloc[0] - 1) * 100, 1)
-
-                mktcap_cr = round(mktcap / 1e7, 0) if mktcap else None
-
-                rows.append({
-                    "company": company, "ticker": ticker,
-                    "price": round(price, 2) if price else None,
-                    "pe": round(pe, 1) if pe else None,
-                    "pb": round(pb, 2) if pb else None,
-                    "mktcap_cr": mktcap_cr,
-                    "chg_12m": chg_12m,
-                })
-            except Exception:
-                rows.append({"company": company, "ticker": ticker,
-                             "price": None, "pe": None, "pb": None,
-                             "mktcap_cr": None, "chg_12m": None})
-
-        return pd.DataFrame(rows)
 
     with st.spinner("Fetching live market data…"):
         val_df = fetch_valuation_data()
@@ -1981,9 +2031,9 @@ with tabs[5]:
         )
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TAB 8: DATA
+# TAB 9: DATA
 # ─────────────────────────────────────────────────────────────────────────────
-with tabs[6]:
+with tabs[7]:
     search = st.text_input("Search companies", placeholder="Type company name…")
     lbl = latest_period_label(fin_filtered)
 
