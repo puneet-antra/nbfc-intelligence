@@ -390,12 +390,15 @@ h1 {
     background: #DBEFD9 !important;
     border-color: #144835 !important;
 }
-/* Active / selected chip */
-.qs-chip-marker.qs-active ~ div[data-testid="stButton"] button {
-    background: #F0FBF5 !important;
+/* Active / selected chip — marker is inside a .stMarkdown wrapper,
+   so use :has() to reach the sibling stButton container            */
+div:has(> .qs-chip-marker.qs-active) ~ div[data-testid="stButton"] button,
+div:has(> .qs-chip-marker.qs-active) ~ div[data-testid="stButton"] button:focus {
+    background: #E8F5EE !important;
     border-color: #2CA076 !important;
     color: #144835 !important;
     font-weight: 600 !important;
+    box-shadow: 0 0 0 2px rgba(44,160,118,0.18) !important;
 }
 
 /* ── Scrollbar ── */
