@@ -1401,6 +1401,10 @@ with tabs[4]:
         .dropna().unique().tolist()
     )
 
+    # Default to KreditBee on first load
+    if "dd_company_select" not in st.session_state and "KreditBee" in companies_with_data:
+        st.session_state["dd_company_select"] = "KreditBee"
+
     # ── Company selector + inline filter icon ─────────────────────────────────
     dd_base = nbfc_filtered[nbfc_filtered["name"].isin(companies_with_data)]
     avail_layers  = sorted(dd_base["rbi_layer"].dropna().unique().tolist())
@@ -1452,10 +1456,15 @@ with tabs[4]:
 
     sel_col, filter_col = st.columns([14, 1])
     with sel_col:
+        _default = st.session_state.get("dd_company_select")
+        _default_idx = (
+            filtered_companies.index(_default)
+            if _default in filtered_companies else None
+        )
         selected = st.selectbox(
             "Select an NBFC to explore",
             filtered_companies,
-            index=None,
+            index=_default_idx,
             placeholder="Search or type a company name…",
             key="dd_company_select",
         )
