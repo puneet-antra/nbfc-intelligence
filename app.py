@@ -1327,7 +1327,50 @@ with tabs[4]:
         fin_filtered[fin_filtered["has_financials"] == 1]["name"]
         .dropna().unique().tolist()
     )
-    selected = st.selectbox("Select a company", sorted(companies_with_data))
+
+    # ── Prominent selector card ───────────────────────────────────────────────
+    st.markdown("""
+    <div style="background:linear-gradient(135deg,#f0faf4 0%,#ffffff 65%);
+         border:1.5px solid #c6dfd3;border-radius:20px;
+         padding:1.5rem 2rem 1.2rem 2rem;margin-bottom:0.5rem;
+         box-shadow:0 2px 14px rgba(20,72,53,0.07);">
+      <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;
+           color:#217858;text-transform:uppercase;margin-bottom:0.3rem;">
+        NBFC Deep Dive
+      </div>
+      <div style="font-size:1.2rem;font-weight:700;color:#1a1a1a;
+           letter-spacing:-0.01em;margin-bottom:0.2rem;">
+        Select a company to explore
+      </div>
+      <div style="font-size:0.78rem;color:#73757A;line-height:1.5;">
+        Filter by layer or sector to narrow the list, then pick a company below.
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Sub-filters: Layer | Sector | Company (all in one row)
+    dd_base = nbfc_filtered[nbfc_filtered["name"].isin(companies_with_data)]
+    avail_layers  = sorted(dd_base["rbi_layer"].dropna().unique().tolist())
+    avail_sectors = sorted(dd_base["sector"].dropna().unique().tolist())
+
+    fc1, fc2, fc3 = st.columns([1, 1, 2])
+    with fc1:
+        dd_layer = st.selectbox("RBI Layer", ["All"] + avail_layers, key="dd_layer_filter")
+    with fc2:
+        dd_sect = st.selectbox("Sector", ["All"] + avail_sectors, key="dd_sector_filter")
+
+    dd_filtered = dd_base.copy()
+    if dd_layer != "All":
+        dd_filtered = dd_filtered[dd_filtered["rbi_layer"] == dd_layer]
+    if dd_sect != "All":
+        dd_filtered = dd_filtered[dd_filtered["sector"] == dd_sect]
+    filtered_companies = sorted(dd_filtered["name"].dropna().unique().tolist())
+    if not filtered_companies:
+        filtered_companies = sorted(companies_with_data)
+
+    match_label = f"{len(filtered_companies)} compan{'y' if len(filtered_companies) == 1 else 'ies'}"
+    with fc3:
+        selected = st.selectbox(f"Company — {match_label}", filtered_companies, key="dd_company_select")
 
     if selected:
         company_info_rows = nbfc_filtered[nbfc_filtered["name"] == selected]
