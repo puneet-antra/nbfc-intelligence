@@ -79,7 +79,8 @@ COMPANIES = [
     ("SBI Cards and Payment Services", "Upper", "Consumer Finance", 1, 1, 62000, "audited", "SBICARD.NS", "SBI Cards Annual Reports"),
     # Unlisted fintechs (BSE-listed NCDs, so quarterly filings available)
     ("KreditBee", "Middle", "Consumer Finance", 0, 1, 9281, "audited", None, "KreditBee (KrazyBee Services Ltd) - BSE NCD filings"),
-    # Fibe excluded — no verified source data available
+    # Unlisted NBFCs — data from rating agency rationales based on company-submitted audited financials
+    ("Fibe", "Middle", "Consumer Finance", 0, 1, 3280, "estimated", None, "EarlySalary Services Pvt Ltd (CIN U67120PN1994PTC184868). CareEdge & Acuite rating rationales based on ESPL standalone audited/provisional financials. FY25 provisional."),
 ]
 
 # ── Financial data ────────────────────────────────────────────────────────────
@@ -290,9 +291,19 @@ FINANCIALS = [
     ("KreditBee", "FY2023",  2417,  2927, 1591,  313,  65,  249, 10.30, 2.29, 2.91,  5.91, "audited", "KreditBee FY23 actual - BSE Annual Report FY24 (KrazyBee Services Ltd standalone). Loan book ₹2,417 Cr; PAT ₹65 Cr; NII ₹313 Cr; Impairment ₹249 Cr; GNPA 2.29%"),
     ("KreditBee", "FY2024",  4824,  5041, 2050,  991, 200,  432,  8.96, 2.29, 5.02, 10.99, "audited", "KreditBee FY24 actual - BSE Annual Report FY24 (KrazyBee Services Ltd standalone). Loan book ₹4,824 Cr; PAT ₹200 Cr; NII ₹991 Cr; Impairment ₹432 Cr; GNPA 2.29%"),
     ("KreditBee", "FY2025", 5649, 6250, 2347, 1214, 221, 762, 13.49, 2.83, 3.94, 9.44, "audited", "KreditBee FY25 actual - BSE filing (KrazyBee Services Ltd). Loan book ₹5,649 Cr; PAT ₹221 Cr; NII ₹1,214 Cr; Impairment ₹762 Cr; GNPA 2.83%"),
-    ("KreditBee", "FY2026-Q3", 8448, 9281, 2707, 978, 189, 612, 7.25, 1.79, 3.60, 10.00, "audited", "KreditBee 9MFY26 adjusted - Reported PAT 341 Cr adjusted to 189 Cr ex one-times: GST SCN reversal +104 Cr + DTA +48 Cr. Adj ROA 3.6%, Adj ROE 10.0%."),
-    # ── Fibe ──────────────────────────────────────────────────────────────────
-    # Fibe excluded — no verified source data available (unlisted, no BSE filings)
+    ("KreditBee", "FY2026-Q3", 8448, 9281, 2707, 978, 341, 612, 7.25, 1.79, 6.45, 17.96, "audited", "KreditBee 9MFY26 actual - BSE filing Feb-2026. Loan book ₹8,448 Cr; 9M PAT ₹341 Cr (reported, incl. ~₹152 Cr one-times); 9M NII ₹978 Cr; 9M Impairment ₹612 Cr; GNPA 1.79%. One-time adj applied in app.py."),
+    # ── Fibe (EarlySalary Services Pvt Ltd) ──────────────────────────────────
+    # NBFC entity: EarlySalary Services Pvt Ltd (CIN U67120PN1994PTC184868), Middle Layer.
+    # Brand: Fibe. Parent: Social Worth Technologies Pvt Ltd. Unlisted, no BSE filings.
+    # Source: CareEdge rating press releases (Feb-2023, Oct-2023, Nov-2024, Nov-2025) and
+    # Acuite rating rationale (Oct-2025), both based on ESPL audited/provisional standalone
+    # financials submitted by the company. FY2025 figures are provisional/unaudited.
+    # NII not disclosed standalone; credit losses not available in absolute standalone terms.
+    # GNPA excludes written-off accounts (GNPA incl. write-offs: FY24 8.56%, FY25 10.12%).
+    ("Fibe", "FY2022",  1019,   518,  None, None,    2.89, None, None, None,  0.43,  None, "audited",   "Fibe (ESPL standalone) FY22 audited. AUM ₹1,019 Cr; Total assets ₹517.77 Cr; PAT ₹2.89 Cr; ROA 0.43%. Source: CareEdge Feb-2023 rating rationale."),
+    ("Fibe", "FY2023",  1963,  1338,  None, None,  -10.83, None, None, 3.50, -1.20,  None, "audited",   "Fibe (ESPL standalone) FY23 audited. AUM ₹1,963 Cr; Total assets ₹1,337.63 Cr; PAT -₹10.83 Cr (loss); GNPA 3.50%; ROA -1.20%. Source: CareEdge Oct-2023 rating rationale."),
+    ("Fibe", "FY2024",  4064,  2259,   739, None,   55.34, None, None, 2.67,  3.09, 10.33, "audited",   "Fibe (ESPL standalone) FY24 audited. AUM ₹4,064 Cr; Total assets ₹2,258.80 Cr; Net worth ₹739.38 Cr; PAT ₹55.34 Cr; GNPA 2.67%; ROA 3.09%; ROE 10.33%. Source: Acuite Oct-2025 rating rationale."),
+    ("Fibe", "FY2025",  5287,  3280,   994, None,  100.19, None, None, 3.07,  3.62, 11.56, "estimated", "Fibe (ESPL standalone) FY25 provisional. AUM ₹5,287 Cr; Total assets ₹3,279.89 Cr; Net worth ₹994.28 Cr; PAT ₹100.19 Cr; GNPA 3.07%; ROA 3.62%; ROE 11.56%. Source: CareEdge Nov-2025 & Acuite Oct-2025 (provisional/unaudited)."),
 ]
 
 
