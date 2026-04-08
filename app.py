@@ -739,23 +739,21 @@ HOVER_LABEL = dict(
 
 
 def wrap_title(title, max_len=32):
-    """Split long titles at a natural break; second line rendered smaller & muted."""
-    # "(as of …)" always goes to second line regardless of title length
+    """Split long titles at a natural break; second line muted using Plotly <font> tag."""
+    if "<br>" in title:          # already wrapped — don't double-process
+        return title
+    # "(as of …)" always drops to second line regardless of total length
     for sep in [" (as of", " — ", " (", ": ", " - ", " vs "]:
         idx = title.find(sep)
         if idx > 0 and (sep == " (as of" or idx <= max_len):
             first = title[:idx]
             rest  = title[idx:].lstrip()
-            return (f"{first}<br>"
-                    f"<span style='font-size:0.85em;font-weight:600;"
-                    f"color:#6B7280;'>{rest}</span>")
+            return f"{first}<br><b><font color='#6B7280'>{rest}</font></b>"
     idx = title.rfind(" ", 0, max_len)
     if idx > 0:
         first = title[:idx]
         rest  = title[idx + 1:]
-        return (f"{first}<br>"
-                f"<span style='font-size:0.78em;font-weight:400;"
-                f"color:#9CA3AF;'>{rest}</span>")
+        return f"{first}<br><font color='#6B7280'>{rest}</font>"
     return title
 
 
@@ -822,7 +820,7 @@ def chart_layout(fig, title=None):
     existing = ""
     if fig.layout.title and fig.layout.title.text:
         existing = fig.layout.title.text
-    t = wrap_title(title) if title else (wrap_title(existing) if existing else "")
+    t = wrap_title(title) if title else (existing if existing else "")
     fig.update_layout(
         paper_bgcolor=CHART_PAPER, plot_bgcolor=CHART_BG,
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
