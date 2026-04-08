@@ -1596,9 +1596,6 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
 
             st.markdown("")
 
-        if company_info is not None and company_info.get("data_quality") in ["estimated", "unverified"]:
-            note("This company's data includes estimated or unverified figures.", "warning")
-
         has_q3 = "FY2026-Q3" in company_fin["period"].values
 
         # Key metrics
