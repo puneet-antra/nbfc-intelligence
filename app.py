@@ -748,7 +748,7 @@ def wrap_title(title, max_len=32):
             first = title[:idx]
             rest  = title[idx:].lstrip()
             return (f"{first}<br>"
-                    f"<span style='font-size:0.85em;font-weight:400;"
+                    f"<span style='font-size:0.85em;font-weight:600;"
                     f"color:#6B7280;'>{rest}</span>")
     idx = title.rfind(" ", 0, max_len)
     if idx > 0:
