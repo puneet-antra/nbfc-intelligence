@@ -364,10 +364,12 @@ h1 {
 }
 
 /* ── Deep Dive: quick-select chip buttons ── */
-/* A zero-height marker span is injected before each chip button; target
-   the sibling stButton div that immediately follows it.               */
-.qs-chip-marker ~ div[data-testid="stButton"] button,
-.qs-chip-marker ~ div[data-testid="stButton"] button:focus {
+/* Streamlit wraps st.markdown output in .stMarkdown > p, so the marker
+   span is NOT a direct sibling of stButton — use :has() on the wrapper. */
+
+/* Pill shape & default style for every chip button */
+.stMarkdown:has(.qs-chip-marker) ~ div[data-testid="stButton"] button,
+.stMarkdown:has(.qs-chip-marker) ~ div[data-testid="stButton"] button:focus {
     border-radius: 999px !important;
     padding: 0.18rem 0.7rem !important;
     min-height: 1.85rem !important;
@@ -380,25 +382,24 @@ h1 {
     box-shadow: none !important;
     transition: background 0.15s, border-color 0.15s, color 0.15s !important;
 }
-.qs-chip-marker ~ div[data-testid="stButton"] button:hover {
+.stMarkdown:has(.qs-chip-marker) ~ div[data-testid="stButton"] button:hover {
     background: #F0FBF5 !important;
     border-color: #2CA076 !important;
     color: #144835 !important;
     box-shadow: 0 1px 4px rgba(20,72,53,0.10) !important;
 }
-.qs-chip-marker ~ div[data-testid="stButton"] button:active {
+.stMarkdown:has(.qs-chip-marker) ~ div[data-testid="stButton"] button:active {
     background: #DBEFD9 !important;
     border-color: #144835 !important;
 }
-/* Active / selected chip — marker is inside a .stMarkdown wrapper,
-   so use :has() to reach the sibling stButton container            */
-div:has(> .qs-chip-marker.qs-active) ~ div[data-testid="stButton"] button,
-div:has(> .qs-chip-marker.qs-active) ~ div[data-testid="stButton"] button:focus {
+/* Active / selected chip */
+.stMarkdown:has(.qs-chip-marker.qs-active) ~ div[data-testid="stButton"] button,
+.stMarkdown:has(.qs-chip-marker.qs-active) ~ div[data-testid="stButton"] button:focus {
     background: #E8F5EE !important;
     border-color: #2CA076 !important;
     color: #144835 !important;
     font-weight: 600 !important;
-    box-shadow: 0 0 0 2px rgba(44,160,118,0.18) !important;
+    box-shadow: 0 0 0 2px rgba(44,160,118,0.20) !important;
 }
 
 /* ── Scrollbar ── */
