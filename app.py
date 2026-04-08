@@ -363,6 +363,41 @@ h1 {
     user-select: none;
 }
 
+/* ── Deep Dive: quick-select chip buttons ── */
+/* A zero-height marker span is injected before each chip button; target
+   the sibling stButton div that immediately follows it.               */
+.qs-chip-marker ~ div[data-testid="stButton"] button,
+.qs-chip-marker ~ div[data-testid="stButton"] button:focus {
+    border-radius: 999px !important;
+    padding: 0.18rem 0.7rem !important;
+    min-height: 1.85rem !important;
+    height: 1.85rem !important;
+    font-size: 0.76rem !important;
+    font-weight: 500 !important;
+    border: 1.5px solid #D0D2D8 !important;
+    background: #FFFFFF !important;
+    color: #28292D !important;
+    box-shadow: none !important;
+    transition: background 0.15s, border-color 0.15s, color 0.15s !important;
+}
+.qs-chip-marker ~ div[data-testid="stButton"] button:hover {
+    background: #F0FBF5 !important;
+    border-color: #2CA076 !important;
+    color: #144835 !important;
+    box-shadow: 0 1px 4px rgba(20,72,53,0.10) !important;
+}
+.qs-chip-marker ~ div[data-testid="stButton"] button:active {
+    background: #DBEFD9 !important;
+    border-color: #144835 !important;
+}
+/* Active / selected chip */
+.qs-chip-marker.qs-active ~ div[data-testid="stButton"] button {
+    background: #F0FBF5 !important;
+    border-color: #2CA076 !important;
+    color: #144835 !important;
+    font-weight: 600 !important;
+}
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1383,6 +1418,36 @@ with tabs[4]:
     filtered_companies = sorted(dd_filtered["name"].dropna().unique().tolist())
     if not filtered_companies:
         filtered_companies = sorted(companies_with_data)
+
+    # ── Quick-select shortcut chips ──────────────────────────────────────────
+    QUICK_NBFCS = ["KreditBee", "Fibe", "Bajaj Finance", "SBI Card"]
+    # Only show chips for companies that exist in the current data
+    available_quick = [n for n in QUICK_NBFCS if n in companies_with_data]
+
+    if available_quick:
+        # Label col + one col per chip + spacer to push chips left
+        chip_cols = st.columns(
+            [1.1] + [1.4] * len(available_quick) + [6 - len(available_quick) * 1.4],
+            gap="small",
+        )
+        with chip_cols[0]:
+            st.markdown(
+                '<div style="display:flex;align-items:center;height:1.85rem;">'
+                '<span style="font-size:0.68rem;font-weight:600;color:#A0A2A8;'
+                'text-transform:uppercase;letter-spacing:0.05em;">Featured</span>'
+                '</div>',
+                unsafe_allow_html=True,
+            )
+        for i, name in enumerate(available_quick, start=1):
+            with chip_cols[i]:
+                is_active = st.session_state.get("dd_company_select") == name
+                marker_class = "qs-chip-marker qs-active" if is_active else "qs-chip-marker"
+                st.markdown(f'<span class="{marker_class}"></span>', unsafe_allow_html=True)
+                if st.button(name, key=f"qs_btn_{name}", use_container_width=True):
+                    st.session_state["dd_company_select"] = name
+                    st.session_state["dd_layer_filter"] = "All"
+                    st.session_state["dd_sector_filter"] = "All"
+                    st.rerun()
 
     sel_col, filter_col = st.columns([14, 1])
     with sel_col:
