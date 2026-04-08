@@ -1328,36 +1328,36 @@ with tabs[4]:
         .dropna().unique().tolist()
     )
 
-    # ── Prominent selector card ───────────────────────────────────────────────
+    # ── Selector card ─────────────────────────────────────────────────────────
     st.markdown("""
     <div style="background:linear-gradient(135deg,#f0faf4 0%,#ffffff 65%);
          border:1.5px solid #c6dfd3;border-radius:20px;
-         padding:1.5rem 2rem 1.2rem 2rem;margin-bottom:0.5rem;
+         padding:1.4rem 2rem 1.2rem 2rem;margin-bottom:0.75rem;
          box-shadow:0 2px 14px rgba(20,72,53,0.07);">
       <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.1em;
            color:#217858;text-transform:uppercase;margin-bottom:0.3rem;">
         NBFC Deep Dive
       </div>
       <div style="font-size:1.2rem;font-weight:700;color:#1a1a1a;
-           letter-spacing:-0.01em;margin-bottom:0.2rem;">
+           letter-spacing:-0.01em;">
         Select a company to explore
-      </div>
-      <div style="font-size:0.78rem;color:#73757A;line-height:1.5;">
-        Filter by layer or sector to narrow the list, then pick a company below.
       </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # Sub-filters: Layer | Sector | Company (all in one row)
+    # Optional filters (hidden by default)
     dd_base = nbfc_filtered[nbfc_filtered["name"].isin(companies_with_data)]
     avail_layers  = sorted(dd_base["rbi_layer"].dropna().unique().tolist())
     avail_sectors = sorted(dd_base["sector"].dropna().unique().tolist())
 
-    fc1, fc2, fc3 = st.columns([1, 1, 2])
-    with fc1:
-        dd_layer = st.selectbox("RBI Layer", ["All"] + avail_layers, key="dd_layer_filter")
-    with fc2:
-        dd_sect = st.selectbox("Sector", ["All"] + avail_sectors, key="dd_sector_filter")
+    dd_layer = "All"
+    dd_sect  = "All"
+    with st.expander("⚙ Filters — narrow by Layer or Sector"):
+        fc1, fc2 = st.columns(2)
+        with fc1:
+            dd_layer = st.selectbox("RBI Layer", ["All"] + avail_layers, key="dd_layer_filter")
+        with fc2:
+            dd_sect = st.selectbox("Sector", ["All"] + avail_sectors, key="dd_sector_filter")
 
     dd_filtered = dd_base.copy()
     if dd_layer != "All":
@@ -1368,9 +1368,8 @@ with tabs[4]:
     if not filtered_companies:
         filtered_companies = sorted(companies_with_data)
 
-    match_label = f"{len(filtered_companies)} compan{'y' if len(filtered_companies) == 1 else 'ies'}"
-    with fc3:
-        selected = st.selectbox(f"Company — {match_label}", filtered_companies, key="dd_company_select")
+    selected = st.selectbox("", filtered_companies, key="dd_company_select",
+                            label_visibility="collapsed")
 
     if selected:
         company_info_rows = nbfc_filtered[nbfc_filtered["name"] == selected]
@@ -1421,13 +1420,6 @@ with tabs[4]:
             note("This company's data includes estimated or unverified figures.", "warning")
 
         has_q3 = "FY2026-Q3" in company_fin["period"].values
-        if has_q3:
-            note("Latest data: 9MFY26 (9 months ended Dec-2025). Figures shown are raw 9-month values; "
-                 "ROA/ROE are annualised at ×4/3.")
-        if has_q3 and selected == "KreditBee":
-            note("ROA & ROE exclude ~₹152 Cr post-tax one-time items: ₹104 Cr GST provision reversal "
-                 "(Karnataka HC ruling, Dec 2025) + ₹48 Cr DTA recognition. "
-                 "Reported 9M PAT: ₹341 Cr → Adjusted: ~₹189 Cr.", "warning")
 
         # Key metrics
         lbl = latest_period_label(company_fin)
@@ -1532,7 +1524,11 @@ with tabs[4]:
                           "GNPA %", "ROA %", "ROE %"][:len(table_df)]
         st.dataframe(table_df.style.format("{:.1f}", na_rep="N/A"), use_container_width=True)
         if has_q3:
-            st.caption("9MFY26: all figures are raw 9-month / Q3 point-in-time values.")
+            st.caption("9MFY26: all figures are raw 9-month / Q3 point-in-time values. ROA/ROE are annualised at ×4/3.")
+        if has_q3 and selected == "KreditBee":
+            note("ROA, ROE & PAT exclude ~₹152 Cr post-tax one-time items: ₹104 Cr GST provision reversal "
+                 "(Karnataka HC ruling, Dec 2025) + ₹48 Cr DTA recognition. "
+                 "Reported 9M PAT: ₹341 Cr → Adjusted: ~₹189 Cr.", "warning")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 7: VALUATION
