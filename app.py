@@ -740,11 +740,10 @@ HOVER_LABEL = dict(
 
 def wrap_title(title, max_len=32):
     """Split long titles at a natural break; second line rendered smaller & muted."""
-    if len(title) <= max_len:
-        return title
-    for sep in [" — ", " (", ": ", " - ", " vs "]:
+    # "(as of …)" always goes to second line regardless of title length
+    for sep in [" (as of", " — ", " (", ": ", " - ", " vs "]:
         idx = title.find(sep)
-        if 0 < idx <= max_len:
+        if idx > 0 and (sep == " (as of" or idx <= max_len):
             first = title[:idx]
             rest  = title[idx:].lstrip()
             return (f"{first}<br>"
