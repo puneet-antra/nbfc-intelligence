@@ -318,14 +318,6 @@ h1 {
     font-size: 0.84rem !important;
 }
 
-/* ── NBFC company selector: bold prominent selected value ── */
-[data-testid="stSelectbox"]:has(label:has(p:-webkit-any(*, :first-child))) div[data-baseweb="select"] div[class*="singleValue"],
-[data-testid="stSelectbox"] div[data-baseweb="select"] div[class*="singleValue"] {
-    font-weight: 700 !important;
-    font-size: 0.97rem !important;
-    color: #1C1E23 !important;
-    letter-spacing: -0.01em !important;
-}
 
 /* ── Tab panel fade-in ── */
 @keyframes tabFadeIn {
@@ -1528,6 +1520,35 @@ with tabs[4]:
             )
             st.selectbox("RBI Layer", ["All"] + avail_layers, key="dd_layer_filter")
             st.selectbox("Sector",    ["All"] + avail_sectors, key="dd_sector_filter")
+
+    # JS: make the selected value in the dropdown bold & prominent
+    components.html("""
+<script>
+(function() {
+  function styleSelectValue() {
+    var doc = window.parent.document;
+    doc.querySelectorAll('[data-testid="stSelectbox"]').forEach(function(box) {
+      var lbl = box.querySelector('[data-testid="stWidgetLabel"] p');
+      if (!lbl || lbl.textContent.trim() !== 'Select an NBFC to explore') return;
+      var sel = box.querySelector('[data-baseweb="select"]');
+      if (!sel) return;
+      // Walk all leaf divs inside the value area (first child of the control)
+      sel.querySelectorAll('div').forEach(function(d) {
+        if (d.children.length === 0 && d.textContent.trim().length > 1) {
+          d.style.fontWeight  = '700';
+          d.style.fontSize    = '1.0rem';
+          d.style.color       = '#1C1E23';
+          d.style.letterSpacing = '-0.01em';
+        }
+      });
+    });
+  }
+  styleSelectValue();
+  setTimeout(styleSelectValue, 100);
+  setTimeout(styleSelectValue, 400);
+})();
+</script>
+""", height=0, scrolling=False)
 
     if selected is None:
         st.markdown(
