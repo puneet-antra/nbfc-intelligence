@@ -1333,32 +1333,7 @@ with tabs[2]:
                         "Annualized Losses % by Sector", text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
 
-    # ── Row 3: Trend charts ───────────────────────────────────────────────────
-    st.markdown(f'<div class="section-header">Trends — FY2021 to {lbl}</div>', unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
-    with col1:
-        sector_gnpa = chart_df.groupby(["period", "sector"])["gnpa_pct"].mean().reset_index()
-        fig = px.line(sector_gnpa, x="period", y="gnpa_pct", color="sector",
-                      color_discrete_sequence=MV_PALETTE,
-                      labels={"gnpa_pct": "Avg GNPA %", "period": "Period"},
-                      title=f"Avg GNPA % by Sector (FY2021–{lbl})", height=420,
-                      category_orders={"period": PERIOD_ORDER})
-        chart_layout(fig)
-        st.plotly_chart(fig, use_container_width=True)
-    with col2:
-        high12 = all_loss.nlargest(12, "credit_loss_rate_pct")["name"].tolist()
-        trend_df = chart_df[chart_df["name"].isin(high12)][
-            ["name", "period", "credit_loss_rate_pct"]].dropna()
-        fig = px.line(trend_df, x="period", y="credit_loss_rate_pct", color="name",
-                      color_discrete_sequence=MV_PALETTE,
-                      title=f"Annualized Losses % Trend (to {lbl})", height=420,
-                      category_orders={"period": PERIOD_ORDER})
-        fig.add_hline(y=2.0, line_dash="dot", line_color=COLOR["warning"],
-                      annotation_text="2% Reference Line")
-        chart_layout(fig)
-        st.plotly_chart(fig, use_container_width=True)
-
-    # ── Row 4: Heatmaps side by side ─────────────────────────────────────────
+    # ── Row 3: Heatmaps side by side ─────────────────────────────────────────
     st.markdown('<div class="section-header">Heatmaps</div>', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
 
