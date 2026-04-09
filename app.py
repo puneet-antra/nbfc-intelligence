@@ -1164,7 +1164,7 @@ with tabs[0]:
 
     all_growers = growth_df.sort_values("growth_pct", ascending=False)
     fig = make_hbar(all_growers, "growth_pct", "display_name",
-                    COLOR["success"], "AUM Growth % — All NBFCs (Fastest → Slowest)",
+                    COLOR["success"], "AUM Growth % (Fastest → Slowest)",
                     hover_text=all_growers["period_label"].values, text_suffix="%")
     st.plotly_chart(fig, use_container_width=True)
 
