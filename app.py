@@ -1025,7 +1025,7 @@ avg_gnpa = latest_annual["gnpa_pct"].mean()
 growth_df_header = compute_latest_growth(fin_filtered, "loan_book_cr")
 avg_growth = growth_df_header["growth_pct"].mean() if not growth_df_header.empty else 0.0
 
-c1, c2, c3, c4, c5 = st.columns(5)
+_gap, c1, c2, c3, c4, c5, _gap2 = st.columns([0.3, 1, 1, 1, 1, 1, 0.3])
 c1.metric("Total NBFCs", f"{total_nbfcs:,}", help="RBI Registry")
 c2.metric("With Financials", f"{with_data:,}")
 c3.metric("Combined Assets", f"₹{total_assets:.1f}L Cr", help="FY25")
@@ -2175,10 +2175,9 @@ with tabs[7]:
     lbl = latest_period_label(fin_filtered)
     all_names = sorted(fin_filtered["name"].dropna().unique().tolist())
     selected_name = st.selectbox(
-        "Type company name…",
+        "Select Company",
         options=["All companies"] + all_names,
         index=0,
-        label_visibility="collapsed",
     )
 
     st.markdown(f'<div class="section-header">All Companies — Financial Metrics as of {lbl}</div>',
