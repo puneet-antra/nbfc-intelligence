@@ -1646,7 +1646,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       var s = doc.createElement('style');
       s.id = 'nbfc-sel-style';
       s.textContent = [
-        '[data-testid="stSelectbox"] input::selection {{ background: #E2E4E9; color: #1C1E23; }}',
+        '[data-testid="stSelectbox"] input::selection {{ background: #B8BCC8; color: #1C1E23; }}',
         /* Bold the display-value div inside the NBFC selectbox at all times */
         '[data-testid="stSelectbox"] [data-baseweb="select"] > div:first-child > div > div {{',
         '  font-weight: 700 !important;',
@@ -1658,6 +1658,9 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       doc.head.appendChild(s);
     }}
 
+    // Module-level cache: stores the NBFC name last seen in the closed state
+    var _nbfcVal = '';
+
     // Helper: is this element inside the NBFC company selectbox?
     function getNbfcBox(target) {{
       if (!target) return null;
@@ -1668,35 +1671,93 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       return box;
     }}
 
-    // mousedown: highlight the display div with grey background.
-    // This fires BEFORE BaseWeb hides the display div, so the name is still visible.
-    // No React/BaseWeb state is touched — single-click selection works normally.
+    // Read the displayed name from the closed-state display div
+    function readDisplayVal(box) {{
+      var sel = box.querySelector('[data-baseweb="select"]');
+      if (!sel) return '';
+      // The selected-value text sits in a leaf div alongside the hidden input
+      var inp = sel.querySelector('input');
+      if (!inp) return '';
+      var container = inp.parentElement;
+      if (!container) return '';
+      for (var i = 0; i < container.children.length; i++) {{
+        var child = container.children[i];
+        if (child.tagName === 'DIV') {{
+          var t = child.textContent.trim();
+          if (t.length > 1) return t;
+        }}
+      }}
+      // Fallback: first leaf div with text anywhere in the selectbox
+      var found = '';
+      sel.querySelectorAll('div').forEach(function(d) {{
+        if (!found && d.children.length === 0) {{
+          var t = d.textContent.trim();
+          if (t.length > 1) found = t;
+        }}
+      }});
+      return found;
+    }}
+
+    // mousedown fires BEFORE BaseWeb hides the display div:
+    // 1. Cache the displayed name for use in focusin
+    // 2. Briefly highlight the display div so the user sees the name selected
     doc.addEventListener('mousedown', function(e) {{
       var box = getNbfcBox(e.target);
       if (!box) return;
+      var v = readDisplayVal(box);
+      if (v) _nbfcVal = v;
+      // Visual: grey background on the display div container
       var displayDiv = box.querySelector(
         '[data-baseweb="select"] > div:first-child > div:first-child');
-      if (!displayDiv) return;
-      displayDiv.style.background    = '#E2E4E9';
-      displayDiv.style.borderRadius  = '3px';
-      // Remove once the dropdown closes (focusout) or after a safety timeout
-      setTimeout(function() {{
-        displayDiv.style.background   = '';
-        displayDiv.style.borderRadius = '';
-      }}, 600);
+      if (displayDiv) {{
+        displayDiv.style.background   = '#E2E4E9';
+        displayDiv.style.borderRadius = '3px';
+        setTimeout(function() {{
+          displayDiv.style.background   = '';
+          displayDiv.style.borderRadius = '';
+        }}, 600);
+      }}
+    }});
+
+    // focusin: write cached name directly into input and select-all.
+    // Direct inp.value (no React setter, no event dispatch) keeps BaseWeb
+    // out of filter mode → single-click option selection works.
+    doc.addEventListener('focusin', function(e) {{
+      if (!e.target || e.target.tagName !== 'INPUT') return;
+      var box = getNbfcBox(e.target);
+      if (!box) return;
+      var inp = e.target;
+      var val = _nbfcVal;
+      if (!val) return;
+      // Two parent-rAFs: fire after BaseWeb's own focusin handler has rendered
+      window.parent.requestAnimationFrame(function() {{
+        window.parent.requestAnimationFrame(function() {{
+          if (inp !== doc.activeElement) return;
+          inp.value = val;           // direct DOM write — no React event dispatch
+          inp.select();              // select all text (primary)
+          inp.setSelectionRange(0, val.length);  // backup in case select() doesn't persist
+          // Third frame: re-assert selection in case BaseWeb reset cursor after rAF2
+          window.parent.requestAnimationFrame(function() {{
+            if (inp !== doc.activeElement) return;
+            inp.setSelectionRange(0, val.length);
+          }});
+        }});
+      }});
     }});
 
     doc.addEventListener('focusout', function(e) {{
       var box = getNbfcBox(e.target);
       if (box) {{
-        // Clear any residual highlight
+        // Clear any residual display-div highlight
         var displayDiv = box.querySelector(
           '[data-baseweb="select"] > div:first-child > div:first-child');
         if (displayDiv) {{
           displayDiv.style.background   = '';
           displayDiv.style.borderRadius = '';
         }}
-        // Re-apply bold styling after dropdown closes
+        // Refresh the cache and re-apply bold styling after dropdown closes
+        var v = readDisplayVal(box);
+        if (v) _nbfcVal = v;
         setTimeout(applyStyles, 80);
         setTimeout(applyStyles, 300);
       }}
@@ -2248,6 +2309,26 @@ with tabs[6]:
             fig = make_hbar(pb_df, "pb", "company", COLOR["accent"], "P/B Ratio",
                             height=bar_chart_height(len(pb_df)),
                             hover_text=["Latest"] * len(pb_df), text_suffix="×")
+            st.plotly_chart(fig, use_container_width=True)
+
+        # P/E by sector
+        st.markdown('<div class="section-header">Median P/E by Sector</div>', unsafe_allow_html=True)
+        _sector_map = nbfc_df.set_index("name")["sector"].to_dict()
+        val_sect = val_with_price.copy()
+        val_sect["sector"] = val_sect["company"].map(_sector_map)
+        pe_sect = (
+            val_sect.dropna(subset=["pe", "sector"])
+            .groupby("sector")["pe"]
+            .median()
+            .reset_index()
+            .sort_values("pe", ascending=False)
+        )
+        if not pe_sect.empty:
+            fig = make_hbar(
+                pe_sect, "pe", "sector", COLOR["primary"], "Median P/E by Sector (TTM)",
+                height=bar_chart_height(len(pe_sect)),
+                hover_text=["TTM"] * len(pe_sect), text_suffix="×",
+            )
             st.plotly_chart(fig, use_container_width=True)
 
         # 12M price change
