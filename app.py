@@ -1202,16 +1202,16 @@ with tabs[1]:
                 unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1:
-        top_roa = latest_snap.nlargest(top_n, "roa_pct").sort_values("roa_pct", ascending=False)
+        top_roa = latest_snap.nlargest(10, "roa_pct").sort_values("roa_pct", ascending=False)
         fig = make_hbar(top_roa, "roa_pct", "name", COLOR["primary"],
-                        f"Top {top_n} by ROA %",
+                        "Top 10 by ROA %",
                         hover_text=top_roa["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
     with col2:
-        top_roe = latest_snap.nlargest(top_n, "roe_pct").sort_values("roe_pct", ascending=False)
+        top_roe = latest_snap.nlargest(10, "roe_pct").sort_values("roe_pct", ascending=False)
         fig = make_hbar(top_roe, "roe_pct", "name", COLOR["accent"],
-                        f"Top {top_n} by ROE %",
+                        "Top 10 by ROE %",
                         hover_text=top_roe["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
