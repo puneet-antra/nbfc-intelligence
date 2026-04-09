@@ -583,7 +583,7 @@ def _needs_rebuild():
     try:
         _c = _sqlite3.connect("data/nbfc_full.db")
         _cur = _c.cursor()
-        _cur.execute("SELECT COUNT(*) FROM nbfc WHERE name='MoneyView'")
+        _cur.execute("SELECT COUNT(*) FROM nbfc WHERE name='Moneyview'")
         _has_mv = _cur.fetchone()[0] > 0
         _c.close()
         return not _has_mv
@@ -641,8 +641,8 @@ EXCEPTIONAL_ITEMS_ADJ = {
 # Companies whose ROA (and optionally ROE) use a non-standard denominator stored in the DB.
 # For these, annualise_9m preserves the pre-stored Q3 roa_pct/roe_pct rather than
 # recalculating from loan_book_cr.
-# MoneyView: ROA denominator = managed AUM (not WFPL on-book loan book).
-USE_STORED_ROA_ROE = {"MoneyView"}
+# Note: Moneyview loan_book_cr = managed AUM, so the generic annualise_9m formula is correct.
+USE_STORED_ROA_ROE: set = set()
 
 
 @st.cache_data(ttl=3600)
@@ -1203,9 +1203,9 @@ with tabs[1]:
     note("KreditBee 9MFY26: ROA & ROE adjusted to exclude ~₹152 Cr post-tax one-time items "
          "(₹104 Cr GST provision reversal after Karnataka HC ruling, Dec 2025 + ₹48 Cr DTA recognition). "
          "Reported 9M PAT was ₹341 Cr; adjusted figure used for ratios is ~₹189 Cr.", "warning")
-    note("MoneyView 9MFY26: ROA calculated on managed AUM (₹~18,265 Cr avg) rather than on-book loan book, "
-         "reflecting MoneyView's hybrid DLG lending model. PAT used = ₹245 Cr (before exceptional items; "
-         "reported ₹210 Cr). Annualised ROA ~1.79%, ROE ~15.98%. Source: DRHP filed Mar-2026.", "info")
+    note("Moneyview 9MFY26: Loan book = managed AUM (₹19,815 Cr). ROA = annualised PAT ₹327 Cr / avg managed AUM "
+         "₹18,265 Cr = 1.79%. Credit loss rate = annualised impairment ₹965 Cr / avg managed AUM = 5.29%. "
+         "PAT = ₹245 Cr before exceptional items (reported ₹210 Cr). Source: DRHP filed Mar-2026.", "info")
 
     # Sector breakdown — latest period
     st.markdown(f'<div class="section-header">By Sector — {lbl}</div>', unsafe_allow_html=True)
@@ -1561,7 +1561,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
         ("KreditBee",                      "KreditBee"),
         ("Fibe",                           "Fibe"),
         ("Kissht",                         "Kissht"),
-        ("MoneyView",                      "MoneyView"),
+        ("Moneyview",                      "Moneyview"),
         ("Bajaj Finance",                  "Bajaj Finance"),
         ("SBI Cards and Payment Services", "SBI Cards"),
     ]
@@ -1575,8 +1575,8 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
             'Featured</p>',
             unsafe_allow_html=True,
         )
-        # Equal-width columns for all chips + spacer
-        chip_cols = st.columns([1] * len(available_quick) + [3], gap="small")
+        # Equal-width columns for all chips — no trailing spacer so each button is maximally wide
+        chip_cols = st.columns(len(available_quick), gap="small")
         for i, (name, label) in enumerate(available_quick):
             with chip_cols[i]:
                 if st.button(label, key=f"qs_btn_{name}", use_container_width=True):
@@ -1904,11 +1904,14 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
             note("ROA, ROE & PAT exclude ~₹152 Cr post-tax one-time items: ₹104 Cr GST provision reversal "
                  "(Karnataka HC ruling, Dec 2025) + ₹48 Cr DTA recognition. "
                  "Reported 9M PAT: ₹341 Cr → Adjusted: ~₹189 Cr.", "warning")
-        if has_q3 and selected == "MoneyView":
-            note("ROA for 9MFY26 is calculated on managed AUM (~₹18,265 Cr avg of FY25 ₹16,715 Cr + Dec-2025 ₹19,815 Cr), "
-                 "not on-book loan book, reflecting MoneyView's hybrid DLG model. "
-                 "PAT = ₹245 Cr before exceptional items (reported PAT ₹210 Cr). "
-                 "Annualised ROA ~1.79% | ROE ~15.98%. Source: DRHP filed Mar-2026.", "info")
+        if has_q3 and selected == "Moneyview":
+            note("Loan book = managed AUM (on-book + off-book DLG). 9MFY26: ROA = ann. PAT ₹327 Cr / avg managed AUM "
+                 "₹18,265 Cr = 1.79%. Credit loss rate = ann. impairment ₹965 Cr / avg managed AUM = 5.29%. "
+                 "PAT = ₹245 Cr before exceptional items (reported ₹210 Cr). Source: DRHP filed Mar-2026.", "info")
+        if selected == "Kissht":
+            note("Kissht FY2025 (latest): ROA = ₹161 Cr PAT / avg total assets ₹2,249 Cr = 7.14%. "
+                 "ROE = ₹161 Cr / avg equity ₹906 Cr = 17.74%. "
+                 "Source: Kissht DRHP (OnEMI Technology Solutions) filed Aug 2025.", "info")
 
     if selected:
         _src = nbfc_filtered[nbfc_filtered["name"] == selected]["source"].values
