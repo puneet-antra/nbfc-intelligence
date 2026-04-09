@@ -1141,43 +1141,38 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Inject filter badge into parent document next to the sidebar arrow (top-left)
+# Filter badge — fixed position top-left next to the sidebar arrow
 st.markdown(f"""
-<script>
-(function() {{
-  var LABEL = {repr(_badge_label)};
-  var SVG = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M4 8h8M6 12h4" stroke="#144835" stroke-width="2" stroke-linecap="round"/></svg>';
-  function injectBadge() {{
-    var pdoc = window.parent.document;
-    var old = pdoc.getElementById('nbfc-filter-badge');
-    if (old) {{ old.remove(); }}
-    var badge = pdoc.createElement('div');
-    badge.id = 'nbfc-filter-badge';
-    badge.title = 'Click to toggle filters';
-    badge.innerHTML = SVG + '\u00a0' + LABEL;
-    badge.style.cssText = [
-      'position:fixed', 'top:0.62rem', 'left:3.3rem', 'z-index:99999',
-      'display:inline-flex', 'align-items:center', 'gap:0.3rem',
-      'background:#EAF4EE', 'border:1px solid #144835', 'border-radius:20px',
-      'padding:0.22rem 0.75rem', 'cursor:pointer', 'user-select:none',
-      'font-size:0.75rem', 'font-weight:600', 'color:#144835',
-      'box-shadow:0 1px 4px rgba(0,0,0,0.12)', 'font-family:Inter,sans-serif',
-      'white-space:nowrap'
-    ].join(';');
-    badge.onclick = function() {{
-      var btn = pdoc.querySelector('[data-testid="stSidebarCollapseButton"] button') ||
-                pdoc.querySelector('[data-testid="stSidebarCollapsedControl"] button') ||
-                pdoc.querySelector('[data-testid="stSidebar"] button');
-      if (btn) btn.click();
-    }};
-    pdoc.body.appendChild(badge);
-  }}
-  if (window.parent.document.readyState === 'complete') {{ injectBadge(); }}
-  else {{ window.parent.addEventListener('load', injectBadge); }}
-  // Re-inject after short delay to handle Streamlit rerenders
-  setTimeout(injectBadge, 800);
-}})();
-</script>
+<style>
+#nbfc-filter-badge {{
+  position: fixed;
+  top: 0.62rem;
+  left: 3.3rem;
+  z-index: 99999;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #EAF4EE;
+  border: 1px solid #144835;
+  border-radius: 20px;
+  padding: 0.22rem 0.75rem;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #144835;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+  font-family: Inter, sans-serif;
+  white-space: nowrap;
+}}
+</style>
+<div id="nbfc-filter-badge" title="Click to toggle filters"
+     onclick="var btn=document.querySelector('[data-testid=stSidebarCollapseButton] button')||document.querySelector('[data-testid=stSidebarCollapsedControl] button')||document.querySelector('[data-testid=stSidebar] button');if(btn)btn.click();">
+  <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+    <path d="M2 4h12M4 8h8M6 12h4" stroke="#144835" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+  {_badge_label}
+</div>
 """, unsafe_allow_html=True)
 
 annual_fin = annual_only(fin_filtered)
@@ -1258,9 +1253,10 @@ with tabs[0]:
 
     # ── Row 2: AUM | Revenue | PAT Growth by Sector ──────────────────────────
     # Use unfiltered fin_df so sector charts always show all sectors
-    _growth_all     = compute_latest_growth(fin_df, "loan_book_cr").dropna(subset=["growth_pct"])
-    _rev_growth_all = compute_latest_growth(fin_df, "net_interest_income_cr").dropna(subset=["growth_pct"])
-    _pat_growth_all = compute_latest_growth(fin_df, "pat_cr").dropna(subset=["growth_pct"])
+    _sectors_map = fin_df[["name", "sector"]].drop_duplicates()
+    _growth_all     = compute_latest_growth(fin_df, "loan_book_cr").dropna(subset=["growth_pct"]).merge(_sectors_map, on="name", how="left")
+    _rev_growth_all = compute_latest_growth(fin_df, "net_interest_income_cr").dropna(subset=["growth_pct"]).merge(_sectors_map, on="name", how="left")
+    _pat_growth_all = compute_latest_growth(fin_df, "pat_cr").dropna(subset=["growth_pct"]).merge(_sectors_map, on="name", how="left")
 
     st.markdown('<div class="section-header">Growth by Sector — Latest 1Y</div>', unsafe_allow_html=True)
     col1, col2, col3 = st.columns(3)
