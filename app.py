@@ -756,11 +756,10 @@ def wrap_title(title, max_len=32):
         return title
     def _split(first, rest):
         return f"<b>{first}</b><br>{rest}"
-    # Any parenthetical qualifier always goes to the second line
-    for paren_sep in [" (as of", " (₹", " (to ", " («"]:
-        idx = title.find(paren_sep)
-        if idx > 0:
-            return _split(title[:idx], title[idx:].lstrip())
+    # Any parenthetical qualifier always goes to the second line (checked before length guard)
+    paren_idx = title.find(" (")
+    if paren_idx > 0:
+        return _split(title[:paren_idx], title[paren_idx:].lstrip())
     # Short titles with no parenthetical: no wrapping needed
     if len(title) <= max_len:
         return title
