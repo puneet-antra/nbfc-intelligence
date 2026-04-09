@@ -1582,7 +1582,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       }}
     }});
 
-    // 2. Bold selected value in the NBFC dropdown
+    // 2. Bold selected value + clear-on-focus for the NBFC dropdown
     doc.querySelectorAll('[data-testid="stSelectbox"]').forEach(function(box) {{
       var lbl = box.querySelector('[data-testid="stWidgetLabel"] p');
       if (!lbl || lbl.textContent.trim() !== 'Select an NBFC to explore') return;
@@ -1596,6 +1596,17 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
           d.style.letterSpacing = '-0.01em';
         }}
       }});
+      // Clear the typed/display input when user opens the dropdown
+      var inp = sel.querySelector('input');
+      if (inp && !inp._clearBound) {{
+        inp._clearBound = true;
+        inp.addEventListener('focus', function() {{
+          setTimeout(function() {{ inp.value = ''; }}, 0);
+        }});
+        inp.addEventListener('mousedown', function() {{
+          setTimeout(function() {{ inp.value = ''; }}, 0);
+        }});
+      }}
     }});
   }}
 
