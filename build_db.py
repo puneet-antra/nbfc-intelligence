@@ -80,7 +80,7 @@ COMPANIES = [
     # Unlisted fintechs (BSE-listed NCDs, so quarterly filings available)
     ("KreditBee", "Middle", "Consumer Finance", 0, 1, 9281, "audited", None, "KreditBee (KrazyBee Services Ltd) - BSE NCD filings"),
     # Unlisted NBFCs — data from rating agency rationales based on company-submitted audited financials
-    ("Fibe", "Middle", "Consumer Finance", 0, 1, 3280, "estimated", None, "EarlySalary Services Pvt Ltd (CIN U67120PN1994PTC184868). CareEdge & Acuite rating rationales based on ESPL standalone audited/provisional financials. FY25 provisional."),
+    ("Fibe", "Middle", "Consumer Finance", 0, 1, 4702, "audited", None, "EarlySalary Services Pvt Ltd (CIN U67120PN1994PTC184868). Audited consolidated financial statements FY21-FY25 + BSE quarterly results 9MFY26. Total assets ₹4,702 Cr (Dec-2025)."),
     # Pre-IPO — DRHP filed Aug 2025 (OnEMI Technology Solutions Ltd; NBFC subsidiary: Si Creva Capital Services Pvt Ltd)
     ("Kissht", "Middle", "Consumer Finance", 0, 1, 2701, "DRHP", None, "OnEMI Technology Solutions DRHP filed Aug 2025 with SEBI. Restated consolidated financials FY23-FY25."),
     # Pre-IPO — DRHP filed Mar 2026 (Moneyview Limited; NBFC subsidiary: Whizdm Finance Pvt Ltd)
@@ -298,16 +298,24 @@ FINANCIALS = [
     ("KreditBee", "FY2026-Q3", 8448, 9281, 2707, 978, 341, 612, 7.25, 1.79, 6.45, 17.96, "audited", "KreditBee 9MFY26 actual - BSE filing Feb-2026. Loan book ₹8,448 Cr; 9M PAT ₹341 Cr (reported, incl. ~₹152 Cr one-times); 9M NII ₹978 Cr; 9M Impairment ₹612 Cr; GNPA 1.79%. One-time adj applied in app.py."),
     # ── Fibe (EarlySalary Services Pvt Ltd) ──────────────────────────────────
     # NBFC entity: EarlySalary Services Pvt Ltd (CIN U67120PN1994PTC184868), Middle Layer.
-    # Brand: Fibe. Parent: Social Worth Technologies Pvt Ltd. Unlisted, no BSE filings.
-    # Source: CareEdge rating press releases (Feb-2023, Oct-2023, Nov-2024, Nov-2025) and
-    # Acuite rating rationale (Oct-2025), both based on ESPL audited/provisional standalone
-    # financials submitted by the company. FY2025 figures are provisional/unaudited.
-    # NII not disclosed standalone; credit losses not available in absolute standalone terms.
-    # GNPA excludes written-off accounts (GNPA incl. write-offs: FY24 8.56%, FY25 10.12%).
-    ("Fibe", "FY2022",  1019,   518,  None, None,    2.89, None, None, None,  0.43,  None, "audited",   "Fibe (ESPL standalone) FY22 audited. AUM ₹1,019 Cr; Total assets ₹517.77 Cr; PAT ₹2.89 Cr; ROA 0.43%. Source: CareEdge Feb-2023 rating rationale."),
-    ("Fibe", "FY2023",  1963,  1338,  None, None,  -10.83, None, None, 3.50, -1.20,  None, "audited",   "Fibe (ESPL standalone) FY23 audited. AUM ₹1,963 Cr; Total assets ₹1,337.63 Cr; PAT -₹10.83 Cr (loss); GNPA 3.50%; ROA -1.20%. Source: CareEdge Oct-2023 rating rationale."),
-    ("Fibe", "FY2024",  4064,  2259,   739, None,   55.34, None, None, 2.67,  3.09, 10.33, "audited",   "Fibe (ESPL standalone) FY24 audited. AUM ₹4,064 Cr; Total assets ₹2,258.80 Cr; Net worth ₹739.38 Cr; PAT ₹55.34 Cr; GNPA 2.67%; ROA 3.09%; ROE 10.33%. Source: Acuite Oct-2025 rating rationale."),
-    ("Fibe", "FY2025",  5287,  3280,   994, None,  100.19, None, None, 3.07,  3.62, 11.56, "estimated", "Fibe (ESPL standalone) FY25 provisional. AUM ₹5,287 Cr; Total assets ₹3,279.89 Cr; Net worth ₹994.28 Cr; PAT ₹100.19 Cr; GNPA 3.07%; ROA 3.62%; ROE 11.56%. Source: CareEdge Nov-2025 & Acuite Oct-2025 (provisional/unaudited)."),
+    # Brand: Fibe. Parent: Social Worth Technologies Pvt Ltd. Unlisted. BSE filings from FY25.
+    # Source: Audited consolidated financial statements (FY21-FY25) + BSE quarterly (9MFY26).
+    # FY21-FY23: Indian GAAP. FY24 onwards: Ind AS.
+    # Loan book = gross on-book loans (balance sheet; FY25 = net loans, gross not disclosed).
+    # NII = revenue from operations (interest income + processing fees).
+    # Credit loss rate = annualised credit losses / avg loan book. ROA/ROE on avg assets/equity.
+    ("Fibe", "FY2021",   231,  297,   89,   71,   0.47,  24, 10.39, 1.62,  0.16,  0.53, "audited",
+     "Fibe (ESPL consolidated) FY21 audited. Gross loans ₹231 Cr; assets ₹297 Cr; equity ₹89 Cr; revenue ₹71 Cr; PAT ₹0.47 Cr; provisions ₹24 Cr; GNPA 1.62%. ROA = PAT/ending assets (no FY20). Source: ESPL audited FS FY20-21."),
+    ("Fibe", "FY2022",   475,  521,  107,  108,   2.89,  19,  5.38, 1.83,  0.71,  2.95, "audited",
+     "Fibe (ESPL consolidated) FY22 audited. Gross loans ₹475 Cr; assets ₹521 Cr; equity ₹107 Cr; revenue ₹108 Cr; PAT ₹2.89 Cr; provisions ₹19 Cr; GNPA 1.83%. ROA 0.71%; ROE 2.95%. Source: ESPL audited FS FY21-22."),
+    ("Fibe", "FY2023",  1244, 1346,  369,  276,  15.17,  67,  7.80, 3.50,  1.63,  6.37, "audited",
+     "Fibe (ESPL consolidated) FY23 audited (Indian GAAP). Gross loans ₹1,244 Cr; assets ₹1,346 Cr; equity ₹369 Cr; revenue ₹276 Cr; PAT ₹15.17 Cr; provisions ₹67 Cr; GNPA 3.50%. ROA 1.63%; ROE 6.37%. Source: ESPL audited FS FY22-23."),
+    ("Fibe", "FY2024",  2287, 2297,  739,  705,  55.34, 201, 11.39, 1.95,  3.04,  9.99, "audited",
+     "Fibe (ESPL consolidated) FY24 audited (Ind AS). Gross loans ₹2,287 Cr; assets ₹2,297 Cr; equity ₹739 Cr; revenue ₹705 Cr; PAT ₹55.34 Cr; ECL ₹201 Cr; GNPA 1.95% Stage 3. ROA 3.04%; ROE 9.99%. Source: ESPL audited FS FY23-24."),
+    ("Fibe", "FY2025",  3062, 3329,  994, 1008, 100.19, 268, 10.02, 3.07,  3.56, 11.56, "audited",
+     "Fibe (ESPL consolidated) FY25 audited (Ind AS, BSE filing). Net loans ₹3,062 Cr; assets ₹3,329 Cr; equity ₹994 Cr; revenue ₹1,008 Cr; PAT ₹100.19 Cr; ECL ₹268 Cr; GNPA 3.07% Stage 3. ROA 3.56%; ROE 11.56%. Source: ESPL Financial Results Mar 2025 (BSE)."),
+    ("Fibe", "FY2026-Q3", 4511, 4702, 1296,  957,  99.0, 198,  None, 1.37,  None,  None, "audited",
+     "Fibe (ESPL consolidated) 9MFY26 Apr-Dec 2025 (Ind AS, BSE quarterly). Gross loans ₹4,511 Cr; assets ₹4,702 Cr; equity ₹1,296 Cr; revenue ₹957 Cr (9M); PAT ₹99 Cr (9M); ECL ₹198 Cr (9M); GNPA 1.37% Stage 3 Dec-2025. ROA/ROE/ann.loss rate by annualise_9m. Source: ESPL Results Dec 2025 (BSE)."),
     # ── Kissht (OnEMI Technology Solutions Ltd / Si Creva Capital Services Pvt Ltd) ──
     # Source: DRHP filed with SEBI, Aug 18 2025. Restated consolidated financials.
     # AUM = On-book + Off-book. Total Assets = consolidated balance sheet.
