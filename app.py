@@ -895,8 +895,11 @@ def note(text, kind="info"):
     )
 
 
+MONEYVIEW_GREEN = "#1B5E20"   # Moneyview brand dark green
+
 def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text_suffix=""):
-    """Standard horizontal bar chart — pass data sorted DESCENDING (chart reverses y-axis)."""
+    """Standard horizontal bar chart — pass data sorted DESCENDING (chart reverses y-axis).
+    Moneyview is automatically highlighted: dark-green bar + bold dark-green label."""
     df = df.copy()
     df[y_col] = df[y_col].apply(lambda n: truncate_name(str(n)))
     h = height or bar_chart_height(len(df))
@@ -904,10 +907,21 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
     x_max = vals.abs().max() if not vals.empty else 1
     x_range = [vals.min() * 1.05 if vals.min() < 0 else 0, x_max * 1.4]
     text_labels = df[x_col].round(1).astype(str) + text_suffix
+
+    names = df[y_col].tolist()
+    # Per-bar colours: dark green for Moneyview, default for everyone else
+    bar_colors = [MONEYVIEW_GREEN if n == "Moneyview" else color for n in names]
+    # Y-axis tick labels: bold dark-green for Moneyview
+    tick_text = [
+        f"<b><span style='color:{MONEYVIEW_GREEN}'>{n}</span></b>"
+        if n == "Moneyview" else n
+        for n in names
+    ]
+
     fig = px.bar(df, x=x_col, y=y_col, orientation="h", height=h,
                  text=text_labels)
     fig.update_traces(
-        marker_color=color, marker_line_width=0,
+        marker_color=bar_colors, marker_line_width=0,
         marker_opacity=0.88,
         textposition="outside",
         textfont=dict(family=CHART_MONO, size=11, color=COLOR["text_secondary"]),
@@ -917,7 +931,9 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
         title=_title_dict(title),
         paper_bgcolor=CHART_PAPER, plot_bgcolor=CHART_BG,
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
-        yaxis=dict(autorange="reversed", tickfont=dict(family=CHART_FONT, size=12),
+        yaxis=dict(autorange="reversed",
+                   tickmode="array", tickvals=names, ticktext=tick_text,
+                   tickfont=dict(family=CHART_FONT, size=12),
                    showgrid=False, tickcolor="rgba(0,0,0,0)", title=""),
         xaxis=dict(showgrid=False, showticklabels=False,
                    range=x_range, zeroline=True, zerolinecolor=CHART_GRID,
