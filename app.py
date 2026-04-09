@@ -1027,9 +1027,9 @@ nbfc_df = load_nbfc_table()
 fin_df = load_financials()
 
 rbi_layer = st.sidebar.selectbox("RBI Layer", ["All", "Upper", "Middle", "Base"])
-sectors = ["All"] + sorted(nbfc_df["sector"].dropna().unique().tolist())
-default_sector_idx = sectors.index("Consumer Finance") if "Consumer Finance" in sectors else 0
-sector_filter = st.sidebar.selectbox("Sector", sectors, index=default_sector_idx)
+all_sectors = sorted(nbfc_df["sector"].dropna().unique().tolist())
+_default_sectors = ["Consumer Finance"] if "Consumer Finance" in all_sectors else []
+sector_filter = st.sidebar.multiselect("Sector", all_sectors, default=_default_sectors)
 listing_filter = st.sidebar.radio("Listing Status", ["All", "Listed Only", "Unlisted Only"])
 top_n = st.sidebar.slider("Companies in Rankings", min_value=10, max_value=80, value=40, step=5)
 include_estimated = st.sidebar.checkbox("Include Estimated Data", value=True)
@@ -1049,8 +1049,11 @@ if _AUTH_ENABLED:
 
 # ── Active filter badge (computed here, injected into page header below) ──────
 _active_filters = []
-if sector_filter != "All":
-    _active_filters.append(f"Sector: {sector_filter}")
+if sector_filter and len(sector_filter) < len(all_sectors):
+    if len(sector_filter) == 1:
+        _active_filters.append(f"Sector: {sector_filter[0]}")
+    else:
+        _active_filters.append(f"{len(sector_filter)} Sectors")
 if rbi_layer != "All":
     _active_filters.append(f"Layer: {rbi_layer}")
 if listing_filter != "All":
@@ -1062,8 +1065,8 @@ def apply_filters(df):
     d = df.copy()
     if rbi_layer != "All":
         d = d[d["rbi_layer"] == rbi_layer]
-    if sector_filter != "All":
-        d = d[d["sector"] == sector_filter]
+    if sector_filter:  # non-empty list → filter active
+        d = d[d["sector"].isin(sector_filter)]
     if listing_filter == "Listed Only":
         d = d[d["listed"] == 1]
     elif listing_filter == "Unlisted Only":
@@ -1138,55 +1141,55 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Filter badge — injected into parent DOM via components.html iframe (window.parent access)
-# Re-renders every Streamlit cycle with current LABEL; polling keeps it alive after rerenders
+# MY_TS ownership: only the most-recently-created iframe updates the badge (prevents stale iframes
+# from overwriting). Uses a named <span> for text so onclick is never replaced.
 components.html(f"""
 <script>
 (function() {{
-  var LABEL = {repr(_badge_label)};
-  var CSS = "position:fixed;top:0.62rem;left:3.4rem;z-index:2147483647;"
-          + "display:inline-flex;align-items:center;gap:0.35rem;"
-          + "background:#EAF4EE;border:1px solid #144835;border-radius:20px;"
-          + "padding:0.22rem 0.75rem;cursor:pointer;user-select:none;"
-          + "font-size:0.75rem;font-weight:600;color:#144835;"
-          + "box-shadow:0 2px 6px rgba(0,0,0,0.15);font-family:Inter,sans-serif;white-space:nowrap;";
-  var SVG = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none">'
-          + '<path d="M2 4h12M4 8h8M6 12h4" stroke="#144835" stroke-width="2" stroke-linecap="round"/>'
-          + '</svg>&nbsp;';
+  var LABEL  = {repr(_badge_label)};
+  var MY_TS  = String(Date.now());
+  var CSS    = "position:fixed;top:0.62rem;left:3.4rem;z-index:2147483647;"
+             + "display:inline-flex;align-items:center;gap:0.35rem;"
+             + "background:#EAF4EE;border:1px solid #144835;border-radius:20px;"
+             + "padding:0.22rem 0.75rem;cursor:pointer;user-select:none;"
+             + "font-size:0.75rem;font-weight:600;color:#144835;"
+             + "box-shadow:0 2px 6px rgba(0,0,0,0.15);font-family:Inter,sans-serif;white-space:nowrap;";
+
   function toggleSidebar() {{
     var doc = window.parent.document;
-    // Button is always INSIDE the control container — query child button first
     var btn = doc.querySelector('[data-testid="stSidebarCollapsedControl"] button')
            || doc.querySelector('[data-testid="stSidebarCollapseButton"] button')
            || doc.querySelector('[data-testid="stSidebarCollapsedControl"]')
            || doc.querySelector('[data-testid="stSidebarCollapseButton"]');
-    if (btn) {{
-      // Use dispatchEvent so React's synthetic event system fires reliably
-      btn.dispatchEvent(new MouseEvent('click', {{bubbles: true, cancelable: true, view: window.parent}}));
-    }}
+    if (btn) btn.dispatchEvent(new MouseEvent('click', {{bubbles:true, cancelable:true, view:window.parent}}));
   }}
+
   function syncBadge() {{
     try {{
       var doc = window.parent.document;
       var b = doc.getElementById('nbfc-filter-badge');
       if (b) {{
-        // Badge exists — update label if it changed (filter was changed via sidebar)
-        if (b.dataset.label !== LABEL) {{
-          b.innerHTML = SVG + LABEL;
-          b.dataset.label = LABEL;
-        }}
+        var owner = b.dataset.owner || '0';
+        if (MY_TS < owner) return;          // A newer iframe owns this badge — stand down
+        b.dataset.owner = MY_TS;
+        b.onclick = toggleSidebar;           // Re-assert click handler every cycle
+        var sp = b.querySelector('span');
+        if (sp && sp.textContent !== LABEL) sp.textContent = LABEL;
       }} else {{
-        // Badge missing — create it
         b = doc.createElement('div');
         b.id = 'nbfc-filter-badge';
         b.title = 'Click to open/close filters';
         b.setAttribute('style', CSS);
-        b.dataset.label = LABEL;
-        b.innerHTML = SVG + LABEL;
-        b.addEventListener('click', toggleSidebar);
+        b.dataset.owner = MY_TS;
+        b.onclick = toggleSidebar;
+        b.innerHTML = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none">'
+                    + '<path d="M2 4h12M4 8h8M6 12h4" stroke="#144835" stroke-width="2" stroke-linecap="round"/>'
+                    + '</svg>&nbsp;<span>' + LABEL + '</span>';
         doc.body.appendChild(b);
       }}
     }} catch(e) {{ console.warn('nbfc-badge:', e); }}
   }}
+
   syncBadge();
   setInterval(syncBadge, 1200);
 }})();
