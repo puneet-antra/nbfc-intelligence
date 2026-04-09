@@ -750,14 +750,19 @@ HOVER_LABEL = dict(
 )
 
 
+_SUBTITLE_STYLE = "<font color='#8B8FA8'>"
+_SUBTITLE_END   = "</font>"
+
 def wrap_title(title, max_len=32):
-    """Insert <br> at a natural break point so long chart titles don't overflow."""
+    """Insert <br> at a natural break; second line rendered in a muted colour."""
     if "<br>" in title:          # already wrapped — don't double-process
         return title
+    def _split(first, rest):
+        return f"{first}<br>{_SUBTITLE_STYLE}{rest}{_SUBTITLE_END}"
     # "(as of …)" always goes to second line regardless of total length
     idx_asof = title.find(" (as of")
     if idx_asof > 0:
-        return title[:idx_asof] + "<br>" + title[idx_asof:].lstrip()
+        return _split(title[:idx_asof], title[idx_asof:].lstrip())
     # Short titles: no wrapping needed
     if len(title) <= max_len:
         return title
@@ -765,10 +770,10 @@ def wrap_title(title, max_len=32):
     for sep in [" — ", " (", ": ", " - ", " vs "]:
         idx = title.find(sep)
         if 0 < idx <= max_len:
-            return title[:idx] + "<br>" + title[idx:].lstrip()
+            return _split(title[:idx], title[idx:].lstrip())
     idx = title.rfind(" ", 0, max_len)
     if idx > 0:
-        return title[:idx] + "<br>" + title[idx + 1:]
+        return _split(title[:idx], title[idx + 1:])
     return title
 
 
