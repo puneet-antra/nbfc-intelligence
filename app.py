@@ -1384,6 +1384,10 @@ with tabs[2]:
                          title=f"Annualized Losses vs GNPA — {lbl} (bubble = loan book)", height=500)
         chart_layout(fig)
         fig.update_traces(hovertemplate="%{hovertext}<extra></extra>")
+        fig.update_layout(
+            xaxis=dict(title="GNPA %", title_font=dict(size=12, family=CHART_FONT)),
+            yaxis=dict(title="Annualized Losses %", title_font=dict(size=12, family=CHART_FONT)),
+        )
         st.plotly_chart(fig, use_container_width=True)
 
     # ── Waterfall: FY2021 → FY2025 change ────────────────────────────────────
