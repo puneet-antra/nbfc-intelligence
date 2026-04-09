@@ -1219,6 +1219,47 @@ with tabs[0]:
                         hover_text=[lbl] * len(sector_rev), text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
 
+    # ── Row 3: AUM Growth vs Revenue Growth bubble chart ─────────────────────
+    st.markdown('<div class="section-header">AUM Growth vs Revenue Growth</div>', unsafe_allow_html=True)
+    latest_lb = get_latest_period_data(fin_filtered)[["name", "loan_book_cr", "sector"]].dropna(subset=["loan_book_cr"])
+    bubble_df = (
+        growth_df[["name", "growth_pct"]].rename(columns={"growth_pct": "aum_growth"})
+        .merge(rev_growth_df[["name", "growth_pct"]].rename(columns={"growth_pct": "rev_growth"}), on="name", how="inner")
+        .merge(latest_lb, on="name", how="inner")
+        .dropna(subset=["aum_growth", "rev_growth", "loan_book_cr"])
+    )
+    if not bubble_df.empty:
+        fig = px.scatter(
+            bubble_df, x="aum_growth", y="rev_growth",
+            size="loan_book_cr", color="sector", hover_name="name",
+            color_discrete_sequence=MV_PALETTE,
+            labels={"aum_growth": "AUM Growth %", "rev_growth": "Revenue Growth %"},
+            title="AUM Growth vs Revenue Growth (bubble = AUM size)",
+            height=520,
+        )
+        fig.update_traces(
+            hovertemplate=(
+                "<b>%{hovertext}</b><br>"
+                "AUM Growth = %{x:.1f}%<br>"
+                "Revenue Growth = %{y:.1f}%"
+                "<extra></extra>"
+            )
+        )
+        # Diagonal reference line (equal growth)
+        g_min = min(bubble_df["aum_growth"].min(), bubble_df["rev_growth"].min())
+        g_max = max(bubble_df["aum_growth"].max(), bubble_df["rev_growth"].max())
+        fig.add_shape(type="line", x0=g_min, y0=g_min, x1=g_max, y1=g_max,
+                      line=dict(color=COLOR["text_secondary"], width=1, dash="dot"))
+        fig.add_annotation(x=g_max, y=g_max, text="Equal growth", showarrow=False,
+                           font=dict(size=10, color=COLOR["text_secondary"]), xanchor="right")
+        chart_layout(fig)
+        fig.update_layout(
+            xaxis=dict(title="AUM Growth %", title_font=dict(size=12, family=CHART_FONT)),
+            yaxis=dict(title="Revenue Growth %", title_font=dict(size=12, family=CHART_FONT)),
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    st.caption("Bubbles above the diagonal line = revenue growing faster than AUM (improving yield). Below = AUM growing faster than revenue.")
+
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 2: PROFITABILITY
 # ─────────────────────────────────────────────────────────────────────────────
