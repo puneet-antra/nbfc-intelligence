@@ -1051,7 +1051,7 @@ if _AUTH_ENABLED:
     if st.sidebar.button("Sign out", use_container_width=True):
         st.logout()
 
-# ── Active filter badge — fixed top-left next to sidebar arrow ────────────────
+# ── Active filter badge (computed here, injected into page header below) ──────
 _active_filters = []
 if sector_filter != "All":
     _active_filters.append(f"Sector: {sector_filter}")
@@ -1060,43 +1060,6 @@ if rbi_layer != "All":
 if listing_filter != "All":
     _active_filters.append(listing_filter.replace(" Only", ""))
 _badge_label = " · ".join(_active_filters) if _active_filters else "All NBFCs"
-
-st.markdown(f"""
-<style>
-#filter-topbar {{
-    position: fixed;
-    top: 0.6rem;
-    left: 3.8rem;
-    z-index: 99999;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    background: #EAF4EE;
-    border: 1px solid #144835;
-    border-radius: 20px;
-    padding: 0.22rem 0.7rem;
-    cursor: pointer;
-    user-select: none;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: #144835;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
-    transition: background 0.15s;
-}}
-#filter-topbar:hover {{ background: #d4ecda; }}
-</style>
-<div id="filter-topbar" title="Click to open filters" onclick="
-    var btn = window.parent.document.querySelector('[data-testid=stSidebarCollapsedControl] button');
-    if (!btn) btn = window.parent.document.querySelector('[data-testid=stSidebarNavCollapseIcon]');
-    if (!btn) btn = window.parent.document.querySelector('[data-testid=stSidebar] button');
-    if (btn) btn.click();
-">
-  <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-    <path d="M2 4h12M4 8h8M6 12h4" stroke="#144835" stroke-width="2" stroke-linecap="round"/>
-  </svg>
-  {_badge_label}
-</div>
-""", unsafe_allow_html=True)
 
 
 def apply_filters(df):
@@ -1169,9 +1132,18 @@ st.markdown("""
 }
 </style>
 <div class="page-header-wrap">
-  <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;">
-    <span class="page-title">NBFC Intelligence</span>
-    <span class="page-badge">INDIA</span>
+  <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+    <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;">
+      <span class="page-title">NBFC Intelligence</span>
+      <span class="page-badge">INDIA</span>
+    </div>
+    <div id="filter-badge" title="Click to change filters" onclick="
+      var btns = window.parent.document.querySelectorAll('[data-testid=stSidebar] button');
+      if (btns.length) {{ btns[0].click(); }}
+    " style="display:inline-flex;align-items:center;gap:0.35rem;background:#EAF4EE;border:1px solid #144835;border-radius:20px;padding:0.25rem 0.8rem;cursor:pointer;user-select:none;font-size:0.78rem;font-weight:600;color:#144835;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M4 8h8M6 12h4" stroke="#144835" stroke-width="2" stroke-linecap="round"/></svg>
+      """ + _badge_label + """
+    </div>
   </div>
   <p class="page-subtitle">Non-Banking Financial Companies &mdash; Growth &middot; Profitability &middot; Asset Quality &middot; Valuation</p>
   <hr class="header-rule"/>
