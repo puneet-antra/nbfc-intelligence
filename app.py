@@ -895,7 +895,7 @@ def _title_dict(raw_title, pad_t=10, pad_b=14):
         text = f"<b>{main}</b>"
     return dict(
         text=text,
-        font=dict(color=COLOR["text_secondary"], size=12, family=CHART_TITLE_FONT),
+        font=dict(color=COLOR["text"], size=15.5, family=CHART_TITLE_FONT),
         x=0.5, xanchor="center", xref="paper",
         pad=dict(t=pad_t, b=pad_b),
     )
@@ -1945,10 +1945,10 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
             if has_nii:
                 fig.add_trace(go.Scatter(
                     x=nii_df["period"], y=nii_df["net_interest_income_cr"],
-                    mode="lines+markers", name="NII",
+                    mode="lines+markers", name="Revenues",
                     line=dict(color="#144835", width=2),
                     marker=dict(size=6),
-                    hovertemplate="₹%{y:,.0f} Cr<extra>NII</extra>",
+                    hovertemplate="₹%{y:,.0f} Cr<extra>Revenues</extra>",
                 ))
             fig.add_trace(go.Scatter(
                 x=pat_df["period"], y=pat_df["pat_cr"],
@@ -1957,7 +1957,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                 marker=dict(size=6),
                 hovertemplate="₹%{y:,.0f} Cr<extra>PAT</extra>",
             ))
-            title_txt = "NII & PAT (₹ Crore)" if has_nii else "PAT (₹ Crore) — NII not disclosed"
+            title_txt = "Revenues & PAT (₹ Crore)" if has_nii else "PAT (₹ Crore) — Revenues not disclosed"
             fig.update_layout(
                 title=_title_dict(title_txt),
                 height=400,
