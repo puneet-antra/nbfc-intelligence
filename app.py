@@ -1728,20 +1728,20 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       setTimeout(function() {{
         if (inp !== doc.activeElement) return;
         inp.value = val;
-        inp.style.color      = '#1a1a1a';   // make text visible
-        inp.style.background = '#CCE5FF';   // blue-highlight tint
-        inp.style.borderRadius = '2px';
-        inp.setSelectionRange(0, val.length); // also try real selection
+        // Use setProperty('…','important') to beat any BaseWeb !important rules
+        inp.style.setProperty('color',           '#1a1a1a', 'important');
+        inp.style.setProperty('background',      '#E0E2E8', 'important');
+        inp.style.setProperty('border-radius',   '2px',     'important');
 
         function clearHL() {{
-          inp.style.color      = '';
-          inp.style.background = '';
-          inp.style.borderRadius = '';
+          inp.style.removeProperty('color');
+          inp.style.removeProperty('background');
+          inp.style.removeProperty('border-radius');
           inp.value = '';   // clear before char is inserted → clean filter state
         }}
         inp.addEventListener('keydown', clearHL, {{ once: true }});
         setTimeout(clearHL, 6000); // failsafe
-      }}, 0);
+      }}, 100);
     }});
 
     doc.addEventListener('focusout', function(e) {{
@@ -1750,9 +1750,9 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
         // Reset any injected input styles when dropdown closes
         var inp2 = box.querySelector('input');
         if (inp2) {{
-          inp2.style.color = '';
-          inp2.style.background = '';
-          inp2.style.borderRadius = '';
+          inp2.style.removeProperty('color');
+          inp2.style.removeProperty('background');
+          inp2.style.removeProperty('border-radius');
         }}
         // Refresh the cache and re-apply bold styling after dropdown closes
         var v = readDisplayVal(box);
