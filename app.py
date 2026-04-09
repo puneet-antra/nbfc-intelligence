@@ -574,23 +574,9 @@ PERIOD_SHORT = {
     "FY2024": "FY24", "FY2025": "FY25", "9MFY26": "9MFY26",
 }
 
-# ── Ensure DB exists and is up-to-date ───────────────────────────────────────
-import os as _os, sqlite3 as _sqlite3
-
-def _needs_rebuild():
-    if not _os.path.exists("data/nbfc_full.db"):
-        return True
-    try:
-        _c = _sqlite3.connect("data/nbfc_full.db")
-        _cur = _c.cursor()
-        _cur.execute("SELECT COUNT(*) FROM nbfc WHERE name='Moneyview'")
-        _has_mv = _cur.fetchone()[0] > 0
-        _c.close()
-        return not _has_mv
-    except Exception:
-        return True
-
-if _needs_rebuild():
+# ── Ensure DB exists ─────────────────────────────────────────────────────────
+import os as _os
+if not _os.path.exists("data/nbfc_full.db"):
     import build_db as _build_db
     _build_db.build()
 
