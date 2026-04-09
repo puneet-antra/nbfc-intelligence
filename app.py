@@ -1383,7 +1383,14 @@ with tabs[2]:
                          labels={"gnpa_pct": "GNPA %", "credit_loss_rate_pct": "Annualized Losses %"},
                          title=f"Annualized Losses vs GNPA — {lbl} (bubble = loan book)", height=500)
         chart_layout(fig)
-        fig.update_traces(hovertemplate="%{hovertext}<extra></extra>")
+        fig.update_traces(
+            hovertemplate=(
+                "<b>%{hovertext}</b><br>"
+                "GNPA = %{x:.1f}%<br>"
+                "Ann. Losses = %{y:.1f}%"
+                "<extra></extra>"
+            )
+        )
         fig.update_layout(
             xaxis=dict(title="GNPA %", title_font=dict(size=12, family=CHART_FONT)),
             yaxis=dict(title="Annualized Losses %", title_font=dict(size=12, family=CHART_FONT)),
