@@ -331,8 +331,8 @@ FINANCIALS = [
      "MoneyView DRHP Mar-2026. FY24: Revenue ₹1,342 Cr; PAT ₹171 Cr; annualized credit loss rate 7.93% on managed AUM; GNPA (Gross Stage 3, Whizdm Finance on-book) 0.94%."),
     ("MoneyView", "FY2025", None, None, None, 2339, 240,  346,  7.07, None, None, None, "DRHP",
      "MoneyView DRHP Mar-2026. FY25: Revenue ₹2,339 Cr (fees ₹1,487 Cr + interest ₹789 Cr); PAT ₹240 Cr; impairment ₹346 Cr + DLG expense ₹322 Cr; credit loss rate 7.07% (annualized managed AUM basis). Current assets ₹4,198 Cr."),
-    ("MoneyView", "FY2026-Q3", None, 7719, None, 2373, 210,  724,  None, 2.53, None, None, "DRHP",
-     "MoneyView DRHP Mar-2026. 9MFY26 (Apr-Dec 2025): Revenue ₹2,373 Cr; PAT ₹210 Cr; impairment ₹724 Cr; total assets ₹7,719 Cr; Gross Stage 3 (Whizdm Finance on-book) 2.53%. Managed AUM ₹19,814 Cr."),
+    ("MoneyView", "FY2026-Q3", None, 7719, None, 2373, 245,  724,  None, 2.53, None, None, "DRHP",
+     "MoneyView DRHP Mar-2026. 9MFY26 (Apr-Dec 2025): Revenue ₹2,373 Cr; PAT ₹245 Cr (before exceptional items; reported PAT ₹210 Cr); impairment ₹724 Cr; total assets ₹7,719 Cr; Gross Stage 3 (Whizdm Finance on-book) 2.53%. Managed AUM ₹19,814 Cr."),
 ]
 
 
