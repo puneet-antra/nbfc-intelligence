@@ -884,26 +884,22 @@ def split_title(title, max_len=32):
 
 
 def _title_dict(raw_title, pad_t=10, pad_b=14):
-    """Build a Plotly title dict with optional subtitle via <br> (compatible with all Plotly versions)."""
+    """Build a Plotly title dict. Uses <b> for main title and native subtitle dict for subtitle."""
     main, sub = split_title(raw_title)
-    if sub:
-        # Non-breaking spaces prevent wrapping in both lines
-        main_nbsp = main.replace(" ", "\u00a0")
-        sub_nbsp = sub.replace(" ", "\u00a0")
-        text = (
-            f"<span style='font-size:15px;font-weight:bold;color:{COLOR['text']}'>{main_nbsp}</span>"
-            f"<br>"
-            f"<span style='font-size:11px;font-weight:normal;color:#8B8FA8'>{sub_nbsp}</span>"
-        )
-    else:
-        main_nbsp = main.replace(" ", "\u00a0")
-        text = f"<span style='font-size:15px;font-weight:bold;color:{COLOR['text']}'>{main_nbsp}</span>"
-    return dict(
-        text=text,
+    main_nbsp = main.replace(" ", "\u00a0")
+    td = dict(
+        text=f"<b>{main_nbsp}</b>",
         font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT),
         x=0.5, xanchor="center", xref="paper",
         pad=dict(t=pad_t, b=pad_b),
     )
+    if sub:
+        sub_nbsp = sub.replace(" ", "\u00a0")
+        td["subtitle"] = dict(
+            text=sub_nbsp,
+            font=dict(color="#8B8FA8", size=11, family=CHART_TITLE_FONT),
+        )
+    return td
 
 
 # Keep wrap_title as a thin shim so any callers that still use it keep working
@@ -967,13 +963,13 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
         yaxis=dict(autorange="reversed",
                    tickmode="array", tickvals=names, ticktext=tick_text,
                    tickfont=dict(family=CHART_FONT, size=12.5),
-                   automargin=True,
+                   automargin=True, standoff=12,
                    showgrid=False, tickcolor="rgba(0,0,0,0)", title=""),
         xaxis=dict(showgrid=False, showticklabels=False,
                    range=x_range, zeroline=True, zerolinecolor=CHART_GRID,
                    zerolinewidth=1, tickcolor="rgba(0,0,0,0)", title=""),
         bargap=0.28,
-        margin=dict(l=180, r=110, t=90, b=24),
+        margin=dict(l=10, r=130, t=90, b=24),
         hoverlabel=HOVER_LABEL,
     )
     if hover_text is not None:
@@ -1141,39 +1137,44 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Filter badge — fixed position top-left next to the sidebar arrow
-st.markdown(f"""
-<style>
-#nbfc-filter-badge {{
-  position: fixed;
-  top: 0.62rem;
-  left: 3.3rem;
-  z-index: 99999;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  background: #EAF4EE;
-  border: 1px solid #144835;
-  border-radius: 20px;
-  padding: 0.22rem 0.75rem;
-  cursor: pointer;
-  user-select: none;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #144835;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
-  font-family: Inter, sans-serif;
-  white-space: nowrap;
-}}
-</style>
-<div id="nbfc-filter-badge" title="Click to toggle filters"
-     onclick="var btn=document.querySelector('[data-testid=stSidebarCollapseButton] button')||document.querySelector('[data-testid=stSidebarCollapsedControl] button')||document.querySelector('[data-testid=stSidebar] button');if(btn)btn.click();">
-  <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-    <path d="M2 4h12M4 8h8M6 12h4" stroke="#144835" stroke-width="2" stroke-linecap="round"/>
-  </svg>
-  {_badge_label}
-</div>
-""", unsafe_allow_html=True)
+# Filter badge — injected into parent DOM via components.html so position:fixed is page-level
+_badge_css = (
+    "position:fixed;top:0.65rem;left:3.1rem;z-index:99999;"
+    "display:inline-flex;align-items:center;gap:0.35rem;"
+    "background:#EAF4EE;border:1px solid #144835;border-radius:20px;"
+    "padding:0.22rem 0.75rem;cursor:pointer;user-select:none;"
+    "font-size:0.75rem;font-weight:600;color:#144835;"
+    "box-shadow:0 1px 4px rgba(0,0,0,0.12);font-family:Inter,sans-serif;white-space:nowrap;"
+)
+components.html(f"""
+<script>
+(function() {{
+  var LABEL = {repr(_badge_label)};
+  var CSS   = {repr(_badge_css)};
+  function addBadge() {{
+    try {{
+      var doc = window.parent.document;
+      var old = doc.getElementById('nbfc-filter-badge');
+      if (old) old.remove();
+      var b = doc.createElement('div');
+      b.id = 'nbfc-filter-badge';
+      b.title = 'Click to toggle filters';
+      b.style.cssText = CSS;
+      b.innerHTML = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M4 8h8M6 12h4" stroke="#144835" stroke-width="2" stroke-linecap="round"/></svg>\\u00a0' + LABEL;
+      b.onclick = function() {{
+        var btn = doc.querySelector('[data-testid=stSidebarCollapseButton] button')
+               || doc.querySelector('[data-testid=stSidebarCollapsedControl] button')
+               || doc.querySelector('[data-testid=stSidebar] button');
+        if (btn) btn.click();
+      }};
+      doc.body.appendChild(b);
+    }} catch(e) {{ console.warn('badge:', e); }}
+  }}
+  addBadge();
+  setTimeout(addBadge, 800);
+}})();
+</script>
+""", height=0)
 
 annual_fin = annual_only(fin_filtered)
 latest_annual = annual_fin[annual_fin["period"] == "FY2025"]
