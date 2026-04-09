@@ -1646,11 +1646,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       var s = doc.createElement('style');
       s.id = 'nbfc-sel-style';
       s.textContent = [
-        /* Highlight class applied to the selectbox when dropdown opens */
-        '.nbfc-hl [data-baseweb="select"] > div:first-child {{',
-        '  background: #E0E2E8 !important;',
-        '  border-radius: 4px !important;',
-        '}}',
+        '[data-testid="stSelectbox"] input::selection {{ background: #3B7DD8 !important; color: #ffffff !important; }}',
         /* Bold the display-value div inside the NBFC selectbox at all times */
         '[data-testid="stSelectbox"] [data-baseweb="select"] > div:first-child > div > div {{',
         '  font-weight: 700 !important;',
@@ -1710,38 +1706,54 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       if (v) _nbfcVal = v;
     }});
 
-    // focusin: add CSS class 'nbfc-hl' to the selectbox container — the
-    // stylesheet above handles the grey highlight.  Classes on container divs
-    // survive React reconciliation (React only controls its own className
-    // props; it doesn't strip unknown classes added via classList).
-    // Direct inp.value write (no React event) keeps BaseWeb out of filter
-    // mode → single-click option selection continues to work.
+    // focusin: 50 ms after focus, BaseWeb has finished its own render cycle.
+    // Write the cached name — direct DOM write (no React event dispatch) keeps
+    // BaseWeb out of filter mode → single-click option selection works.
+    // Highlight is a background tint on the input wrapper (more reliable than
+    // ::selection which gets reset by BaseWeb before the browser paints).
     doc.addEventListener('focusin', function(e) {{
       if (!e.target || e.target.tagName !== 'INPUT') return;
       var box = getNbfcBox(e.target);
       if (!box) return;
+      var inp = e.target;
       var val = _nbfcVal;
       if (!val) return;
-
+      // BaseWeb's Select input has color:transparent by default — the value is
+      // rendered in a sibling <div>, not the input itself.  setSelectionRange
+      // therefore selects invisible text and shows nothing.
+      // Fix: write the name, force visible text + blue-highlight background to
+      // SIMULATE a text-selection look.  On first keydown, clear everything
+      // before the browser inserts the typed character so BaseWeb filters from
+      // a clean empty state.
       setTimeout(function() {{
-        var inp = box.querySelector('input');
-        if (!inp) return;
+        if (inp !== doc.activeElement) return;
         inp.value = val;
-        box.classList.add('nbfc-hl');   // triggers CSS highlight rule
+        // Use setProperty('…','important') to beat any BaseWeb !important rules
+        inp.style.setProperty('color',           '#1a1a1a', 'important');
+        inp.style.setProperty('background',      '#E0E2E8', 'important');
+        inp.style.setProperty('border-radius',   '2px',     'important');
 
         function clearHL() {{
-          box.classList.remove('nbfc-hl');
+          inp.style.removeProperty('color');
+          inp.style.removeProperty('background');
+          inp.style.removeProperty('border-radius');
           inp.value = '';   // clear before char is inserted → clean filter state
         }}
         inp.addEventListener('keydown', clearHL, {{ once: true }});
         setTimeout(clearHL, 6000); // failsafe
-      }}, 50);
+      }}, 100);
     }});
 
     doc.addEventListener('focusout', function(e) {{
       var box = getNbfcBox(e.target);
       if (box) {{
-        box.classList.remove('nbfc-hl');
+        // Reset any injected input styles when dropdown closes
+        var inp2 = box.querySelector('input');
+        if (inp2) {{
+          inp2.style.removeProperty('color');
+          inp2.style.removeProperty('background');
+          inp2.style.removeProperty('border-radius');
+        }}
         // Refresh the cache and re-apply bold styling after dropdown closes
         var v = readDisplayVal(box);
         if (v) _nbfcVal = v;
