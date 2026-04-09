@@ -1721,7 +1721,23 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
 
     doc.addEventListener('focusout', function(e) {{
       if (e.target && e.target._pendingClear) e.target._pendingClear = false;
+      // Re-apply bold styling after a selection is made
+      if (getNbfcBox(e.target)) {{
+        setTimeout(applyStyles, 80);
+        setTimeout(applyStyles, 300);
+        setTimeout(applyStyles, 700);
+      }}
     }});
+
+    // MutationObserver: re-apply bold styling whenever the selectbox display text changes
+    var _observer = new MutationObserver(function(mutations) {{
+      var relevant = mutations.some(function(m) {{
+        var node = m.target;
+        return node.closest && node.closest('[data-testid="stSelectbox"]');
+      }});
+      if (relevant) applyStyles();
+    }});
+    _observer.observe(doc.body, {{ childList: true, subtree: true }});
   }})();
 
   function applyStyles() {{
