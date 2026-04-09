@@ -1257,12 +1257,16 @@ with tabs[0]:
     st.caption("★ = estimated data. 9MFY26 growth annualised: (9M value × 4/3) / FY25 − 1. Otherwise FY25 vs FY24.")
 
     # ── Row 2: AUM | Revenue | PAT Growth by Sector ──────────────────────────
+    # Use unfiltered fin_df so sector charts always show all sectors
+    _growth_all     = compute_latest_growth(fin_df, "loan_book_cr").dropna(subset=["growth_pct"])
+    _rev_growth_all = compute_latest_growth(fin_df, "net_interest_income_cr").dropna(subset=["growth_pct"])
+    _pat_growth_all = compute_latest_growth(fin_df, "pat_cr").dropna(subset=["growth_pct"])
+
     st.markdown('<div class="section-header">Growth by Sector — Latest 1Y</div>', unsafe_allow_html=True)
     col1, col2, col3 = st.columns(3)
     with col1:
         sector_aum = (
-            growth_df.merge(sectors_df, on="name", how="left")
-            .groupby("sector")["growth_pct"].mean().reset_index()
+            _growth_all.groupby("sector")["growth_pct"].mean().reset_index()
             .sort_values("growth_pct", ascending=False)
         )
         fig = make_hbar(sector_aum, "growth_pct", "sector", COLOR["primary"],
@@ -1271,8 +1275,7 @@ with tabs[0]:
         st.plotly_chart(fig, use_container_width=True)
     with col2:
         sector_rev = (
-            rev_growth_df.merge(sectors_df, on="name", how="left")
-            .groupby("sector")["growth_pct"].mean().reset_index()
+            _rev_growth_all.groupby("sector")["growth_pct"].mean().reset_index()
             .sort_values("growth_pct", ascending=False)
         )
         fig = make_hbar(sector_rev, "growth_pct", "sector", COLOR["success"],
@@ -1281,8 +1284,7 @@ with tabs[0]:
         st.plotly_chart(fig, use_container_width=True)
     with col3:
         sector_pat = (
-            pat_growth_df.merge(sectors_df, on="name", how="left")
-            .groupby("sector")["growth_pct"].mean().reset_index()
+            _pat_growth_all.groupby("sector")["growth_pct"].mean().reset_index()
             .sort_values("growth_pct", ascending=False)
         )
         fig = make_hbar(sector_pat, "growth_pct", "sector", COLOR["accent"],
@@ -1379,9 +1381,10 @@ with tabs[1]:
          "₹18,265 Cr = 1.79%. Annualized loss rate = annualised impairment ₹965 Cr / avg managed AUM = 5.29%. "
          "PAT = ₹245 Cr before exceptional items (reported ₹210 Cr). Source: DRHP filed Mar-2026.", "info")
 
-    # Sector breakdown — latest period
+    # Sector breakdown — latest period (always all sectors, ignore filter)
     st.markdown(f'<div class="section-header">By Sector — {lbl}</div>', unsafe_allow_html=True)
-    sector_avg = latest_snap.groupby("sector").agg(
+    _snap_all = get_latest_period_data(fin_df).dropna(subset=["roa_pct", "roe_pct"])
+    sector_avg = _snap_all.groupby("sector").agg(
         roa=("roa_pct", "mean"),
         roe=("roe_pct", "mean"),
     ).reset_index().dropna().sort_values("roa", ascending=False)
@@ -1466,11 +1469,16 @@ with tabs[2]:
         st.caption("9MFY26: annualised credit losses (×4/3) ÷ avg loan book.")
 
     # ── Row 2: Latest GNPA by Sector | Latest Annualized Losses by Sector ────
+    # Always use unfiltered data so all sectors appear
+    _snap_cq_all = get_latest_period_data(fin_df)
+    _all_gnpa_all = _snap_cq_all.dropna(subset=["gnpa_pct"])
+    _all_loss_all = _snap_cq_all.dropna(subset=["credit_loss_rate_pct"])
+
     st.markdown('<div class="section-header">By Sector — Latest Period</div>', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1:
         sector_gnpa_latest = (
-            all_gnpa.groupby("sector")["gnpa_pct"].mean().reset_index()
+            _all_gnpa_all.groupby("sector")["gnpa_pct"].mean().reset_index()
             .sort_values("gnpa_pct", ascending=True)
         )
         fig = make_hbar(sector_gnpa_latest, "gnpa_pct", "sector", COLOR["primary"],
@@ -1478,7 +1486,7 @@ with tabs[2]:
         st.plotly_chart(fig, use_container_width=True)
     with col2:
         sector_loss_latest = (
-            all_loss.groupby("sector")["credit_loss_rate_pct"].mean().reset_index()
+            _all_loss_all.groupby("sector")["credit_loss_rate_pct"].mean().reset_index()
             .sort_values("credit_loss_rate_pct", ascending=True)
         )
         fig = make_hbar(sector_loss_latest, "credit_loss_rate_pct", "sector", COLOR["primary"],
