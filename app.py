@@ -1254,8 +1254,7 @@ with tabs[0]:
         .query("pat_growth >= -200 and pat_growth <= 500")
     )
     if not bubble_df.empty:
-        periods = bubble_df["rev_period"].unique()
-        subtitle = periods[0] if len(periods) == 1 else "mixed periods"
+        default_period = "9MFY26 (Ann.) vs FY25"
         fig = px.scatter(
             bubble_df, x="rev_growth", y="pat_growth",
             size="loan_book_cr", color="sector",
@@ -1263,7 +1262,7 @@ with tabs[0]:
             custom_data=["name", "rev_growth", "pat_growth"],
             color_discrete_sequence=MV_PALETTE,
             labels={"rev_growth": "Revenue Growth %", "pat_growth": "PAT Growth %"},
-            title=f"Revenue Growth vs PAT Growth ({subtitle})",
+            title=f"Revenue Growth vs PAT Growth (FY25 to 9MFY26 Growth, Bubble size based on AUM)",
             height=520,
         )
         chart_layout(fig)
@@ -1282,6 +1281,19 @@ with tabs[0]:
             )
         )
         st.plotly_chart(fig, use_container_width=True)
+
+        # Note any NBFCs where the growth period differs from the default
+        diff_rev = bubble_df[bubble_df["rev_period"] != default_period][["name", "rev_period"]]
+        diff_pat = bubble_df[bubble_df["pat_period"] != default_period][["name", "pat_period"]]
+        diff_notes = []
+        for _, row in diff_rev.iterrows():
+            diff_notes.append(f"{row['name']} (Revenue: {row['rev_period']})")
+        for _, row in diff_pat.iterrows():
+            name = row["name"]
+            if not any(name in n for n in diff_notes):
+                diff_notes.append(f"{name} (PAT: {row['pat_period']})")
+        if diff_notes:
+            st.caption("Different growth period: " + "; ".join(diff_notes))
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 2: PROFITABILITY
