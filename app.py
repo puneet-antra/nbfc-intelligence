@@ -327,6 +327,16 @@ h1 {
     font-family: 'Inter', sans-serif !important;
     font-size: 0.84rem !important;
 }
+/* Move chevron to left side of selectbox */
+[data-testid="stSelectbox"] [data-baseweb="select"] > div:first-child {
+    flex-direction: row-reverse !important;
+    padding-left: 8px !important;
+    padding-right: 14px !important;
+}
+[data-testid="stSelectbox"] [data-baseweb="select"] > div:first-child > div:last-child {
+    padding-left: 0 !important;
+    padding-right: 8px !important;
+}
 
 
 /* ── Tab panel fade-in ── */
