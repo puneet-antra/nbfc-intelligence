@@ -1287,8 +1287,10 @@ with tabs[0]:
         )
         chart_layout(fig)
         fig.update_layout(
-            xaxis=dict(title="Revenue Growth %", title_font=dict(size=12, family=CHART_FONT), autorange=True),
-            yaxis=dict(title="PAT Growth %", title_font=dict(size=12, family=CHART_FONT), autorange=True),
+            xaxis=dict(title="Revenue Growth %", title_font=dict(size=12, family=CHART_FONT),
+                       autorange=True, tickvals=None, ticktext=None),
+            yaxis=dict(title="PAT Growth %", title_font=dict(size=12, family=CHART_FONT),
+                       autorange=True, tickvals=None, ticktext=None),
         )
         fig.update_traces(hovertemplate=hover_tmpl)
         st.plotly_chart(fig, use_container_width=True)
@@ -1492,8 +1494,10 @@ with tabs[2]:
             )
         )
         fig.update_layout(
-            xaxis=dict(title="GNPA %", title_font=dict(size=12, family=CHART_FONT)),
-            yaxis=dict(title="Annualized Losses %", title_font=dict(size=12, family=CHART_FONT)),
+            xaxis=dict(title="GNPA %", title_font=dict(size=12, family=CHART_FONT),
+                       autorange=True, tickvals=None, ticktext=None),
+            yaxis=dict(title="Annualized Losses %", title_font=dict(size=12, family=CHART_FONT),
+                       autorange=True, tickvals=None, ticktext=None),
         )
         st.plotly_chart(fig, use_container_width=True)
 
