@@ -575,6 +575,8 @@ PERIOD_SHORT = {
     "FY2024": "FY24", "FY2025": "FY25", "9MFY26": "9MFY26",
     "9MFY26 (Ann.)": "9MFY26 (Ann.)",
 }
+# Same as PERIOD_SHORT but flags 9MFY26 as annualised — use for hover on ROA/ROE/PAT/NII charts
+PERIOD_SHORT_ANN = {**PERIOD_SHORT, "9MFY26": "9MFY26 (Ann.)"}
 
 # ── Ensure DB exists ─────────────────────────────────────────────────────────
 import os as _os
@@ -1187,14 +1189,14 @@ with tabs[1]:
         top_roa = latest_snap.nlargest(top_n, "roa_pct").sort_values("roa_pct", ascending=False)
         fig = make_hbar(top_roa, "roa_pct", "name", COLOR["primary"],
                         f"Top {top_n} by ROA %",
-                        hover_text=top_roa["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values,
+                        hover_text=top_roa["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
     with col2:
         top_roe = latest_snap.nlargest(top_n, "roe_pct").sort_values("roe_pct", ascending=False)
         fig = make_hbar(top_roe, "roe_pct", "name", COLOR["accent"],
                         f"Top {top_n} by ROE %",
-                        hover_text=top_roe["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values,
+                        hover_text=top_roe["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
 
@@ -1351,7 +1353,7 @@ with tabs[3]:
             "credit_loss_rate_pct", ascending=True)
         fig = make_hbar(lowest, "credit_loss_rate_pct", "name", COLOR["success"],
                         f"Lowest Annualized Loss Rate ({period_label_for(lowest)})",
-                        hover_text=lowest["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values,
+                        hover_text=lowest["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
     with col2:
@@ -1359,7 +1361,7 @@ with tabs[3]:
             "credit_loss_rate_pct", ascending=False)
         fig = make_hbar(highest, "credit_loss_rate_pct", "name", COLOR["danger"],
                         f"Highest Annualized Loss Rate ({period_label_for(highest)})",
-                        hover_text=highest["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values,
+                        hover_text=highest["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
 
