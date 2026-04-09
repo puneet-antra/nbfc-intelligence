@@ -1246,7 +1246,7 @@ with tabs[1]:
     chart_df = get_chart_periods(fin_filtered)
     pat_trend = chart_df[chart_df["name"].isin(top10_names)][["name", "period", "pat_cr"]].dropna()
     pat_trend = pat_trend.copy()
-    pat_trend["period"] = pat_trend["period"].replace("9MFY26", "9MFY26 (Ann.)")
+    pat_trend["period"] = pat_trend["period"].astype(str).replace("9MFY26", "9MFY26 (Ann.)")
 
     fig = px.line(pat_trend, x="period", y="pat_cr", color="name",
                   color_discrete_sequence=MV_PALETTE,
@@ -1343,7 +1343,7 @@ with tabs[3]:
     col1, col2 = st.columns(2)
     with col1:
         lowest = latest_snap.nsmallest(20, "credit_loss_rate_pct").sort_values(
-            "credit_loss_rate_pct", ascending=False)
+            "credit_loss_rate_pct", ascending=True)
         fig = make_hbar(lowest, "credit_loss_rate_pct", "name", COLOR["success"],
                         f"Lowest Annualized Loss Rate ({period_label_for(lowest)})",
                         hover_text=lowest["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values)
@@ -1480,7 +1480,7 @@ with tabs[8]:
         nii_df = chart_df[chart_df["name"].isin(top10)][
             ["name", "period", "net_interest_income_cr"]].dropna()
         nii_df = nii_df.copy()
-        nii_df["period"] = nii_df["period"].replace("9MFY26", "9MFY26 (Ann.)")
+        nii_df["period"] = nii_df["period"].astype(str).replace("9MFY26", "9MFY26 (Ann.)")
         fig = px.line(nii_df, x="period", y="net_interest_income_cr", color="name",
                       color_discrete_sequence=MV_PALETTE,
                       title=f"Net Interest Income (₹ Crore, to {lbl})", height=420,
@@ -1813,8 +1813,8 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
             # Require PAT; NII is optional — plot whichever series has data
             pat_df = chart_df[["period", "pat_cr"]].dropna(subset=["pat_cr"]).copy()
             nii_df = chart_df[["period", "net_interest_income_cr"]].dropna(subset=["net_interest_income_cr"]).copy()
-            pat_df["period"] = pat_df["period"].replace("9MFY26", "9MFY26 (Ann.)")
-            nii_df["period"] = nii_df["period"].replace("9MFY26", "9MFY26 (Ann.)")
+            pat_df["period"] = pat_df["period"].astype(str).replace("9MFY26", "9MFY26 (Ann.)")
+            nii_df["period"] = nii_df["period"].astype(str).replace("9MFY26", "9MFY26 (Ann.)")
             has_nii = not nii_df.empty
             fig = go.Figure()
             if has_nii:
@@ -1898,7 +1898,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                         "net_interest_income_cr", "pat_cr", "credit_loss_rate_pct",
                         "gnpa_pct", "roa_pct", "roe_pct"]
         _table_src = chart_df[[c for c in display_cols if c in chart_df.columns]].copy()
-        _table_src["period"] = _table_src["period"].replace("9MFY26", "9MFY26 (Ann.)")
+        _table_src["period"] = _table_src["period"].astype(str).replace("9MFY26", "9MFY26 (Ann.)")
         table_df = _table_src.set_index("period").T
         table_df.index = ["Loan Book (₹ Cr)", "Total Assets (₹ Cr)", "Equity (₹ Cr)",
                           "NII (₹ Cr)", "PAT (₹ Cr)", "Annualized Loss Rate %",
