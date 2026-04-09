@@ -1220,14 +1220,14 @@ with tabs[1]:
     with col1:
         all_roa = latest_snap.sort_values("roa_pct", ascending=False)
         fig = make_hbar(all_roa, "roa_pct", "name", COLOR["primary"],
-                        f"ROA % — All NBFCs ({lbl})",
+                        f"ROA % ({lbl})",
                         hover_text=all_roa["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
     with col2:
         all_roe = latest_snap.sort_values("roe_pct", ascending=False)
         fig = make_hbar(all_roe, "roe_pct", "name", COLOR["accent"],
-                        f"ROE % — All NBFCs ({lbl})",
+                        f"ROE % ({lbl})",
                         hover_text=all_roe["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
