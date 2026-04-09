@@ -1641,11 +1641,20 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
     if (doc._nbfcSelectReady) return;
     doc._nbfcSelectReady = true;
 
-    // Light-grey selection colour
+    // CSS: light-grey selection colour + permanently bold the selected value display
     if (!doc.getElementById('nbfc-sel-style')) {{
       var s = doc.createElement('style');
       s.id = 'nbfc-sel-style';
-      s.textContent = '[data-testid="stSelectbox"] input::selection {{ background: #E2E4E9; color: #1C1E23; }}';
+      s.textContent = [
+        '[data-testid="stSelectbox"] input::selection {{ background: #E2E4E9; color: #1C1E23; }}',
+        /* Bold the display-value div inside the NBFC selectbox at all times */
+        '[data-testid="stSelectbox"] [data-baseweb="select"] > div:first-child > div > div {{',
+        '  font-weight: 700 !important;',
+        '  font-size: 1.0rem !important;',
+        '  color: #1C1E23 !important;',
+        '  letter-spacing: -0.01em !important;',
+        '}}'
+      ].join(' ');
       doc.head.appendChild(s);
     }}
 
@@ -1782,21 +1791,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       }}
     }});
 
-    // 2. Bold selected value in the NBFC dropdown
-    doc.querySelectorAll('[data-testid="stSelectbox"]').forEach(function(box) {{
-      var lbl = box.querySelector('[data-testid="stWidgetLabel"] p');
-      if (!lbl || lbl.textContent.trim() !== 'Select an NBFC to explore') return;
-      var sel = box.querySelector('[data-baseweb="select"]');
-      if (!sel) return;
-      sel.querySelectorAll('div').forEach(function(d) {{
-        if (d.children.length === 0 && d.textContent.trim().length > 1) {{
-          d.style.fontWeight    = '700';
-          d.style.fontSize      = '1.0rem';
-          d.style.color         = '#1C1E23';
-          d.style.letterSpacing = '-0.01em';
-        }}
-      }});
-    }});
+    // Bold selected-value styling is handled by the injected CSS rule above.
   }}
 
   applyStyles();
