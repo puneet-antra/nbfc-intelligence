@@ -2114,20 +2114,49 @@ with tabs[6]:
 
         # Summary table
         st.markdown('<div class="section-header">All Listed NBFCs</div>', unsafe_allow_html=True)
-        display_val = val_df.sort_values("mktcap_cr", ascending=False, na_position="last").rename(
-            columns={"company": "Company", "ticker": "Ticker", "price": "Price (₹)",
-                     "pe": "P/E", "pb": "P/B", "mktcap_cr": "Mkt Cap (₹ Cr)", "chg_12m": "12M Chg %"})
-        st.dataframe(
-            display_val[["Ticker", "Company", "Price (₹)", "P/E", "P/B", "Mkt Cap (₹ Cr)", "12M Chg %"]],
-            use_container_width=True, hide_index=True,
-            column_config={
-                "Price (₹)":     st.column_config.NumberColumn("Price (₹)",     format="₹%.2f"),
-                "P/E":           st.column_config.NumberColumn("P/E",           format="%.1f"),
-                "P/B":           st.column_config.NumberColumn("P/B",           format="%.2f"),
-                "Mkt Cap (₹ Cr)":st.column_config.NumberColumn("Mkt Cap (₹ Cr)",format="₹%,.0f"),
-                "12M Chg %":     st.column_config.NumberColumn("12M Chg %",     format="%.1f%%"),
-            },
+        display_val = val_df.sort_values("mktcap_cr", ascending=False, na_position="last")
+
+        _cols   = ["ticker", "company", "price", "pe", "pb", "mktcap_cr", "chg_12m"]
+        _heads  = ["Ticker", "Company", "Price (₹)", "P/E", "P/B", "Mkt Cap (₹ Cr)", "12M Chg %"]
+        _right  = {2, 3, 4, 5, 6}   # 0-indexed columns that should be right-aligned
+
+        def _fmt_val_cell(col, val):
+            if pd.isna(val): return "—"
+            if col == "price":    return f"₹{val:,.2f}"
+            if col == "pe":       return f"{val:.1f}"
+            if col == "pb":       return f"{val:.2f}"
+            if col == "mktcap_cr":return f"₹{val:,.0f}"
+            if col == "chg_12m":  return f"{val:+.1f}%"
+            return str(val)
+
+        _th = ("padding:9px 14px;font-size:12px;font-weight:700;color:#1a1a1a;"
+               "border-bottom:2px solid #DCDCDE;white-space:nowrap;background:#f8fafb;")
+        _td = "padding:8px 14px;font-size:13px;border-bottom:1px solid #f0f0f0;white-space:nowrap;"
+
+        rows_html = ""
+        for _, r in display_val[_cols].iterrows():
+            cells = ""
+            for i, c in enumerate(_cols):
+                val_str = _fmt_val_cell(c, r[c])
+                color   = ""
+                if c == "chg_12m" and pd.notna(r[c]):
+                    color = "color:#144835;" if r[c] >= 0 else "color:#c0392b;"
+                align = "right" if i in _right else "left"
+                cells += f'<td style="{_td}text-align:{align};{color}">{val_str}</td>'
+            rows_html += f"<tr>{cells}</tr>"
+
+        headers_html = "".join(
+            f'<th style="{_th}text-align:{"right" if i in _right else "left"}">{h}</th>'
+            for i, h in enumerate(_heads)
         )
+
+        st.markdown(f"""
+        <div style="overflow-x:auto;border:1px solid #EAEAEA;border-radius:12px;margin-top:0.5rem;">
+        <table style="width:100%;border-collapse:collapse;font-family:Inter,sans-serif;">
+          <thead><tr>{headers_html}</tr></thead>
+          <tbody>{rows_html}</tbody>
+        </table></div>
+        """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 9: DATA
