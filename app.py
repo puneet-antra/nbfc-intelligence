@@ -751,21 +751,17 @@ HOVER_LABEL = dict(
 
 
 def wrap_title(title, max_len=32):
-    """Split long titles at a natural break; second line muted using Plotly <font> tag."""
+    """Insert <br> at a natural break point so long chart titles don't overflow."""
     if "<br>" in title:          # already wrapped — don't double-process
         return title
     # "(as of …)" always drops to second line regardless of total length
     for sep in [" (as of", " — ", " (", ": ", " - ", " vs "]:
         idx = title.find(sep)
         if idx > 0 and (sep == " (as of" or idx <= max_len):
-            first = title[:idx]
-            rest  = title[idx:].lstrip()
-            return f"{first}<br><b><font color='#6B7280'>{rest}</font></b>"
+            return title[:idx] + "<br>" + title[idx:].lstrip()
     idx = title.rfind(" ", 0, max_len)
     if idx > 0:
-        first = title[:idx]
-        rest  = title[idx + 1:]
-        return f"{first}<br><font color='#6B7280'>{rest}</font>"
+        return title[:idx] + "<br>" + title[idx + 1:]
     return title
 
 
