@@ -754,10 +754,17 @@ def wrap_title(title, max_len=32):
     """Insert <br> at a natural break point so long chart titles don't overflow."""
     if "<br>" in title:          # already wrapped — don't double-process
         return title
-    # "(as of …)" always drops to second line regardless of total length
-    for sep in [" (as of", " — ", " (", ": ", " - ", " vs "]:
+    # "(as of …)" always goes to second line regardless of total length
+    idx_asof = title.find(" (as of")
+    if idx_asof > 0:
+        return title[:idx_asof] + "<br>" + title[idx_asof:].lstrip()
+    # Short titles: no wrapping needed
+    if len(title) <= max_len:
+        return title
+    # Long titles: split at natural separator or word boundary
+    for sep in [" — ", " (", ": ", " - ", " vs "]:
         idx = title.find(sep)
-        if idx > 0 and (sep == " (as of" or idx <= max_len):
+        if 0 < idx <= max_len:
             return title[:idx] + "<br>" + title[idx:].lstrip()
     idx = title.rfind(" ", 0, max_len)
     if idx > 0:
