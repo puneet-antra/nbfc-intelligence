@@ -1658,12 +1658,9 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       doc.head.appendChild(s);
     }}
 
-    var _reactSetter = Object.getOwnPropertyDescriptor(
-      window.parent.HTMLInputElement.prototype, 'value').set;
-
-    // Helper: is this input the NBFC company selectbox?
+    // Helper: is this element inside the NBFC company selectbox?
     function getNbfcBox(target) {{
-      if (!target || target.tagName !== 'INPUT') return null;
+      if (!target) return null;
       var box = target.closest('[data-testid="stSelectbox"]');
       if (!box) return null;
       var lbl = box.querySelector('[data-testid="stWidgetLabel"] p');
@@ -1671,94 +1668,47 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       return box;
     }}
 
-    // Read the live display-div text (only visible when dropdown is CLOSED)
-    function readLiveDisplayValue(box) {{
-      var sel = box.querySelector('[data-baseweb="select"]');
-      if (!sel) return '';
-      var found = '';
-      sel.querySelectorAll('div').forEach(function(d) {{
-        if (!found && d.children.length === 0) {{
-          var t = d.textContent.trim();
-          if (t.length > 1) found = t;
-        }}
-      }});
-      return found;
-    }}
-
-    // Cache the display value whenever it is readable (dropdown closed)
-    function cacheDisplayValue(box) {{
-      var v = readLiveDisplayValue(box);
-      if (v) box._cachedVal = v;
-    }}
-
-    // mousedown fires BEFORE focusin, while the display div is still visible
+    // mousedown: highlight the display div with grey background.
+    // This fires BEFORE BaseWeb hides the display div, so the name is still visible.
+    // No React/BaseWeb state is touched — single-click selection works normally.
     doc.addEventListener('mousedown', function(e) {{
-      var box = e.target.closest('[data-testid="stSelectbox"]');
-      if (!box) return;
-      var lbl = box.querySelector('[data-testid="stWidgetLabel"] p');
-      if (!lbl || lbl.textContent.trim() !== 'Select an NBFC to explore') return;
-      cacheDisplayValue(box);
-    }});
-
-    // focusin: inject cached name + dispatch input (so React stays in sync) + select-all.
-    doc.addEventListener('focusin', function(e) {{
       var box = getNbfcBox(e.target);
       if (!box) return;
-      var inp = e.target;
-      cacheDisplayValue(box);
-      var val = box._cachedVal || '';
-      if (!val) return;
-      window.parent.requestAnimationFrame(function() {{
-        window.parent.requestAnimationFrame(function() {{
-          _reactSetter.call(inp, val);
-          inp.dispatchEvent(new Event('input', {{ bubbles: true }}));
-          // One more rAF so setSelectionRange fires after React re-renders
-          window.parent.requestAnimationFrame(function() {{
-            inp.setSelectionRange(0, val.length);
-            inp._pendingClear = true;
-          }});
-        }});
-      }});
+      var displayDiv = box.querySelector(
+        '[data-baseweb="select"] > div:first-child > div:first-child');
+      if (!displayDiv) return;
+      displayDiv.style.background    = '#E2E4E9';
+      displayDiv.style.borderRadius  = '3px';
+      // Remove once the dropdown closes (focusout) or after a safety timeout
+      setTimeout(function() {{
+        displayDiv.style.background   = '';
+        displayDiv.style.borderRadius = '';
+      }}, 600);
     }});
-
-    // keydown: clear the pending flag and let natural typing replace the selection.
-    // Do NOT call e.preventDefault() — that was the root cause of the two-click bug.
-    doc.addEventListener('keydown', function(e) {{
-      var inp = e.target;
-      if (!inp._pendingClear) return;
-      if (!getNbfcBox(inp)) return;
-      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {{
-        inp._pendingClear = false;
-        // Natural typing replaces the selected text; no manual override needed.
-      }} else if (e.key !== 'Shift' && e.key !== 'CapsLock') {{
-        inp._pendingClear = false;
-      }}
-    }}, true);
 
     doc.addEventListener('focusout', function(e) {{
       var box = getNbfcBox(e.target);
       if (box) {{
-        // Re-apply bold styling and refresh cache after dropdown closes
-        setTimeout(function() {{ cacheDisplayValue(box); applyStyles(); }}, 80);
-        setTimeout(function() {{ cacheDisplayValue(box); applyStyles(); }}, 300);
-        setTimeout(function() {{ cacheDisplayValue(box); applyStyles(); }}, 700);
+        // Clear any residual highlight
+        var displayDiv = box.querySelector(
+          '[data-baseweb="select"] > div:first-child > div:first-child');
+        if (displayDiv) {{
+          displayDiv.style.background   = '';
+          displayDiv.style.borderRadius = '';
+        }}
+        // Re-apply bold styling after dropdown closes
+        setTimeout(applyStyles, 80);
+        setTimeout(applyStyles, 300);
       }}
     }});
 
-    // MutationObserver: re-apply bold styling and refresh cache on DOM changes
+    // MutationObserver: re-apply bold styling whenever the selectbox DOM changes
     var _observer = new MutationObserver(function(mutations) {{
       var relevant = mutations.some(function(m) {{
         var node = m.target;
         return node.closest && node.closest('[data-testid="stSelectbox"]');
       }});
-      if (relevant) {{
-        applyStyles();
-        // Refresh cache for all NBFC selectboxes
-        doc.querySelectorAll('[data-testid="stSelectbox"]').forEach(function(box) {{
-          var lbl = box.querySelector('[data-testid="stWidgetLabel"] p');
-          if (lbl && lbl.textContent.trim() === 'Select an NBFC to explore') cacheDisplayValue(box);
-        }});
-      }}
+      if (relevant) applyStyles();
     }});
     _observer.observe(doc.body, {{ childList: true, subtree: true }});
   }})();
