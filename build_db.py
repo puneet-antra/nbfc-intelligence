@@ -84,7 +84,7 @@ COMPANIES = [
     # Pre-IPO — DRHP filed Aug 2025 (OnEMI Technology Solutions Ltd; NBFC subsidiary: Si Creva Capital Services Pvt Ltd)
     ("Kissht", "Middle", "Consumer Finance", 0, 1, 2701, "DRHP", None, "OnEMI Technology Solutions DRHP filed Aug 2025 with SEBI. Restated consolidated financials FY23-FY25."),
     # Pre-IPO — DRHP filed Mar 2026 (MoneyView Limited; NBFC subsidiary: Whizdm Finance Pvt Ltd)
-    ("MoneyView", "Middle", "Consumer Finance", 0, 1, 7719, "DRHP", None, "MoneyView Limited DRHP filed Mar-2026 with SEBI. Restated consolidated financials FY23-FY25 + 9MFY26 (Apr-Dec 2025). Primarily off-book DLG lending model; NBFC subsidiary is Whizdm Finance Pvt Ltd."),
+    ("MoneyView", "Middle", "Consumer Finance", 0, 1, 7719, "DRHP", None, "MoneyView Limited DRHP filed Mar-2026 with SEBI. Restated consolidated financials FY23-FY25 + 9MFY26. Hybrid on/off-book DLG lending model; NBFC subsidiary is Whizdm Finance Pvt Ltd. Total assets ₹7,719 Cr (Dec-2025); managed AUM ₹19,815 Cr."),
 ]
 
 # ── Financial data ────────────────────────────────────────────────────────────
@@ -322,17 +322,18 @@ FINANCIALS = [
     # Source: MoneyView Limited DRHP filed Mar-2026 with SEBI. Restated consolidated financials.
     # Business model: Primarily off-book DLG lending platform + direct NBFC (Whizdm Finance) lending.
     # NII field = revenue from operations (fees + interest income combined) — hybrid model.
+    # Loan book = managed AUM (on-book + off-book DLG); total assets = consolidated balance sheet.
     # Credit loss rate = annualized loss rate on managed AUM (incl. off-book) per DRHP.
     # GNPA = Gross Stage 3 loans on Whizdm Finance's on-book portfolio.
-    # Total assets / equity not available from public sources for FY23–FY25.
-    ("MoneyView", "FY2023", None, None, None,  577, 163, None,  None, None, None, None, "DRHP",
-     "MoneyView DRHP Mar-2026. FY23: Revenue ₹577 Cr (87.9% fees, 6.6% interest); PAT ₹163 Cr (27x YoY)."),
-    ("MoneyView", "FY2024", None, None, None, 1342, 171, None,  7.93, 0.94, None, None, "DRHP",
-     "MoneyView DRHP Mar-2026. FY24: Revenue ₹1,342 Cr; PAT ₹171 Cr; annualized credit loss rate 7.93% on managed AUM; GNPA (Gross Stage 3, Whizdm Finance on-book) 0.94%."),
-    ("MoneyView", "FY2025", None, None, None, 2339, 240,  346,  7.07, None, None, None, "DRHP",
-     "MoneyView DRHP Mar-2026. FY25: Revenue ₹2,339 Cr (fees ₹1,487 Cr + interest ₹789 Cr); PAT ₹240 Cr; impairment ₹346 Cr + DLG expense ₹322 Cr; credit loss rate 7.07% (annualized managed AUM basis). Current assets ₹4,198 Cr."),
-    ("MoneyView", "FY2026-Q3", None, 7719, None, 2373, 245,  724,  None, 2.53, None, None, "DRHP",
-     "MoneyView DRHP Mar-2026. 9MFY26 (Apr-Dec 2025): Revenue ₹2,373 Cr; PAT ₹245 Cr (before exceptional items; reported PAT ₹210 Cr); impairment ₹724 Cr; total assets ₹7,719 Cr; Gross Stage 3 (Whizdm Finance on-book) 2.53%. Managed AUM ₹19,814 Cr."),
+    # ROE from DRHP (average equity basis). ROA = annualized PAT / avg total assets (computed).
+    ("MoneyView", "FY2023",  7644, 1724, 1314,  577, 163, None,  None, None,  9.45, 12.40, "DRHP",
+     "MoneyView DRHP Mar-2026. FY23: Managed AUM ₹7,644 Cr; total assets ₹1,724 Cr; equity ₹1,314 Cr; revenue ₹577 Cr (87.9% fees, 6.6% interest); PAT ₹163 Cr. ROA = PAT/ending assets (FY22 assets unavailable). ROE = PAT/ending equity."),
+    ("MoneyView", "FY2024", 12885, 3520, 1607, 1342, 171, None,  7.93, 0.94,  6.52, 11.72, "DRHP",
+     "MoneyView DRHP Mar-2026. FY24: Managed AUM ₹12,885 Cr; total assets ₹3,520 Cr; equity ₹1,607 Cr; revenue ₹1,342 Cr; PAT ₹171 Cr; credit loss rate 7.93% (annualized managed AUM basis); GNPA (Gross Stage 3, Whizdm Finance on-book) 0.94%. ROA = PAT/avg assets; ROE per DRHP."),
+    ("MoneyView", "FY2025", 16715, 5632, 1919, 2339, 240,  346,  7.07, None,  5.24, 13.63, "DRHP",
+     "MoneyView DRHP Mar-2026. FY25: Managed AUM ₹16,715 Cr; total assets ₹5,632 Cr; equity ₹1,919 Cr; revenue ₹2,339 Cr (fees ₹1,487 Cr + interest ₹789 Cr); PAT ₹240 Cr; impairment ₹346 Cr + DLG expense ₹322 Cr; credit loss rate 7.07% (annualized managed AUM). ROA = PAT/avg assets; ROE per DRHP."),
+    ("MoneyView", "FY2026-Q3", 19815, 7719, 2169, 2373, 245,  724,  None, 2.53,  4.89, 15.98, "DRHP",
+     "MoneyView DRHP Mar-2026. 9MFY26 (Apr-Dec 2025): Managed AUM ₹19,815 Cr; total assets ₹7,719 Cr; equity ₹2,169 Cr; revenue ₹2,373 Cr; PAT ₹245 Cr (before exceptional items; reported ₹210 Cr); impairment ₹724 Cr; Gross Stage 3 (Whizdm Finance on-book) 2.53%. ROA/ROE annualized."),
 ]
 
 
