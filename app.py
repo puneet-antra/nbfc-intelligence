@@ -1706,42 +1706,35 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       if (v) _nbfcVal = v;
     }});
 
-    // focusin: 50 ms after focus, BaseWeb has finished its own render cycle.
-    // Write the cached name — direct DOM write (no React event dispatch) keeps
-    // BaseWeb out of filter mode → single-click option selection works.
-    // Highlight is a background tint on the input wrapper (more reliable than
-    // ::selection which gets reset by BaseWeb before the browser paints).
+    // focusin: write the cached NBFC name into the input and apply a grey
+    // highlight. Re-query inp fresh inside the timeout (avoids stale reference)
+    // and drop the activeElement guard (which was silently bailing early).
+    // Direct inp.value write keeps BaseWeb out of filter mode → single-click
+    // option selection continues to work.
     doc.addEventListener('focusin', function(e) {{
       if (!e.target || e.target.tagName !== 'INPUT') return;
       var box = getNbfcBox(e.target);
       if (!box) return;
-      var inp = e.target;
       var val = _nbfcVal;
       if (!val) return;
-      // BaseWeb's Select input has color:transparent by default — the value is
-      // rendered in a sibling <div>, not the input itself.  setSelectionRange
-      // therefore selects invisible text and shows nothing.
-      // Fix: write the name, force visible text + blue-highlight background to
-      // SIMULATE a text-selection look.  On first keydown, clear everything
-      // before the browser inserts the typed character so BaseWeb filters from
-      // a clean empty state.
+
       setTimeout(function() {{
-        if (inp !== doc.activeElement) return;
+        var inp = box.querySelector('input');  // fresh query — no stale ref
+        if (!inp) return;
         inp.value = val;
-        // Use setProperty('…','important') to beat any BaseWeb !important rules
-        inp.style.setProperty('color',           '#1a1a1a', 'important');
-        inp.style.setProperty('background',      '#E0E2E8', 'important');
-        inp.style.setProperty('border-radius',   '2px',     'important');
+        inp.style.setProperty('color',         '#1a1a1a', 'important');
+        inp.style.setProperty('background',    '#E0E2E8', 'important');
+        inp.style.setProperty('border-radius', '2px',     'important');
 
         function clearHL() {{
           inp.style.removeProperty('color');
           inp.style.removeProperty('background');
           inp.style.removeProperty('border-radius');
-          inp.value = '';   // clear before char is inserted → clean filter state
+          inp.value = '';
         }}
         inp.addEventListener('keydown', clearHL, {{ once: true }});
-        setTimeout(clearHL, 6000); // failsafe
-      }}, 100);
+        setTimeout(clearHL, 6000);
+      }}, 50);
     }});
 
     doc.addEventListener('focusout', function(e) {{
