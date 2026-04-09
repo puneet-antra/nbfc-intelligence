@@ -750,20 +750,18 @@ HOVER_LABEL = dict(
 )
 
 
-_SUBTITLE_STYLE = "<font color='#8B8FA8'>"
-_SUBTITLE_END   = "</font>"
-
 def wrap_title(title, max_len=32):
-    """Insert <br> at a natural break; second line rendered in a muted colour."""
+    """Insert <br> at a natural break; first line bold, second line normal weight."""
     if "<br>" in title:          # already wrapped — don't double-process
         return title
     def _split(first, rest):
-        return f"{first}<br>{_SUBTITLE_STYLE}{rest}{_SUBTITLE_END}"
-    # "(as of …)" always goes to second line regardless of total length
-    idx_asof = title.find(" (as of")
-    if idx_asof > 0:
-        return _split(title[:idx_asof], title[idx_asof:].lstrip())
-    # Short titles: no wrapping needed
+        return f"<b>{first}</b><br>{rest}"
+    # Any parenthetical qualifier always goes to the second line
+    for paren_sep in [" (as of", " (₹", " (to ", " («"]:
+        idx = title.find(paren_sep)
+        if idx > 0:
+            return _split(title[:idx], title[idx:].lstrip())
+    # Short titles with no parenthetical: no wrapping needed
     if len(title) <= max_len:
         return title
     # Long titles: split at natural separator or word boundary
@@ -813,7 +811,7 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None):
     fig.update_layout(
         title=dict(
             text=wrap_title(title),
-            font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT, weight="bold"),
+            font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT),
             x=0.5, xanchor="center", xref="paper",
             pad=dict(t=8, b=12),
         ),
@@ -840,13 +838,13 @@ def chart_layout(fig, title=None):
     existing = ""
     if fig.layout.title and fig.layout.title.text:
         existing = fig.layout.title.text
-    t = wrap_title(title) if title else (existing if existing else "")
+    t = wrap_title(title) if title else (wrap_title(existing) if existing else "")
     fig.update_layout(
         paper_bgcolor=CHART_PAPER, plot_bgcolor=CHART_BG,
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
         title=dict(
             text=t,
-            font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT, weight="bold"),
+            font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT),
             x=0.5, xanchor="center", xref="paper",
             pad=dict(t=8, b=12),
         ),
