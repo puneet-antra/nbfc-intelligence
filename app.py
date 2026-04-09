@@ -1700,32 +1700,40 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       cacheDisplayValue(box);
     }});
 
-    // focusin: inject cached name into input + select-all.
-    // Critically: do NOT dispatch an 'input' event — that would put BaseWeb's
-    // filter state out of sync and cause the "two clicks needed" bug.
-    // Natural browser behaviour (typing replaces the selection) handles clearing.
+    // focusin: inject cached name + dispatch input (so React stays in sync) + select-all.
     doc.addEventListener('focusin', function(e) {{
       var box = getNbfcBox(e.target);
       if (!box) return;
       var inp = e.target;
-      // Refresh cache for keyboard/tab navigation where mousedown didn't fire
       cacheDisplayValue(box);
       var val = box._cachedVal || '';
       if (!val) return;
-      // Three rAFs: ensure we run after BaseWeb's own focusin handler settles
       window.parent.requestAnimationFrame(function() {{
         window.parent.requestAnimationFrame(function() {{
+          _reactSetter.call(inp, val);
+          inp.dispatchEvent(new Event('input', {{ bubbles: true }}));
+          // One more rAF so setSelectionRange fires after React re-renders
           window.parent.requestAnimationFrame(function() {{
-            _reactSetter.call(inp, val);
-            // No input-event dispatch here — keeps BaseWeb dropdown unfiltered
             inp.setSelectionRange(0, val.length);
+            inp._pendingClear = true;
           }});
         }});
       }});
     }});
 
-    // No keydown handler needed: since the full name is selected (setSelectionRange),
-    // the first typed character naturally replaces it via the browser's own input handling.
+    // keydown: clear the pending flag and let natural typing replace the selection.
+    // Do NOT call e.preventDefault() — that was the root cause of the two-click bug.
+    doc.addEventListener('keydown', function(e) {{
+      var inp = e.target;
+      if (!inp._pendingClear) return;
+      if (!getNbfcBox(inp)) return;
+      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {{
+        inp._pendingClear = false;
+        // Natural typing replaces the selected text; no manual override needed.
+      }} else if (e.key !== 'Shift' && e.key !== 'CapsLock') {{
+        inp._pendingClear = false;
+      }}
+    }}, true);
 
     doc.addEventListener('focusout', function(e) {{
       var box = getNbfcBox(e.target);
