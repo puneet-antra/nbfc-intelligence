@@ -1646,7 +1646,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       var s = doc.createElement('style');
       s.id = 'nbfc-sel-style';
       s.textContent = [
-        '[data-testid="stSelectbox"] input::selection {{ background: #B8BCC8; color: #1C1E23; }}',
+        '[data-testid="stSelectbox"] input::selection {{ background: #3B7DD8 !important; color: #ffffff !important; }}',
         /* Bold the display-value div inside the NBFC selectbox at all times */
         '[data-testid="stSelectbox"] [data-baseweb="select"] > div:first-child > div > div {{',
         '  font-weight: 700 !important;',
@@ -1718,24 +1718,27 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       var inp = e.target;
       var val = _nbfcVal;
       if (!val) return;
+      // 0 ms — next event-loop tick; BaseWeb's sync handlers have run, its
+      // rAFs have not yet fired. We write the name and select all text so the
+      // browser renders it highlighted (::selection CSS above). A once-keydown
+      // listener clears inp.value BEFORE the browser inserts the typed char,
+      // so BaseWeb sees an empty→char transition and filters correctly.
       setTimeout(function() {{
         if (inp !== doc.activeElement) return;
-        inp.value = val;   // write name into input (no React event)
-
-        // Highlight: tint only the input element itself (not the arrow button)
-        inp.style.background = '#D8DCE8';
-        inp.style.borderRadius = '2px';
-
-        function clearHL() {{
-          inp.style.background = '';
-          inp.style.borderRadius = '';
-          // Clear the injected name so the typed key goes into an empty input
-          // and React/BaseWeb filter correctly from a clean state.
+        inp.value = val;
+        inp.setSelectionRange(0, val.length);
+        // Re-assert after one rAF in case BaseWeb collapses the cursor
+        window.parent.requestAnimationFrame(function() {{
+          if (inp === doc.activeElement && inp.value === val) {{
+            inp.setSelectionRange(0, val.length);
+          }}
+        }});
+        // On first keydown: clear the injected name so the typed char lands
+        // in an empty input → correct BaseWeb filter behaviour.
+        inp.addEventListener('keydown', function() {{
           inp.value = '';
-        }}
-        inp.addEventListener('keydown', clearHL, {{ once: true }});
-        setTimeout(clearHL, 5000); // failsafe: auto-clear after 5s
-      }}, 50);
+        }}, {{ once: true }});
+      }}, 0);
     }});
 
     doc.addEventListener('focusout', function(e) {{
@@ -2313,20 +2316,48 @@ with tabs[6]:
         # ROE by sector — from latest financials snapshot
         _roe_snap = get_latest_period_data(fin_filtered)
         _lbl_val  = latest_period_label(fin_filtered)
-        roe_sect  = (
+
+        # Sector order is set by P/E (pe_sect already sorted descending)
+        _sector_order = pe_sect["sector"].tolist() if not pe_sect.empty else []
+
+        def _apply_sector_order(df, sector_col="sector"):
+            """Reindex df rows to match _sector_order; drop sectors not in order."""
+            if not _sector_order:
+                return df
+            order_map = {s: i for i, s in enumerate(_sector_order)}
+            df = df[df[sector_col].isin(order_map)].copy()
+            df["_ord"] = df[sector_col].map(order_map)
+            return df.sort_values("_ord").drop(columns="_ord")
+
+        roe_sect = (
             _roe_snap.dropna(subset=["roe_pct", "sector"])
             .groupby("sector")["roe_pct"]
             .median()
             .reset_index()
-            .sort_values("roe_pct", ascending=False)
         )
+        roe_sect = _apply_sector_order(roe_sect)
 
-        col_pe, col_roe = st.columns(2)
+        # NII revenue growth by sector
+        _nii_growth = compute_latest_growth(fin_filtered, "nii_cr")
+        _nii_growth = _nii_growth.merge(
+            fin_filtered[["name", "sector"]].drop_duplicates(), on="name", how="left"
+        )
+        nii_sect = (
+            _nii_growth.dropna(subset=["growth_pct", "sector"])
+            .groupby("sector")["growth_pct"]
+            .median()
+            .reset_index()
+        )
+        nii_sect = _apply_sector_order(nii_sect)
+        _nii_lbl = _nii_growth["period_label"].mode()[0] if not _nii_growth.empty else _lbl_val
+
+        _chart_h = bar_chart_height(max(len(pe_sect), len(roe_sect), len(nii_sect)))
+        col_pe, col_roe, col_nii = st.columns(3)
         with col_pe:
             if not pe_sect.empty:
                 fig = make_hbar(
                     pe_sect, "pe", "sector", COLOR["primary"], "Median P/E by Sector (TTM)",
-                    height=bar_chart_height(len(pe_sect)),
+                    height=_chart_h,
                     hover_text=["TTM"] * len(pe_sect), text_suffix="×",
                 )
                 st.plotly_chart(fig, use_container_width=True)
@@ -2335,8 +2366,17 @@ with tabs[6]:
                 fig = make_hbar(
                     roe_sect, "roe_pct", "sector", COLOR["accent"],
                     f"Median ROE by Sector ({_lbl_val})",
-                    height=bar_chart_height(len(roe_sect)),
+                    height=_chart_h,
                     hover_text=[_lbl_val] * len(roe_sect), text_suffix="%",
+                )
+                st.plotly_chart(fig, use_container_width=True)
+        with col_nii:
+            if not nii_sect.empty:
+                fig = make_hbar(
+                    nii_sect, "growth_pct", "sector", COLOR["success"],
+                    f"Median NII Growth by Sector ({_nii_lbl})",
+                    height=_chart_h,
+                    hover_text=[_nii_lbl] * len(nii_sect), text_suffix="%",
                 )
                 st.plotly_chart(fig, use_container_width=True)
 
