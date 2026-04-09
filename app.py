@@ -1182,31 +1182,7 @@ with tabs[0]:
     st.caption("★ = estimated data. Where 9MFY26 data exists: growth is annualised ((9M AUM / FY25 AUM)^(12/9) − 1) to make it comparable to a full year. Otherwise: FY25 vs FY24.")
 
     # Bubble: growth vs profitability
-    st.markdown('<div class="section-header">Growth vs Profitability</div>', unsafe_allow_html=True)
-    latest_snap = get_latest_period_data(fin_filtered)
     lbl = latest_period_label(fin_filtered)
-
-    bubble_df = growth_df.merge(
-        latest_snap[["name", "roa_pct", "loan_book_cr", "sector"]].dropna(),
-        on="name", how="inner"
-    ).dropna(subset=["roa_pct", "growth_pct", "loan_book_cr"])
-
-    if not bubble_df.empty:
-        median_growth = bubble_df["growth_pct"].median()
-        fig = px.scatter(
-            bubble_df, x="growth_pct", y="roa_pct",
-            size="loan_book_cr", color="sector",
-            color_discrete_sequence=MV_PALETTE,
-            hover_name="name",
-            labels={"growth_pct": "AUM Growth % (Latest 1Y)", "roa_pct": f"ROA % ({lbl})"},
-            title=f"Growth vs Profitability — ROA as of {lbl} (bubble = loan book)",
-            height=500,
-        )
-        fig.add_vline(x=median_growth, line_dash="dot", line_color=COLOR["text_secondary"],
-                      annotation_text=f"Median: {median_growth:.1f}%")
-        chart_layout(fig)
-        fig.update_traces(hovertemplate="%{hovertext}<extra></extra>")
-        st.plotly_chart(fig, use_container_width=True)
 
     # Growth by sector
     st.markdown('<div class="section-header">AUM Growth by Sector (Latest 1Y)</div>', unsafe_allow_html=True)
