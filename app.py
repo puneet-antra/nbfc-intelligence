@@ -885,15 +885,9 @@ def split_title(title, max_len=32):
 
 
 def _title_dict(raw_title, pad_t=10, pad_b=14):
-    """Build a Plotly title dict with inline subtitle via <br> (compatible with all Plotly versions)."""
+    """Build a Plotly title dict with optional subtitle via <br> (compatible with all Plotly versions)."""
     main, sub = split_title(raw_title)
-    if sub:
-        text = (
-            f'<span style="font-size:15.5px;font-weight:bold;color:{COLOR["text"]}">{main}</span>'
-            f'<br><span style="font-size:12px;font-weight:600;color:#8B8FA8">{sub}</span>'
-        )
-    else:
-        text = f'<span style="font-size:15.5px;font-weight:bold;color:{COLOR["text"]}">{main}</span>'
+    text = f"<b>{main}</b><br><sub>{sub}</sub>" if sub else f"<b>{main}</b>"
     return dict(
         text=text,
         font=dict(color=COLOR["text"], size=15.5, family=CHART_TITLE_FONT),
