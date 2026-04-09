@@ -891,10 +891,14 @@ def _title_dict(raw_title, pad_t=10, pad_b=14):
         # Non-breaking spaces prevent wrapping in both lines
         main_nbsp = main.replace(" ", "\u00a0")
         sub_nbsp = sub.replace(" ", "\u00a0")
-        # <b> makes main prominent; <sub> renders subtitle at ~75% font size
-        text = f"<b>{main_nbsp}</b><br><sub>{sub_nbsp}</sub>"
+        text = (
+            f"<span style='font-size:15px;font-weight:bold;color:{COLOR['text']}'>{main_nbsp}</span>"
+            f"<br>"
+            f"<span style='font-size:11px;font-weight:normal;color:#8B8FA8'>{sub_nbsp}</span>"
+        )
     else:
-        text = f"<b>{main.replace(' ', chr(160))}</b>"
+        main_nbsp = main.replace(" ", "\u00a0")
+        text = f"<span style='font-size:15px;font-weight:bold;color:{COLOR['text']}'>{main_nbsp}</span>"
     return dict(
         text=text,
         font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT),
