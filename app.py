@@ -893,7 +893,7 @@ def note(text, kind="info"):
     )
 
 
-def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None):
+def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text_suffix=""):
     """Standard horizontal bar chart — pass data sorted DESCENDING (chart reverses y-axis)."""
     df = df.copy()
     df[y_col] = df[y_col].apply(lambda n: truncate_name(str(n)))
@@ -901,8 +901,9 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None):
     vals = df[x_col].dropna()
     x_max = vals.abs().max() if not vals.empty else 1
     x_range = [vals.min() * 1.05 if vals.min() < 0 else 0, x_max * 1.4]
+    text_labels = df[x_col].round(1).astype(str) + text_suffix
     fig = px.bar(df, x=x_col, y=y_col, orientation="h", height=h,
-                 text=df[x_col].round(1))
+                 text=text_labels)
     fig.update_traces(
         marker_color=color, marker_line_width=0,
         marker_opacity=0.88,
@@ -1125,12 +1126,12 @@ with tabs[0]:
     with col1:
         fig = make_hbar(top_growers, "growth_pct", "display_name",
                         COLOR["success"], f"Top {min(20, len(top_growers))} Fastest Growing",
-                        hover_text=top_growers["period_label"].values)
+                        hover_text=top_growers["period_label"].values, text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
     with col2:
         fig = make_hbar(bottom_growers, "growth_pct", "display_name",
                         COLOR["danger"], "Slowest Growing / Contracting",
-                        hover_text=bottom_growers["period_label"].values)
+                        hover_text=bottom_growers["period_label"].values, text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
 
     st.caption("★ = estimated data. Where 9MFY26 data exists: growth is annualised ((9M AUM / FY25 AUM)^(12/9) − 1) to make it comparable to a full year. Otherwise: FY25 vs FY24.")
@@ -1169,7 +1170,7 @@ with tabs[0]:
     ).groupby("sector")["growth_pct"].mean().reset_index().sort_values("growth_pct", ascending=False)
     fig = make_hbar(sector_growth, "growth_pct", "sector", COLOR["primary"],
                     "Avg AUM Growth % by Sector",
-                    hover_text=[lbl] * len(sector_growth))
+                    hover_text=[lbl] * len(sector_growth), text_suffix="%")
     st.plotly_chart(fig, use_container_width=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1186,13 +1187,15 @@ with tabs[1]:
         top_roa = latest_snap.nlargest(top_n, "roa_pct").sort_values("roa_pct", ascending=False)
         fig = make_hbar(top_roa, "roa_pct", "name", COLOR["primary"],
                         f"Top {top_n} by ROA %",
-                        hover_text=top_roa["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values)
+                        hover_text=top_roa["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values,
+                        text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
     with col2:
         top_roe = latest_snap.nlargest(top_n, "roe_pct").sort_values("roe_pct", ascending=False)
         fig = make_hbar(top_roe, "roe_pct", "name", COLOR["accent"],
                         f"Top {top_n} by ROE %",
-                        hover_text=top_roe["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values)
+                        hover_text=top_roe["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values,
+                        text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
 
     st.caption(f"Where 9MFY26 data exists: 9MFY26 ROA/ROE used. Otherwise FY25. "
@@ -1273,13 +1276,15 @@ with tabs[2]:
         cleanest = latest_snap.nsmallest(20, "gnpa_pct").sort_values("gnpa_pct", ascending=False)
         fig = make_hbar(cleanest, "gnpa_pct", "name", COLOR["success"],
                         f"Lowest GNPA % ({period_label_for(cleanest)})",
-                        hover_text=cleanest["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values)
+                        hover_text=cleanest["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values,
+                        text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
     with col2:
         stressed = latest_snap.nlargest(20, "gnpa_pct").sort_values("gnpa_pct", ascending=False)
         fig = make_hbar(stressed, "gnpa_pct", "name", COLOR["danger"],
                         f"Highest GNPA % ({period_label_for(stressed)})",
-                        hover_text=stressed["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values)
+                        hover_text=stressed["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values,
+                        text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
 
     st.caption(f"GNPA % is a stock/point-in-time metric — 9MFY26 uses Q3 value directly, no annualisation.")
@@ -1346,14 +1351,16 @@ with tabs[3]:
             "credit_loss_rate_pct", ascending=True)
         fig = make_hbar(lowest, "credit_loss_rate_pct", "name", COLOR["success"],
                         f"Lowest Annualized Loss Rate ({period_label_for(lowest)})",
-                        hover_text=lowest["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values)
+                        hover_text=lowest["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values,
+                        text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
     with col2:
         highest = latest_snap.nlargest(20, "credit_loss_rate_pct").sort_values(
             "credit_loss_rate_pct", ascending=False)
         fig = make_hbar(highest, "credit_loss_rate_pct", "name", COLOR["danger"],
                         f"Highest Annualized Loss Rate ({period_label_for(highest)})",
-                        hover_text=highest["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values)
+                        hover_text=highest["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values,
+                        text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
 
     st.caption(f"Annualized loss rate % shown as of {lbl}. 9MFY26 uses Q3 ratio — not annualised.")
@@ -1521,7 +1528,7 @@ with tabs[8]:
     top_pat = pat_cagr.head(top_n).sort_values("cagr_pct", ascending=False)
     fig = make_hbar(top_pat, "cagr_pct", "name", COLOR["accent"],
                     f"PAT CAGR % (FY21–25) — Top {top_n}",
-                    hover_text=["FY21–FY25"] * len(top_pat))
+                    hover_text=["FY21–FY25"] * len(top_pat), text_suffix="%")
     st.plotly_chart(fig, use_container_width=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -2185,13 +2192,13 @@ with tabs[6]:
             pe_df = val_with_price.dropna(subset=["pe"]).sort_values("pe", ascending=False)
             fig = make_hbar(pe_df, "pe", "company", COLOR["primary"], "P/E Ratio (TTM)",
                             height=bar_chart_height(len(pe_df)),
-                            hover_text=["TTM"] * len(pe_df))
+                            hover_text=["TTM"] * len(pe_df), text_suffix="×")
             st.plotly_chart(fig, use_container_width=True)
         with col2:
             pb_df = val_with_price.dropna(subset=["pb"]).sort_values("pb", ascending=False)
             fig = make_hbar(pb_df, "pb", "company", COLOR["accent"], "P/B Ratio",
                             height=bar_chart_height(len(pb_df)),
-                            hover_text=["Latest"] * len(pb_df))
+                            hover_text=["Latest"] * len(pb_df), text_suffix="×")
             st.plotly_chart(fig, use_container_width=True)
 
         # 12M price change
