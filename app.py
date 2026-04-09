@@ -1685,12 +1685,18 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
         var _reactSetter = Object.getOwnPropertyDescriptor(
           window.parent.HTMLInputElement.prototype, 'value').set;
         inp.addEventListener('focus', function() {{
-          requestAnimationFrame(function() {{
-            requestAnimationFrame(function() {{
+          // Poll until BaseWeb populates the input value, then select-all.
+          // rAF is in iframe context so use parent's rAF for correct timing.
+          var attempts = 0;
+          var trySelect = function() {{
+            if (inp.value.length > 0) {{
               inp.setSelectionRange(0, inp.value.length);
               inp._pendingClear = true;
-            }});
-          }});
+            }} else if (attempts++ < 15) {{
+              window.parent.requestAnimationFrame(trySelect);
+            }}
+          }};
+          window.parent.requestAnimationFrame(trySelect);
         }});
         inp.addEventListener('keydown', function(e) {{
           if (inp._pendingClear && e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {{
