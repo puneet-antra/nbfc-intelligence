@@ -1138,7 +1138,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Filter badge — injected into parent DOM via components.html iframe (window.parent access)
-# Uses max z-index (2147483647), polls every 1.5s to survive Streamlit rerenders
+# Re-renders every Streamlit cycle with current LABEL; polling keeps it alive after rerenders
 components.html(f"""
 <script>
 (function() {{
@@ -1149,32 +1149,43 @@ components.html(f"""
           + "padding:0.22rem 0.75rem;cursor:pointer;user-select:none;"
           + "font-size:0.75rem;font-weight:600;color:#144835;"
           + "box-shadow:0 2px 6px rgba(0,0,0,0.15);font-family:Inter,sans-serif;white-space:nowrap;";
+  var SVG = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none">'
+          + '<path d="M2 4h12M4 8h8M6 12h4" stroke="#144835" stroke-width="2" stroke-linecap="round"/>'
+          + '</svg>&nbsp;';
   function toggleSidebar() {{
     var doc = window.parent.document;
-    var btn = doc.querySelector('[data-testid=stSidebarCollapseButton] button')
-           || doc.querySelector('[data-testid=stSidebarCollapsedControl] button')
-           || doc.querySelector('button[aria-label="Close sidebar"]')
-           || doc.querySelector('button[aria-label="Open sidebar"]')
-           || doc.querySelector('[data-testid=stSidebar] button');
+    // Try both collapsed-control (>> button) and expand/collapse button inside sidebar
+    var btn = doc.querySelector('[data-testid="stSidebarCollapsedControl"]')
+           || doc.querySelector('[data-testid="stSidebarCollapseButton"]')
+           || doc.querySelector('[data-testid="stSidebarCollapsedControl"] button')
+           || doc.querySelector('[data-testid="stSidebarCollapseButton"] button');
     if (btn) btn.click();
   }}
-  function ensureBadge() {{
+  function syncBadge() {{
     try {{
       var doc = window.parent.document;
-      if (doc.getElementById('nbfc-filter-badge')) return;
-      var b = doc.createElement('div');
-      b.id = 'nbfc-filter-badge';
-      b.title = 'Click to toggle filters';
-      b.setAttribute('style', CSS);
-      b.innerHTML = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none">'
-                  + '<path d="M2 4h12M4 8h8M6 12h4" stroke="#144835" stroke-width="2" stroke-linecap="round"/>'
-                  + '</svg>&nbsp;' + LABEL;
-      b.addEventListener('click', toggleSidebar);
-      doc.body.appendChild(b);
+      var b = doc.getElementById('nbfc-filter-badge');
+      if (b) {{
+        // Badge exists — update label if it changed (filter was changed via sidebar)
+        if (b.dataset.label !== LABEL) {{
+          b.innerHTML = SVG + LABEL;
+          b.dataset.label = LABEL;
+        }}
+      }} else {{
+        // Badge missing — create it
+        b = doc.createElement('div');
+        b.id = 'nbfc-filter-badge';
+        b.title = 'Click to open/close filters';
+        b.setAttribute('style', CSS);
+        b.dataset.label = LABEL;
+        b.innerHTML = SVG + LABEL;
+        b.addEventListener('click', toggleSidebar);
+        doc.body.appendChild(b);
+      }}
     }} catch(e) {{ console.warn('nbfc-badge:', e); }}
   }}
-  ensureBadge();
-  setInterval(ensureBadge, 1500);
+  syncBadge();
+  setInterval(syncBadge, 1200);
 }})();
 </script>
 """, height=0, scrolling=False)
