@@ -1260,6 +1260,11 @@ with tabs[0]:
             title="Revenue Growth vs PAT Growth (bubble = AUM size)",
             height=520,
         )
+        chart_layout(fig)
+        fig.update_layout(
+            xaxis=dict(title="Revenue Growth %", title_font=dict(size=12, family=CHART_FONT), range=[None, 175]),
+            yaxis=dict(title="PAT Growth %", title_font=dict(size=12, family=CHART_FONT), autorange=True),
+        )
         fig.update_traces(
             hovertemplate=(
                 "<b>%{customdata[0]}</b><br>"
@@ -1268,19 +1273,7 @@ with tabs[0]:
                 "<extra></extra>"
             )
         )
-        g_min = min(bubble_df["rev_growth"].min(), bubble_df["pat_growth"].min())
-        g_max = max(bubble_df["rev_growth"].max(), bubble_df["pat_growth"].max())
-        fig.add_shape(type="line", x0=g_min, y0=g_min, x1=g_max, y1=g_max,
-                      line=dict(color=COLOR["text_secondary"], width=1, dash="dot"))
-        fig.add_annotation(x=g_max, y=g_max, text="Equal growth", showarrow=False,
-                           font=dict(size=10, color=COLOR["text_secondary"]), xanchor="right")
-        chart_layout(fig)
-        fig.update_layout(
-            xaxis=dict(title="Revenue Growth %", title_font=dict(size=12, family=CHART_FONT), range=[None, 225]),
-            yaxis=dict(title="PAT Growth %", title_font=dict(size=12, family=CHART_FONT)),
-        )
         st.plotly_chart(fig, use_container_width=True)
-    st.caption("Bubbles above the diagonal = PAT growing faster than revenue (margin expansion). Below = revenue outpacing profit.")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 2: PROFITABILITY
