@@ -36,31 +36,33 @@ st.set_page_config(
 
 # ── Authentication ────────────────────────────────────────────────────────────
 _ALLOWED_DOMAIN = "@moneyview.in"
+_AUTH_ENABLED = hasattr(st.user, "is_logged_in")
 
-if not st.user.is_logged_in:
-    st.markdown("""
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
-                min-height:70vh;gap:1.2rem;font-family:'Inter',sans-serif;">
-        <div style="font-size:2rem;font-weight:800;color:#144835;letter-spacing:-0.03em;">
-            NBFC Intelligence
+if _AUTH_ENABLED:
+    if not st.user.is_logged_in:
+        st.markdown("""
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                    min-height:70vh;gap:1.2rem;font-family:'Inter',sans-serif;">
+            <div style="font-size:2rem;font-weight:800;color:#144835;letter-spacing:-0.03em;">
+                NBFC Intelligence
+            </div>
+            <div style="font-size:0.95rem;color:#73757A;">
+                Restricted to MoneyView employees
+            </div>
         </div>
-        <div style="font-size:0.95rem;color:#73757A;">
-            Restricted to MoneyView employees
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    col = st.columns([1, 0.4, 1])[1]
-    with col:
-        if st.button("🔐  Sign in with Google", use_container_width=True, type="primary"):
-            st.login("google")
-    st.stop()
+        """, unsafe_allow_html=True)
+        col = st.columns([1, 0.4, 1])[1]
+        with col:
+            if st.button("🔐  Sign in with Google", use_container_width=True, type="primary"):
+                st.login("google")
+        st.stop()
 
-_user_email = (st.user.email or "").lower()
-if not _user_email.endswith(_ALLOWED_DOMAIN):
-    st.error(f"Access denied — only **{_ALLOWED_DOMAIN}** accounts are permitted.")
-    if st.button("Sign out"):
-        st.logout()
-    st.stop()
+    _user_email = (st.user.email or "").lower()
+    if not _user_email.endswith(_ALLOWED_DOMAIN):
+        st.error(f"Access denied — only **{_ALLOWED_DOMAIN}** accounts are permitted.")
+        if st.button("Sign out"):
+            st.logout()
+        st.stop()
 # ─────────────────────────────────────────────────────────────────────────────
 
 st.markdown("""
@@ -963,9 +965,10 @@ st.sidebar.caption(
     "Live valuations from Yahoo Finance."
 )
 st.sidebar.markdown("---")
-st.sidebar.caption(f"Signed in as **{st.user.email}**")
-if st.sidebar.button("Sign out", use_container_width=True):
-    st.logout()
+if _AUTH_ENABLED:
+    st.sidebar.caption(f"Signed in as **{st.user.email}**")
+    if st.sidebar.button("Sign out", use_container_width=True):
+        st.logout()
 
 
 def apply_filters(df):
