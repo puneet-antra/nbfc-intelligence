@@ -1372,7 +1372,7 @@ with tabs[3]:
 
     all_loss = latest_snap.sort_values("credit_loss_rate_pct", ascending=True)
     fig = make_hbar(all_loss, "credit_loss_rate_pct", "name", COLOR["success"],
-                    f"Annualized Losses — All NBFCs, Lowest → Highest ({period_label_for(all_loss)})",
+                    f"Annualized Losses ({period_label_for(all_loss)})",
                     hover_text=all_loss["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                     text_suffix="%")
     st.plotly_chart(fig, use_container_width=True)
