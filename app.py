@@ -1032,7 +1032,8 @@ fin_df = load_financials()
 
 rbi_layer = st.sidebar.selectbox("RBI Layer", ["All", "Upper", "Middle", "Base"])
 sectors = ["All"] + sorted(nbfc_df["sector"].dropna().unique().tolist())
-sector_filter = st.sidebar.selectbox("Sector", sectors)
+default_sector_idx = sectors.index("Consumer Finance") if "Consumer Finance" in sectors else 0
+sector_filter = st.sidebar.selectbox("Sector", sectors, index=default_sector_idx)
 listing_filter = st.sidebar.radio("Listing Status", ["All", "Listed Only", "Unlisted Only"])
 top_n = st.sidebar.slider("Companies in Rankings", min_value=10, max_value=80, value=40, step=5)
 include_estimated = st.sidebar.checkbox("Include Estimated Data", value=True)
@@ -1049,6 +1050,53 @@ if _AUTH_ENABLED:
     st.sidebar.caption(f"Signed in as **{st.user.email}**")
     if st.sidebar.button("Sign out", use_container_width=True):
         st.logout()
+
+# ── Active filter badge — fixed top-left next to sidebar arrow ────────────────
+_active_filters = []
+if sector_filter != "All":
+    _active_filters.append(f"Sector: {sector_filter}")
+if rbi_layer != "All":
+    _active_filters.append(f"Layer: {rbi_layer}")
+if listing_filter != "All":
+    _active_filters.append(listing_filter.replace(" Only", ""))
+_badge_label = " · ".join(_active_filters) if _active_filters else "All NBFCs"
+
+st.markdown(f"""
+<style>
+#filter-topbar {{
+    position: fixed;
+    top: 0.6rem;
+    left: 3.8rem;
+    z-index: 99999;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: #EAF4EE;
+    border: 1px solid #144835;
+    border-radius: 20px;
+    padding: 0.22rem 0.7rem;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #144835;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+    transition: background 0.15s;
+}}
+#filter-topbar:hover {{ background: #d4ecda; }}
+</style>
+<div id="filter-topbar" title="Click to open filters" onclick="
+    var btn = window.parent.document.querySelector('[data-testid=stSidebarCollapsedControl] button');
+    if (!btn) btn = window.parent.document.querySelector('[data-testid=stSidebarNavCollapseIcon]');
+    if (!btn) btn = window.parent.document.querySelector('[data-testid=stSidebar] button');
+    if (btn) btn.click();
+">
+  <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+    <path d="M2 4h12M4 8h8M6 12h4" stroke="#144835" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+  {_badge_label}
+</div>
+""", unsafe_allow_html=True)
 
 
 def apply_filters(df):
