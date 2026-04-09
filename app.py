@@ -890,12 +890,12 @@ def _title_dict(raw_title, pad_t=10, pad_b=14):
     if sub:
         # Replace spaces with non-breaking spaces in subtitle so it stays on one line
         sub_nbsp = sub.replace(" ", "\u00a0")
-        text = f"<b>{main}</b><br><span style='font-size:11px;color:#9499B0;font-weight:normal'>{sub_nbsp}</span>"
+        text = f"<b>{main}</b><br>{sub_nbsp}"
     else:
         text = f"<b>{main}</b>"
     return dict(
         text=text,
-        font=dict(color=COLOR["text"], size=15.5, family=CHART_TITLE_FONT),
+        font=dict(color=COLOR["text_secondary"], size=12, family=CHART_TITLE_FONT),
         x=0.5, xanchor="center", xref="paper",
         pad=dict(t=pad_t, b=pad_b),
     )
