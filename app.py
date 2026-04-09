@@ -272,6 +272,11 @@ h1 {
 }
 
 /* ── Chart containers ── */
+[data-testid="stPlotlyChart"] {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
 [data-testid="stPlotlyChart"] > div {
     border-radius: 16px !important;
     border: 1px solid #EAEAEA !important;
@@ -279,6 +284,7 @@ h1 {
     box-shadow: 0px 2px 8px 0px rgba(16, 16, 18, 0.08) !important;
     background: #ffffff !important;
     transition: box-shadow 0.2s ease !important;
+    width: 100% !important;
 }
 [data-testid="stPlotlyChart"] > div:hover {
     box-shadow: 0px 4px 16px 0px rgba(16, 16, 18, 0.12) !important;
@@ -449,9 +455,15 @@ h1 {
     [data-testid="stMetricValue"] {
         font-size: 1.1rem !important;
     }
-    /* Charts full width */
+    /* Charts full width, centred */
+    [data-testid="stPlotlyChart"] {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
     [data-testid="stPlotlyChart"] > div {
         border-radius: 10px !important;
+        width: 100% !important;
     }
 }
 </style>
