@@ -579,6 +579,8 @@ import os as _os
 if not _os.path.exists("data/nbfc_full.db"):
     import build_db as _build_db
     _build_db.build()
+    st.cache_resource.clear()
+    st.cache_data.clear()
 
 # ── Data loaders ─────────────────────────────────────────────────────────────
 
