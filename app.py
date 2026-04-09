@@ -934,10 +934,8 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
     h = height or bar_chart_height(len(df))
     vals = df[x_col].dropna()
     x_max = vals.abs().max() if not vals.empty else 1
-    # Extend left by 12 % of x_max so short bars' "outside" labels
-    # never collide with y-axis tick labels (which end right at x=0).
-    x_left = vals.min() * 1.55 if vals.min() < 0 else -x_max * 0.12
-    x_range = [x_left, x_max * 1.6]
+    x_left = vals.min() * 1.55 if vals.min() < 0 else 0
+    x_range = [x_left, x_max * 1.05]  # bars fill most of plot; labels go in right margin via annotations
     text_labels = df[x_col].round(1).astype(str) + text_suffix
 
     names = df[y_col].tolist()
@@ -950,15 +948,23 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
         for n in names
     ]
 
-    fig = px.bar(df, x=x_col, y=y_col, orientation="h", height=h,
-                 text=text_labels)
+    fig = px.bar(df, x=x_col, y=y_col, orientation="h", height=h)
     fig.update_traces(
         marker_color=bar_colors, marker_line_width=0,
         marker_opacity=0.85,
-        textposition="outside",
-        textfont=dict(family=CHART_MONO, size=11.5, color=COLOR["text_secondary"]),
-        cliponaxis=False,
     )
+    # Value labels as fixed-position annotations at the right edge of the plot —
+    # this guarantees no overlap with y-axis labels regardless of bar length.
+    for name, label in zip(names, text_labels):
+        fig.add_annotation(
+            x=1.0, xref="paper",
+            y=name, yref="y",
+            text=label,
+            showarrow=False,
+            xanchor="left", yanchor="middle",
+            xshift=6,
+            font=dict(family=CHART_MONO, size=11.5, color=COLOR["text_secondary"]),
+        )
     fig.update_layout(
         title=_title_dict(title),
         paper_bgcolor=CHART_PAPER, plot_bgcolor=CHART_BG,
@@ -971,7 +977,7 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
                    range=x_range, zeroline=True, zerolinecolor=CHART_GRID,
                    zerolinewidth=1, tickcolor="rgba(0,0,0,0)", title=""),
         bargap=0.28,
-        margin=dict(l=130, r=130, t=90, b=24),
+        margin=dict(l=90, r=70, t=90, b=24),
         hoverlabel=HOVER_LABEL,
     )
     if hover_text is not None:
