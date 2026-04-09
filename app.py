@@ -1528,6 +1528,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
     QUICK_NBFCS = [
         ("KreditBee",                      "KreditBee"),
         ("Fibe",                           "Fibe"),
+        ("Kissht",                         "Kissht"),
         ("Bajaj Finance",                  "Bajaj Finance"),
         ("SBI Cards and Payment Services", "SBI Cards"),
     ]
