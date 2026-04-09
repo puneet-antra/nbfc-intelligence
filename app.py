@@ -647,7 +647,7 @@ def annual_only(df):
     return df[~df["period"].str.contains("Q")]
 
 
-def truncate_name(name, n=28):
+def truncate_name(name, n=15):
     return name[:n] + "…" if len(name) > n else name
 
 
@@ -963,13 +963,12 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
         yaxis=dict(autorange="reversed",
                    tickmode="array", tickvals=names, ticktext=tick_text,
                    tickfont=dict(family=CHART_FONT, size=12.5),
-                   automargin=True,
                    showgrid=False, tickcolor="rgba(0,0,0,0)", title=""),
         xaxis=dict(showgrid=False, showticklabels=False,
                    range=x_range, zeroline=True, zerolinecolor=CHART_GRID,
                    zerolinewidth=1, tickcolor="rgba(0,0,0,0)", title=""),
         bargap=0.28,
-        margin=dict(l=10, r=130, t=90, b=24),
+        margin=dict(l=130, r=130, t=90, b=24),
         hoverlabel=HOVER_LABEL,
     )
     if hover_text is not None:
@@ -1161,17 +1160,25 @@ components.html(f"""
     if (btn) btn.dispatchEvent(new MouseEvent('click', {{bubbles:true, cancelable:true, view:window.parent}}));
   }}
 
+  var INNER = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none">'
+            + '<path d="M2 4h12M4 8h8M6 12h4" stroke="#144835" stroke-width="2" stroke-linecap="round"/>'
+            + '</svg>&nbsp;<span class="nbfc-bl">' + LABEL + '</span>';
   function syncBadge() {{
     try {{
       var doc = window.parent.document;
       var b = doc.getElementById('nbfc-filter-badge');
       if (b) {{
         var owner = b.dataset.owner || '0';
-        if (MY_TS < owner) return;          // A newer iframe owns this badge — stand down
+        if (MY_TS < owner) return;          // A newer iframe owns this — stand down
         b.dataset.owner = MY_TS;
-        b.onclick = toggleSidebar;           // Re-assert click handler every cycle
-        var sp = b.querySelector('span');
-        if (sp && sp.textContent !== LABEL) sp.textContent = LABEL;
+        b.onclick = toggleSidebar;
+        var sp = b.querySelector('.nbfc-bl');
+        if (!sp) {{
+          // Stale badge from old code structure — rebuild inner HTML
+          b.innerHTML = INNER;
+        }} else if (sp.textContent !== LABEL) {{
+          sp.textContent = LABEL;
+        }}
       }} else {{
         b = doc.createElement('div');
         b.id = 'nbfc-filter-badge';
@@ -1179,9 +1186,7 @@ components.html(f"""
         b.setAttribute('style', CSS);
         b.dataset.owner = MY_TS;
         b.onclick = toggleSidebar;
-        b.innerHTML = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none">'
-                    + '<path d="M2 4h12M4 8h8M6 12h4" stroke="#144835" stroke-width="2" stroke-linecap="round"/>'
-                    + '</svg>&nbsp;<span>' + LABEL + '</span>';
+        b.innerHTML = INNER;
         doc.body.appendChild(b);
       }}
     }} catch(e) {{ console.warn('nbfc-badge:', e); }}
