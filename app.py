@@ -2101,13 +2101,24 @@ with tabs[7]:
     if search:
         metrics_df = metrics_df[metrics_df["name"].str.contains(search, case=False, na=False)]
 
-    metrics_df["⚠️"] = metrics_df["data_quality"].apply(
+    metrics_df["Audited"] = metrics_df["data_quality"].apply(
         lambda x: "⚠️ Est." if x == "estimated" else ("❌ Unverified" if x == "unverified" else "✓")
     )
 
+    st.markdown("""
+    <style>
+    div[data-testid="stDataFrame"] div[role="columnheader"] > div {
+        font-weight: 700 !important;
+        color: #1a1a1a !important;
+        font-size: 13px !important;
+        letter-spacing: 0.01em;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     st.dataframe(metrics_df[[
         "name", "rbi_layer", "sector", "period", "loan_book_cr", "total_assets_cr",
-        "gnpa_pct", "credit_loss_rate_pct", "roa_pct", "roe_pct", "⚠️",
+        "gnpa_pct", "credit_loss_rate_pct", "roa_pct", "roe_pct", "Audited",
     ]].rename(columns={
         "name": "Company", "rbi_layer": "Layer", "sector": "Sector", "period": "Period",
         "loan_book_cr": "Loan Book (₹ Cr)", "total_assets_cr": "Assets (₹ Cr)",
