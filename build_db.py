@@ -324,18 +324,20 @@ FINANCIALS = [
     # NII field = revenue from operations (fees + interest income combined) — hybrid model.
     # Loan book = managed AUM (total DLG + on-book portfolio; reflects true platform scale).
     # Total assets / equity = consolidated Moneyview balance sheet (per DRHP).
-    # Credit loss rate = annualized credit losses / avg managed AUM (same denominator as ROA).
+    # Credit loss rate = per DRHP disclosure (total managed portfolio credit losses / managed AUM).
+    # Includes off-book DLG losses not captured in WFPL standalone impairment.
     # GNPA = Gross Stage 3 / NPA on WFPL's on-book portfolio (CARE Ratings; DRHP for 9MFY26).
     # ROA = annualized PAT / avg managed AUM. ROE per DRHP (avg equity basis).
     # For 9MFY26: PAT annualized from 9M before exceptional items (₹245 Cr × 4/3 = ₹327 Cr).
-    ("Moneyview", "FY2023",   7644, 1724, 1314,  577, 163, None,  None, None,  2.13, 12.40, "DRHP",
-     "Moneyview DRHP Mar-2026 + CARE Ratings. FY23: managed AUM ₹7,644 Cr (loan book); total assets ₹1,724 Cr; equity ₹1,314 Cr; revenue ₹577 Cr; PAT ₹163 Cr. ROA = PAT/ending managed AUM (no FY22 AUM). ROE = PAT/ending equity."),
-    ("Moneyview", "FY2024",  12885, 3520, 1607, 1342, 171, None,  None, 0.90,  1.67, 11.72, "DRHP",
-     "Moneyview DRHP Mar-2026 + CARE Ratings. FY24: managed AUM ₹12,885 Cr (loan book); total assets ₹3,520 Cr; equity ₹1,607 Cr; revenue ₹1,342 Cr; PAT ₹171 Cr; GNPA 0.90% (WFPL Gross Stage 3). ROA = PAT/avg managed AUM (7644+12885)/2; ROE per DRHP."),
-    ("Moneyview", "FY2025",  16715, 5632, 1919, 2339, 240,  346,  2.34, 1.90,  1.62, 13.63, "DRHP",
-     "Moneyview DRHP Mar-2026 + CARE Ratings. FY25: managed AUM ₹16,715 Cr (loan book); total assets ₹5,632 Cr; equity ₹1,919 Cr; revenue ₹2,339 Cr; PAT ₹240 Cr; impairment ₹346 Cr; credit loss rate 2.34% = ₹346 Cr/avg managed AUM (12885+16715)/2 = ₹14,800 Cr; GNPA 1.90% (WFPL Gross Stage 3). ROA = PAT/avg managed AUM; ROE per DRHP."),
+    # 9MFY26 credit loss rate: annualized on-book impairment ₹724 Cr×4/3=₹965 Cr / avg managed AUM ₹18,265 Cr = 5.29%.
+    ("Moneyview", "FY2023",   7644, 1724, 1314,  577, 163, None,  7.45, None,  2.13, 12.40, "DRHP",
+     "Moneyview DRHP Mar-2026. FY23: managed AUM ₹7,644 Cr; total assets ₹1,724 Cr; equity ₹1,314 Cr; revenue ₹577 Cr; PAT ₹163 Cr; credit loss rate 7.45% per DRHP. ROA = PAT/ending managed AUM. ROE = PAT/ending equity."),
+    ("Moneyview", "FY2024",  12885, 3520, 1607, 1342, 171, None,  7.95, 0.90,  1.67, 11.72, "DRHP",
+     "Moneyview DRHP Mar-2026. FY24: managed AUM ₹12,885 Cr; total assets ₹3,520 Cr; equity ₹1,607 Cr; revenue ₹1,342 Cr; PAT ₹171 Cr; credit loss rate 7.95% per DRHP; GNPA 0.90% (WFPL Gross Stage 3). ROA = PAT/avg managed AUM (7644+12885)/2."),
+    ("Moneyview", "FY2025",  16715, 5632, 1919, 2339, 240,  346,  7.07, 1.90,  1.62, 13.63, "DRHP",
+     "Moneyview DRHP Mar-2026. FY25: managed AUM ₹16,715 Cr; total assets ₹5,632 Cr; equity ₹1,919 Cr; revenue ₹2,339 Cr; PAT ₹240 Cr; WFPL impairment ₹346 Cr; credit loss rate 7.07% per DRHP (total managed portfolio losses/AUM); GNPA 1.90%. ROA = PAT/avg managed AUM (12885+16715)/2."),
     ("Moneyview", "FY2026-Q3", 19815, 7719, 2169, 2373, 245,  724,  None, 2.53,  1.79, 15.98, "DRHP",
-     "Moneyview DRHP Mar-2026 + CARE Ratings. 9MFY26 (Apr-Dec 2025): managed AUM ₹19,815 Cr (loan book); total assets ₹7,719 Cr; equity ₹2,169 Cr; revenue ₹2,373 Cr; PAT ₹245 Cr before exceptional items (reported ₹210 Cr); impairment ₹724 Cr (9M); GNPA 2.53%. ROA = ann. PAT ₹327 Cr/avg managed AUM (16715+19815)/2=₹18,265 Cr = 1.79%; credit loss rate = ann. ₹965 Cr/₹18,265 Cr = 5.29%; ROE per DRHP avg equity."),
+     "Moneyview DRHP Mar-2026. 9MFY26 (Apr-Dec 2025): managed AUM ₹19,815 Cr; total assets ₹7,719 Cr; equity ₹2,169 Cr; revenue ₹2,373 Cr; PAT ₹245 Cr before exceptional items (reported ₹210 Cr); WFPL impairment ₹724 Cr (9M); GNPA 2.53%. ROA = ann. PAT ₹327 Cr/avg managed AUM ₹18,265 Cr = 1.79%. 9MFY26 credit loss rate computed in annualise_9m as ann. ₹965 Cr/₹18,265 Cr = 5.29%. ROE per DRHP avg equity."),
 ]
 
 

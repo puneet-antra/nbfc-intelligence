@@ -637,7 +637,8 @@ USE_STORED_ROA_ROE: set = set()
 def annualise_9m(df):
     """
     Build 9MFY26 rows from FY2026-Q3 data.
-    - NII, PAT, credit_losses_cr: raw 9-month values (not scaled).
+    - NII: annualised (×4/3) so it is comparable to full-year figures on charts.
+    - PAT, credit_losses_cr: raw 9-month values (adjusted for exceptional items where applicable).
     - ROA: recalculated using annualised PAT (×4/3) ÷ avg loan book.
     - ROE: recalculated using annualised PAT (×4/3) ÷ avg equity.
     - credit_loss_rate_pct: annualised credit losses (×4/3) ÷ avg loan book
@@ -664,6 +665,10 @@ def annualise_9m(df):
     # Adjust pat_cr itself so PAT charts/tables also reflect ex-exceptional figures
     if "pat_cr" in ann.columns:
         ann["pat_cr"] = _adj_9m_pat(ann["pat_cr"])
+
+    # Annualise NII so it is comparable to full-year figures on trend charts
+    if "net_interest_income_cr" in ann.columns:
+        ann["net_interest_income_cr"] = ann["net_interest_income_cr"] * (4 / 3)
 
     # ROA: annualised adjusted PAT ÷ avg loan book (FY25 + Q3) / 2
     # pat_cr is already adjusted above — multiply by 4/3 directly, no second adjustment
@@ -1474,7 +1479,7 @@ with tabs[8]:
                       category_orders={"period": PERIOD_ORDER})
         chart_layout(fig)
         st.plotly_chart(fig, use_container_width=True)
-        st.caption("9MFY26 NII = raw 9-month NII (not annualised).")
+        st.caption("9MFY26 NII is annualised (×4/3) to be comparable with full-year figures.")
 
     with col2:
         st.markdown(f'<div class="section-header">Industry Assets by RBI Layer (to {lbl})</div>',
@@ -1887,7 +1892,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                           "GNPA %", "ROA %", "ROE %"][:len(table_df)]
         st.dataframe(table_df.style.format("{:.1f}", na_rep="N/A"), use_container_width=True)
         if has_q3:
-            st.caption("9MFY26: all figures are raw 9-month / Q3 point-in-time values. ROA/ROE are annualised at ×4/3.")
+            st.caption("9MFY26: PAT & credit losses are raw 9-month values. NII, ROA & ROE are annualised (×4/3).")
         if has_q3 and selected == "KreditBee":
             note("ROA, ROE & PAT exclude ~₹152 Cr post-tax one-time items: ₹104 Cr GST provision reversal "
                  "(Karnataka HC ruling, Dec 2025) + ₹48 Cr DTA recognition. "
