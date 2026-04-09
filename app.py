@@ -755,7 +755,7 @@ def wrap_title(title, max_len=32):
     if "<br>" in title:          # already wrapped — don't double-process
         return title
     def _split(first, rest):
-        return f"<b>{first}</b><br>{rest}"
+        return f'<b>{first}</b><br><b><font color="#8B8FA8">{rest}</font></b>'
     # Any parenthetical qualifier always goes to the second line (checked before length guard)
     paren_idx = title.find(" (")
     if paren_idx > 0:
