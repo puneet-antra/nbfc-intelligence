@@ -1635,15 +1635,93 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
   var activeLabel = {json.dumps(_active_label)};
   var chipLabels  = {_all_labels};
 
-  // Inject light-grey selection highlight for the NBFC dropdown input
+  // ── One-time setup: style injection + document-level event delegation ───────
   (function() {{
     var doc = window.parent.document;
+    if (doc._nbfcSelectReady) return;
+    doc._nbfcSelectReady = true;
+
+    // Light-grey selection colour
     if (!doc.getElementById('nbfc-sel-style')) {{
       var s = doc.createElement('style');
       s.id = 'nbfc-sel-style';
       s.textContent = '[data-testid="stSelectbox"] input::selection {{ background: #E2E4E9; color: #1C1E23; }}';
       doc.head.appendChild(s);
     }}
+
+    var _reactSetter = Object.getOwnPropertyDescriptor(
+      window.parent.HTMLInputElement.prototype, 'value').set;
+
+    // Helper: is this input the NBFC company selectbox?
+    function getNbfcBox(target) {{
+      if (!target || target.tagName !== 'INPUT') return null;
+      var box = target.closest('[data-testid="stSelectbox"]');
+      if (!box) return null;
+      var lbl = box.querySelector('[data-testid="stWidgetLabel"] p');
+      if (!lbl || lbl.textContent.trim() !== 'Select an NBFC to explore') return null;
+      return box;
+    }}
+
+    // Get the currently displayed selected-value text from the display div
+    // (BaseWeb keeps it in a leaf div separate from the <input>)
+    function getDisplayValue(box) {{
+      var sel = box.querySelector('[data-baseweb="select"]');
+      if (!sel) return '';
+      var found = '';
+      sel.querySelectorAll('[data-baseweb="select"] > div > div > div').forEach(function(d) {{
+        if (!found && d.children.length === 0) {{
+          var t = d.textContent.trim();
+          if (t.length > 1) found = t;
+        }}
+      }});
+      if (!found) {{
+        // Fallback: any leaf div with text
+        sel.querySelectorAll('div').forEach(function(d) {{
+          if (!found && d.children.length === 0) {{
+            var t = d.textContent.trim();
+            if (t.length > 1) found = t;
+          }}
+        }});
+      }}
+      return found;
+    }}
+
+    // focusin: inject current display value into input, then select-all
+    doc.addEventListener('focusin', function(e) {{
+      var box = getNbfcBox(e.target);
+      if (!box) return;
+      var inp = e.target;
+      var val = getDisplayValue(box);
+      if (!val) return;
+      // Two rAFs so we fire after BaseWeb's own focus handler
+      window.parent.requestAnimationFrame(function() {{
+        window.parent.requestAnimationFrame(function() {{
+          _reactSetter.call(inp, val);
+          inp.dispatchEvent(new Event('input', {{ bubbles: true }}));
+          inp.setSelectionRange(0, val.length);
+          inp._pendingClear = true;
+        }});
+      }});
+    }});
+
+    // keydown: first printable key clears the injected text, types that char
+    doc.addEventListener('keydown', function(e) {{
+      var inp = e.target;
+      if (!inp._pendingClear) return;
+      if (!getNbfcBox(inp)) return;
+      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {{
+        inp._pendingClear = false;
+        e.preventDefault();
+        _reactSetter.call(inp, e.key);
+        inp.dispatchEvent(new Event('input', {{ bubbles: true }}));
+      }} else if (e.key !== 'Shift' && e.key !== 'CapsLock') {{
+        inp._pendingClear = false;
+      }}
+    }}, true);
+
+    doc.addEventListener('focusout', function(e) {{
+      if (e.target && e.target._pendingClear) e.target._pendingClear = false;
+    }});
   }})();
 
   function applyStyles() {{
@@ -1673,7 +1751,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       }}
     }});
 
-    // 2. Bold selected value + clear-on-focus for the NBFC dropdown
+    // 2. Bold selected value in the NBFC dropdown
     doc.querySelectorAll('[data-testid="stSelectbox"]').forEach(function(box) {{
       var lbl = box.querySelector('[data-testid="stWidgetLabel"] p');
       if (!lbl || lbl.textContent.trim() !== 'Select an NBFC to explore') return;
@@ -1687,42 +1765,6 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
           d.style.letterSpacing = '-0.01em';
         }}
       }});
-      // UX: on focus → select-all (highlights current name); first printable
-      // keypress → clear and type that character instead of appending.
-      // Uses React's native setter so the controlled input registers changes.
-      var inp = sel.querySelector('input');
-      if (inp && !inp._clearBound) {{
-        inp._clearBound = true;
-        var _reactSetter = Object.getOwnPropertyDescriptor(
-          window.parent.HTMLInputElement.prototype, 'value').set;
-        inp.addEventListener('focus', function() {{
-          // Poll until BaseWeb populates the input value, then select-all.
-          // rAF is in iframe context so use parent's rAF for correct timing.
-          var attempts = 0;
-          var trySelect = function() {{
-            if (inp.value.length > 0) {{
-              inp.setSelectionRange(0, inp.value.length);
-              inp._pendingClear = true;
-            }} else if (attempts++ < 15) {{
-              window.parent.requestAnimationFrame(trySelect);
-            }}
-          }};
-          window.parent.requestAnimationFrame(trySelect);
-        }});
-        inp.addEventListener('keydown', function(e) {{
-          if (inp._pendingClear && e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {{
-            inp._pendingClear = false;
-            e.preventDefault();
-            _reactSetter.call(inp, e.key);
-            inp.dispatchEvent(new Event('input', {{ bubbles: true }}));
-          }} else if (e.key !== 'Shift' && e.key !== 'CapsLock') {{
-            inp._pendingClear = false;
-          }}
-        }});
-        inp.addEventListener('blur', function() {{
-          inp._pendingClear = false;
-        }});
-      }}
     }});
   }}
 
