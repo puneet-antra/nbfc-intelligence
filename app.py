@@ -2036,10 +2036,32 @@ with tabs[6]:
         med_pb = val_with_price["pb"].median()
         med_chg = val_with_price["chg_12m"].median()
 
-        c1, c2, c3 = st.columns(3)
-        c1.metric("Median P/E (TTM)", f"{med_pe:.1f}x" if pd.notna(med_pe) else "N/A")
-        c2.metric("Median P/B", f"{med_pb:.2f}x" if pd.notna(med_pb) else "N/A")
-        c3.metric("Median 12M Return", f"{med_chg:.1f}%" if pd.notna(med_chg) else "N/A")
+        pe_val   = f"{med_pe:.1f}x"   if pd.notna(med_pe)  else "N/A"
+        pb_val   = f"{med_pb:.2f}x"   if pd.notna(med_pb)  else "N/A"
+        chg_val  = f"{med_chg:.1f}%"  if pd.notna(med_chg) else "N/A"
+        chg_color = "#144835" if pd.notna(med_chg) and med_chg >= 0 else "#c0392b"
+        st.markdown(f"""
+        <div style="display:flex;gap:1.2rem;margin:0.6rem 0 1.4rem;">
+            <div style="flex:1;background:#f8fafb;border:1px solid #EAEAEA;border-radius:14px;
+                        padding:1.1rem 1.5rem;text-align:center;">
+                <div style="font-size:0.68rem;font-weight:600;color:#8B8FA8;letter-spacing:0.08em;
+                            text-transform:uppercase;margin-bottom:0.45rem;">Median P/E (TTM)</div>
+                <div style="font-size:1.65rem;font-weight:700;color:#1a1a1a;line-height:1.1;">{pe_val}</div>
+            </div>
+            <div style="flex:1;background:#f8fafb;border:1px solid #EAEAEA;border-radius:14px;
+                        padding:1.1rem 1.5rem;text-align:center;">
+                <div style="font-size:0.68rem;font-weight:600;color:#8B8FA8;letter-spacing:0.08em;
+                            text-transform:uppercase;margin-bottom:0.45rem;">Median P/B</div>
+                <div style="font-size:1.65rem;font-weight:700;color:#1a1a1a;line-height:1.1;">{pb_val}</div>
+            </div>
+            <div style="flex:1;background:#f8fafb;border:1px solid #EAEAEA;border-radius:14px;
+                        padding:1.1rem 1.5rem;text-align:center;">
+                <div style="font-size:0.68rem;font-weight:600;color:#8B8FA8;letter-spacing:0.08em;
+                            text-transform:uppercase;margin-bottom:0.45rem;">Median 12M Return</div>
+                <div style="font-size:1.65rem;font-weight:700;color:{chg_color};line-height:1.1;">{chg_val}</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
         col1, col2 = st.columns(2)
         with col1:
