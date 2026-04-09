@@ -1707,8 +1707,10 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
     }});
 
     // focusin: 50 ms after focus, BaseWeb has finished its own render cycle.
-    // Write the cached name and select it — direct DOM write (no React event
-    // dispatch) keeps BaseWeb out of filter mode → single-click option works.
+    // Write the cached name — direct DOM write (no React event dispatch) keeps
+    // BaseWeb out of filter mode → single-click option selection works.
+    // Highlight is a background tint on the input wrapper (more reliable than
+    // ::selection which gets reset by BaseWeb before the browser paints).
     doc.addEventListener('focusin', function(e) {{
       if (!e.target || e.target.tagName !== 'INPUT') return;
       var box = getNbfcBox(e.target);
@@ -1718,8 +1720,21 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       if (!val) return;
       setTimeout(function() {{
         if (inp !== doc.activeElement) return;
-        inp.value = val;                    // write name (no React event)
-        inp.setSelectionRange(0, val.length); // highlight all text
+        inp.value = val;   // write name into input (no React event)
+
+        // Highlight: tint the inner select wrapper so it looks "selected"
+        var wrapper = box.querySelector('[data-baseweb="select"] > div:first-child');
+        if (wrapper) {{
+          wrapper.style.background = '#D8DCE8';
+          wrapper.style.borderRadius = '4px';
+          function clearHL() {{
+            wrapper.style.background = '';
+            wrapper.style.borderRadius = '';
+            inp.removeEventListener('keydown', clearHL);
+          }}
+          inp.addEventListener('keydown', clearHL, {{ once: true }});
+          setTimeout(clearHL, 4000); // failsafe: auto-clear after 4s
+        }}
       }}, 50);
     }});
 
