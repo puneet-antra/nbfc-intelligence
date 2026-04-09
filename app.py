@@ -1121,18 +1121,18 @@ with tabs[0]:
         lambda n: n + " ★" if n in estimated_names else n
     )
 
-    top_growers = growth_df.head(20).sort_values("growth_pct", ascending=False)
-    bottom_growers = growth_df.tail(20).sort_values("growth_pct", ascending=False)
+    top_growers = growth_df.head(10).sort_values("growth_pct", ascending=False)
+    bottom_growers = growth_df.tail(10).sort_values("growth_pct", ascending=False)
 
     col1, col2 = st.columns(2)
     with col1:
         fig = make_hbar(top_growers, "growth_pct", "display_name",
-                        COLOR["success"], f"Top {min(20, len(top_growers))} Fastest Growing",
+                        COLOR["success"], f"Top {min(10, len(top_growers))} Fastest Growing",
                         hover_text=top_growers["period_label"].values, text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
     with col2:
         fig = make_hbar(bottom_growers, "growth_pct", "display_name",
-                        COLOR["danger"], "Slowest Growing / Contracting",
+                        COLOR["danger"], "Bottom 10 Slowest Growing / Contracting",
                         hover_text=bottom_growers["period_label"].values, text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
 
@@ -1275,14 +1275,14 @@ with tabs[2]:
     st.markdown(f'<div class="section-header">GNPA % — {lbl}</div>', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1:
-        cleanest = latest_snap.nsmallest(20, "gnpa_pct").sort_values("gnpa_pct", ascending=False)
+        cleanest = latest_snap.nsmallest(10, "gnpa_pct").sort_values("gnpa_pct", ascending=True)
         fig = make_hbar(cleanest, "gnpa_pct", "name", COLOR["success"],
                         f"Lowest GNPA % ({period_label_for(cleanest)})",
                         hover_text=cleanest["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values,
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
     with col2:
-        stressed = latest_snap.nlargest(20, "gnpa_pct").sort_values("gnpa_pct", ascending=False)
+        stressed = latest_snap.nlargest(10, "gnpa_pct").sort_values("gnpa_pct", ascending=False)
         fig = make_hbar(stressed, "gnpa_pct", "name", COLOR["danger"],
                         f"Highest GNPA % ({period_label_for(stressed)})",
                         hover_text=stressed["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values,
@@ -1349,7 +1349,7 @@ with tabs[3]:
 
     col1, col2 = st.columns(2)
     with col1:
-        lowest = latest_snap.nsmallest(20, "credit_loss_rate_pct").sort_values(
+        lowest = latest_snap.nsmallest(10, "credit_loss_rate_pct").sort_values(
             "credit_loss_rate_pct", ascending=True)
         fig = make_hbar(lowest, "credit_loss_rate_pct", "name", COLOR["success"],
                         f"Lowest Annualized Loss Rate ({period_label_for(lowest)})",
@@ -1357,7 +1357,7 @@ with tabs[3]:
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
     with col2:
-        highest = latest_snap.nlargest(20, "credit_loss_rate_pct").sort_values(
+        highest = latest_snap.nlargest(10, "credit_loss_rate_pct").sort_values(
             "credit_loss_rate_pct", ascending=False)
         fig = make_hbar(highest, "credit_loss_rate_pct", "name", COLOR["danger"],
                         f"Highest Annualized Loss Rate ({period_label_for(highest)})",
@@ -2132,7 +2132,7 @@ with tabs[5]:
 
     def _top20_hbar(metric, label, color, bar_fmt=None, hover_fmt=None, is_inr=False):
         cols = ["name", metric] + (["period"] if "period" in _snap.columns else [])
-        df = _snap[cols].dropna(subset=[metric]).sort_values(metric, ascending=False).head(20).copy()
+        df = _snap[cols].dropna(subset=[metric]).sort_values(metric, ascending=False).head(10).copy()
         period_col = df["period"] if "period" in df.columns else df["name"].map(_snap_period)
 
         # Bar label: formatted value
@@ -2161,7 +2161,7 @@ with tabs[5]:
 
         fig = make_hbar(
             df, metric, "name", color,
-            f"Top 20 by {label} (as of {_chart_lbl})",
+            f"Top 10 by {label} (as of {_chart_lbl})",
             hover_text=df["hover"].tolist(),
         )
         # Override bar text with formatted labels
@@ -2192,13 +2192,13 @@ with tabs[5]:
     _mc = (_val_df[["company", "mktcap_cr"]]
            .dropna(subset=["mktcap_cr"])
            .sort_values("mktcap_cr", ascending=False)
-           .head(20)
+           .head(10)
            .rename(columns={"company": "name"}))
     if not _mc.empty:
         _mc["bar_label"] = _mc["mktcap_cr"].apply(lambda v: f"₹{v:,.0f} Cr")
         _mc["hover"]     = _mc["mktcap_cr"].apply(lambda v: f"₹{v:,.0f} Cr  ·  Live")
         fig_mc = make_hbar(_mc, "mktcap_cr", "name", "#1e40af",
-                           "Top 20 by Market Cap (Live)",
+                           "Top 10 by Market Cap (Live)",
                            hover_text=_mc["hover"].tolist())
         fig_mc.update_traces(text=_mc["bar_label"].tolist(), texttemplate="%{text}")
         st.plotly_chart(fig_mc, use_container_width=True)
