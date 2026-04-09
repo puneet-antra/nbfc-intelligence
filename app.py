@@ -1137,20 +1137,11 @@ with tabs[0]:
         lambda n: n + " ★" if n in estimated_names else n
     )
 
-    top_growers = growth_df.head(10).sort_values("growth_pct", ascending=False)
-    bottom_growers = growth_df.tail(10).sort_values("growth_pct", ascending=False)
-
-    col1, col2 = st.columns(2)
-    with col1:
-        fig = make_hbar(top_growers, "growth_pct", "display_name",
-                        COLOR["success"], f"Top {min(10, len(top_growers))} Fastest Growing",
-                        hover_text=top_growers["period_label"].values, text_suffix="%")
-        st.plotly_chart(fig, use_container_width=True)
-    with col2:
-        fig = make_hbar(bottom_growers, "growth_pct", "display_name",
-                        COLOR["danger"], "Bottom 10 Slowest Growing / Contracting",
-                        hover_text=bottom_growers["period_label"].values, text_suffix="%")
-        st.plotly_chart(fig, use_container_width=True)
+    all_growers = growth_df.sort_values("growth_pct", ascending=False)
+    fig = make_hbar(all_growers, "growth_pct", "display_name",
+                    COLOR["success"], "AUM Growth % — All NBFCs (Fastest → Slowest)",
+                    hover_text=all_growers["period_label"].values, text_suffix="%")
+    st.plotly_chart(fig, use_container_width=True)
 
     st.caption("★ = estimated data. Where 9MFY26 data exists: growth is annualised ((9M AUM / FY25 AUM)^(12/9) − 1) to make it comparable to a full year. Otherwise: FY25 vs FY24.")
 
@@ -1202,17 +1193,17 @@ with tabs[1]:
                 unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1:
-        top_roa = latest_snap.nlargest(10, "roa_pct").sort_values("roa_pct", ascending=False)
-        fig = make_hbar(top_roa, "roa_pct", "name", COLOR["primary"],
-                        "Top 10 by ROA %",
-                        hover_text=top_roa["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
+        all_roa = latest_snap.sort_values("roa_pct", ascending=False)
+        fig = make_hbar(all_roa, "roa_pct", "name", COLOR["primary"],
+                        f"ROA % — All NBFCs ({lbl})",
+                        hover_text=all_roa["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
     with col2:
-        top_roe = latest_snap.nlargest(10, "roe_pct").sort_values("roe_pct", ascending=False)
-        fig = make_hbar(top_roe, "roe_pct", "name", COLOR["accent"],
-                        "Top 10 by ROE %",
-                        hover_text=top_roe["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
+        all_roe = latest_snap.sort_values("roe_pct", ascending=False)
+        fig = make_hbar(all_roe, "roe_pct", "name", COLOR["accent"],
+                        f"ROE % — All NBFCs ({lbl})",
+                        hover_text=all_roe["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
 
@@ -1289,21 +1280,12 @@ with tabs[2]:
     latest_snap = get_latest_period_data(fin_filtered).dropna(subset=["gnpa_pct"])
 
     st.markdown(f'<div class="section-header">GNPA % — {lbl}</div>', unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
-    with col1:
-        cleanest = latest_snap.nsmallest(10, "gnpa_pct").sort_values("gnpa_pct", ascending=True)
-        fig = make_hbar(cleanest, "gnpa_pct", "name", COLOR["success"],
-                        f"Lowest GNPA % ({period_label_for(cleanest)})",
-                        hover_text=cleanest["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values,
-                        text_suffix="%")
-        st.plotly_chart(fig, use_container_width=True)
-    with col2:
-        stressed = latest_snap.nlargest(10, "gnpa_pct").sort_values("gnpa_pct", ascending=False)
-        fig = make_hbar(stressed, "gnpa_pct", "name", COLOR["danger"],
-                        f"Highest GNPA % ({period_label_for(stressed)})",
-                        hover_text=stressed["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values,
-                        text_suffix="%")
-        st.plotly_chart(fig, use_container_width=True)
+    all_gnpa = latest_snap.dropna(subset=["gnpa_pct"]).sort_values("gnpa_pct", ascending=True)
+    fig = make_hbar(all_gnpa, "gnpa_pct", "name", COLOR["success"],
+                    f"GNPA % — All NBFCs, Lowest → Highest ({period_label_for(all_gnpa)})",
+                    hover_text=all_gnpa["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values,
+                    text_suffix="%")
+    st.plotly_chart(fig, use_container_width=True)
 
     st.caption(f"GNPA % is a stock/point-in-time metric — 9MFY26 uses Q3 value directly, no annualisation.")
 
@@ -1363,23 +1345,12 @@ with tabs[3]:
     lbl = latest_period_label(fin_filtered)
     latest_snap = get_latest_period_data(fin_filtered).dropna(subset=["credit_loss_rate_pct"])
 
-    col1, col2 = st.columns(2)
-    with col1:
-        lowest = latest_snap.nsmallest(10, "credit_loss_rate_pct").sort_values(
-            "credit_loss_rate_pct", ascending=True)
-        fig = make_hbar(lowest, "credit_loss_rate_pct", "name", COLOR["success"],
-                        f"Lowest Annualized Loss Rate ({period_label_for(lowest)})",
-                        hover_text=lowest["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
-                        text_suffix="%")
-        st.plotly_chart(fig, use_container_width=True)
-    with col2:
-        highest = latest_snap.nlargest(10, "credit_loss_rate_pct").sort_values(
-            "credit_loss_rate_pct", ascending=False)
-        fig = make_hbar(highest, "credit_loss_rate_pct", "name", COLOR["danger"],
-                        f"Highest Annualized Loss Rate ({period_label_for(highest)})",
-                        hover_text=highest["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
-                        text_suffix="%")
-        st.plotly_chart(fig, use_container_width=True)
+    all_loss = latest_snap.sort_values("credit_loss_rate_pct", ascending=True)
+    fig = make_hbar(all_loss, "credit_loss_rate_pct", "name", COLOR["success"],
+                    f"Annualized Loss Rate % — All NBFCs, Lowest → Highest ({period_label_for(all_loss)})",
+                    hover_text=all_loss["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
+                    text_suffix="%")
+    st.plotly_chart(fig, use_container_width=True)
 
     st.caption(f"Annualized loss rate % shown as of {lbl}. 9MFY26 uses Q3 ratio — not annualised.")
 
