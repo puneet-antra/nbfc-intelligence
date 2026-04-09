@@ -2185,26 +2185,44 @@ with tabs[7]:
         lambda x: "⚠️ Est." if x == "estimated" else ("❌ Unverified" if x == "unverified" else "✓")
     )
 
-    st.markdown("""
-    <style>
-    div[data-testid="stDataFrame"] div[role="columnheader"] > div {
-        font-weight: 700 !important;
-        color: #1a1a1a !important;
-        font-size: 13px !important;
-        letter-spacing: 0.01em;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+    _m_cols  = ["name", "rbi_layer", "sector", "period",
+                "loan_book_cr", "total_assets_cr",
+                "gnpa_pct", "credit_loss_rate_pct", "roa_pct", "roe_pct", "Audited"]
+    _m_heads = ["Company", "Layer", "Sector", "Period",
+                "Loan Book (₹ Cr)", "Assets (₹ Cr)",
+                "GNPA %", "Credit Loss %", "ROA %", "ROE %", "Audited"]
+    _m_right = {4, 5, 6, 7, 8, 9, 10}   # 0-indexed numeric / status cols
 
-    st.dataframe(metrics_df[[
-        "name", "rbi_layer", "sector", "period", "loan_book_cr", "total_assets_cr",
-        "gnpa_pct", "credit_loss_rate_pct", "roa_pct", "roe_pct", "Audited",
-    ]].rename(columns={
-        "name": "Company", "rbi_layer": "Layer", "sector": "Sector", "period": "Period",
-        "loan_book_cr": "Loan Book (₹ Cr)", "total_assets_cr": "Assets (₹ Cr)",
-        "gnpa_pct": "GNPA %", "credit_loss_rate_pct": "Credit Loss %",
-        "roa_pct": "ROA %", "roe_pct": "ROE %",
-    }), use_container_width=True, hide_index=True)
+    def _fmt_metric_cell(col, val):
+        if pd.isna(val) or val is None: return "—"
+        if col in ("loan_book_cr", "total_assets_cr"): return f"₹{val:,.0f}"
+        if col in ("gnpa_pct", "credit_loss_rate_pct", "roa_pct", "roe_pct"): return f"{val:.2f}%"
+        return str(val)
+
+    _mth = ("padding:9px 14px;font-size:12px;font-weight:700;color:#1a1a1a;"
+            "border-bottom:2px solid #DCDCDE;white-space:nowrap;background:#f8fafb;")
+    _mtd = "padding:8px 14px;font-size:12px;border-bottom:1px solid #f0f0f0;white-space:nowrap;"
+
+    _m_rows = ""
+    for _, r in metrics_df[_m_cols].iterrows():
+        cells = ""
+        for i, c in enumerate(_m_cols):
+            val_str = str(r[c]) if c in ("name","rbi_layer","sector","period","Audited") else _fmt_metric_cell(c, r[c])
+            align   = "right" if i in _m_right else "left"
+            cells  += f'<td style="{_mtd}text-align:{align};">{val_str}</td>'
+        _m_rows += f"<tr>{cells}</tr>"
+
+    _m_headers = "".join(
+        f'<th style="{_mth}text-align:{"right" if i in _m_right else "left"}">{h}</th>'
+        for i, h in enumerate(_m_heads)
+    )
+    st.markdown(f"""
+    <div style="overflow-x:auto;border:1px solid #EAEAEA;border-radius:12px;margin-top:0.5rem;">
+    <table style="width:100%;border-collapse:collapse;font-family:Inter,sans-serif;">
+      <thead><tr>{_m_headers}</tr></thead>
+      <tbody>{_m_rows}</tbody>
+    </table></div>
+    """, unsafe_allow_html=True)
     st.caption(
         f"Showing most recent available period per company. "
         f"Where FY2026-Q3 data exists, 9MFY26 is shown. "
