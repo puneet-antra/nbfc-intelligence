@@ -983,7 +983,7 @@ def apply_filters(df):
         d = d[d["listed"] == 0]
     if not include_estimated:
         dq_col = "data_quality" if "data_quality" in d.columns else "company_dq"
-        d = d[d[dq_col] == "audited"]
+        d = d[d[dq_col].isin(["audited", "DRHP"])]
     return d
 
 
@@ -1529,6 +1529,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
         ("KreditBee",                      "KreditBee"),
         ("Fibe",                           "Fibe"),
         ("Kissht",                         "Kissht"),
+        ("MoneyView",                      "MoneyView"),
         ("Bajaj Finance",                  "Bajaj Finance"),
         ("SBI Cards and Payment Services", "SBI Cards"),
     ]
@@ -1688,6 +1689,12 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                     '<span style="background:#D7F4E9;color:#144835;padding:3px 10px;'
                     'border-radius:4px;font-size:12px;font-weight:600;'
                     'border:1px solid #a7f3d0">✓ Audited</span>'
+                )
+            elif dq == "DRHP":
+                badges.append(
+                    '<span style="background:#EFF6FF;color:#1e40af;padding:3px 10px;'
+                    'border-radius:4px;font-size:12px;font-weight:600;'
+                    'border:1px solid #bfdbfe">📄 DRHP</span>'
                 )
             elif dq == "estimated":
                 badges.append('<span class="estimated-badge">⚠️ Estimated Data</span>')
@@ -2242,7 +2249,7 @@ with tabs[7]:
     search = "" if selected_name == "All companies" else selected_name
 
     metrics_df["Audited"] = metrics_df["data_quality"].apply(
-        lambda x: "⚠️ Est." if x == "estimated" else ("❌ Unverified" if x == "unverified" else "✓")
+        lambda x: "⚠️ Est." if x == "estimated" else ("❌ Unverified" if x == "unverified" else ("📄 DRHP" if x == "DRHP" else "✓"))
     )
 
     _m_cols  = ["name", "rbi_layer", "sector", "period",

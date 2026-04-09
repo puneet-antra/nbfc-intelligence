@@ -82,7 +82,9 @@ COMPANIES = [
     # Unlisted NBFCs — data from rating agency rationales based on company-submitted audited financials
     ("Fibe", "Middle", "Consumer Finance", 0, 1, 3280, "estimated", None, "EarlySalary Services Pvt Ltd (CIN U67120PN1994PTC184868). CareEdge & Acuite rating rationales based on ESPL standalone audited/provisional financials. FY25 provisional."),
     # Pre-IPO — DRHP filed Aug 2025 (OnEMI Technology Solutions Ltd; NBFC subsidiary: Si Creva Capital Services Pvt Ltd)
-    ("Kissht", "Middle", "Consumer Finance", 0, 1, 2701, "audited", None, "OnEMI Technology Solutions DRHP filed Aug 2025 with SEBI. Restated consolidated financials FY23-FY25."),
+    ("Kissht", "Middle", "Consumer Finance", 0, 1, 2701, "DRHP", None, "OnEMI Technology Solutions DRHP filed Aug 2025 with SEBI. Restated consolidated financials FY23-FY25."),
+    # Pre-IPO — DRHP filed Mar 2026 (MoneyView Limited; NBFC subsidiary: Whizdm Finance Pvt Ltd)
+    ("MoneyView", "Middle", "Consumer Finance", 0, 1, 7719, "DRHP", None, "MoneyView Limited DRHP filed Mar-2026 with SEBI. Restated consolidated financials FY23-FY25 + 9MFY26 (Apr-Dec 2025). Primarily off-book DLG lending model; NBFC subsidiary is Whizdm Finance Pvt Ltd."),
 ]
 
 # ── Financial data ────────────────────────────────────────────────────────────
@@ -313,9 +315,24 @@ FINANCIALS = [
     # Credit losses = Impairment on financial instruments (P&L line).
     # Credit loss rate = Impairment / average on-book loan book (est.).
     # GNPA = Gross Stage 3 on-book loans / total gross on-book loans.
-    ("Kissht", "FY2023", 1268, 1275,  566,  984,  28, 299, 23.57, 0.05,  3.25,  6.93, "audited",   "Kissht DRHP Aug-2025 (SEBI). Restated consolidated FY23. AUM ₹1,268 Cr (on+off book); Total assets ₹1,275 Cr; Equity ₹566 Cr; Revenue ₹984 Cr; PAT ₹28 Cr; Impairment ₹299 Cr; GNPA 0.05%; ROA 3.25%; ROE 6.93%."),
-    ("Kissht", "FY2024", 2604, 1797,  805, 1674, 197, 621, 23.84, 0.79, 12.85, 28.78, "audited",   "Kissht DRHP Aug-2025 (SEBI). Restated consolidated FY24. AUM ₹2,604 Cr; Total assets ₹1,797 Cr; Equity ₹805 Cr; Revenue ₹1,674 Cr; PAT ₹197 Cr; Impairment ₹621 Cr; GNPA 0.79%; ROA 12.85%; ROE 28.78%."),
-    ("Kissht", "FY2025", 4087, 2701, 1006, 1337, 161, 327,  7.99, 2.89,  7.14, 17.74, "audited",   "Kissht DRHP Aug-2025 (SEBI). Restated consolidated FY25. AUM ₹4,087 Cr; Total assets ₹2,701 Cr; Equity ₹1,006 Cr; Revenue ₹1,337 Cr; PAT ₹161 Cr; Impairment ₹327 Cr; GNPA 2.89%; ROA 7.14%; ROE 17.74%."),
+    ("Kissht", "FY2023", 1268, 1275,  566,  984,  28, 299, 23.57, 0.05,  3.25,  6.93, "DRHP",   "Kissht DRHP Aug-2025 (SEBI). Restated consolidated FY23. AUM ₹1,268 Cr (on+off book); Total assets ₹1,275 Cr; Equity ₹566 Cr; Revenue ₹984 Cr; PAT ₹28 Cr; Impairment ₹299 Cr; GNPA 0.05%; ROA 3.25%; ROE 6.93%."),
+    ("Kissht", "FY2024", 2604, 1797,  805, 1674, 197, 621, 23.84, 0.79, 12.85, 28.78, "DRHP",   "Kissht DRHP Aug-2025 (SEBI). Restated consolidated FY24. AUM ₹2,604 Cr; Total assets ₹1,797 Cr; Equity ₹805 Cr; Revenue ₹1,674 Cr; PAT ₹197 Cr; Impairment ₹621 Cr; GNPA 0.79%; ROA 12.85%; ROE 28.78%."),
+    ("Kissht", "FY2025", 4087, 2701, 1006, 1337, 161, 327,  7.99, 2.89,  7.14, 17.74, "DRHP",   "Kissht DRHP Aug-2025 (SEBI). Restated consolidated FY25. AUM ₹4,087 Cr; Total assets ₹2,701 Cr; Equity ₹1,006 Cr; Revenue ₹1,337 Cr; PAT ₹161 Cr; Impairment ₹327 Cr; GNPA 2.89%; ROA 7.14%; ROE 17.74%."),
+    # ── MoneyView (MoneyView Limited / Whizdm Finance Pvt Ltd) ───────────────
+    # Source: MoneyView Limited DRHP filed Mar-2026 with SEBI. Restated consolidated financials.
+    # Business model: Primarily off-book DLG lending platform + direct NBFC (Whizdm Finance) lending.
+    # NII field = revenue from operations (fees + interest income combined) — hybrid model.
+    # Credit loss rate = annualized loss rate on managed AUM (incl. off-book) per DRHP.
+    # GNPA = Gross Stage 3 loans on Whizdm Finance's on-book portfolio.
+    # Total assets / equity not available from public sources for FY23–FY25.
+    ("MoneyView", "FY2023", None, None, None,  577, 163, None,  None, None, None, None, "DRHP",
+     "MoneyView DRHP Mar-2026. FY23: Revenue ₹577 Cr (87.9% fees, 6.6% interest); PAT ₹163 Cr (27x YoY)."),
+    ("MoneyView", "FY2024", None, None, None, 1342, 171, None,  7.93, 0.94, None, None, "DRHP",
+     "MoneyView DRHP Mar-2026. FY24: Revenue ₹1,342 Cr; PAT ₹171 Cr; annualized credit loss rate 7.93% on managed AUM; GNPA (Gross Stage 3, Whizdm Finance on-book) 0.94%."),
+    ("MoneyView", "FY2025", None, None, None, 2339, 240,  346,  7.07, None, None, None, "DRHP",
+     "MoneyView DRHP Mar-2026. FY25: Revenue ₹2,339 Cr (fees ₹1,487 Cr + interest ₹789 Cr); PAT ₹240 Cr; impairment ₹346 Cr + DLG expense ₹322 Cr; credit loss rate 7.07% (annualized managed AUM basis). Current assets ₹4,198 Cr."),
+    ("MoneyView", "FY2026-Q3", None, 7719, None, 2373, 210,  724,  None, 2.53, None, None, "DRHP",
+     "MoneyView DRHP Mar-2026. 9MFY26 (Apr-Dec 2025): Revenue ₹2,373 Cr; PAT ₹210 Cr; impairment ₹724 Cr; total assets ₹7,719 Cr; Gross Stage 3 (Whizdm Finance on-book) 2.53%. Managed AUM ₹19,814 Cr."),
 ]
 
 
