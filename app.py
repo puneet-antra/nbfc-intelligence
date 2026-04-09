@@ -2338,7 +2338,7 @@ with tabs[6]:
         roe_sect = _apply_sector_order(roe_sect)
 
         # NII revenue growth by sector
-        _nii_growth = compute_latest_growth(fin_filtered, "nii_cr")
+        _nii_growth = compute_latest_growth(fin_filtered, "net_interest_income_cr")
         _nii_growth = _nii_growth.merge(
             fin_filtered[["name", "sector"]].drop_duplicates(), on="name", how="left"
         )
