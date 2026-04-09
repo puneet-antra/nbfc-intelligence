@@ -1166,38 +1166,49 @@ with tabs[0]:
     )
     sectors_df = fin_filtered[["name", "sector"]].drop_duplicates()
 
-    growth_df = compute_latest_growth(fin_filtered, "loan_book_cr").dropna(subset=["growth_pct"])
+    growth_df    = compute_latest_growth(fin_filtered, "loan_book_cr").dropna(subset=["growth_pct"])
     rev_growth_df = compute_latest_growth(fin_filtered, "net_interest_income_cr").dropna(subset=["growth_pct"])
+    pat_growth_df = compute_latest_growth(fin_filtered, "pat_cr").dropna(subset=["growth_pct"])
 
     def _add_star(df):
         df = df.copy()
         df["display_name"] = df["name"].apply(lambda n: n + " ★" if n in estimated_names else n)
         return df
 
-    growth_df = _add_star(growth_df)
+    growth_df     = _add_star(growth_df)
     rev_growth_df = _add_star(rev_growth_df)
+    pat_growth_df = _add_star(pat_growth_df)
 
-    # ── Row 1: AUM Growth | Revenue Growth ───────────────────────────────────
+    # ── Row 1: AUM | Revenue | PAT Growth ────────────────────────────────────
     st.markdown('<div class="section-header">Growth — Latest 1 Year</div>', unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     with col1:
-        all_growers = growth_df.sort_values("growth_pct", ascending=False)
-        fig = make_hbar(all_growers, "growth_pct", "display_name",
-                        COLOR["success"], "AUM Growth % (Fastest → Slowest)",
-                        hover_text=all_growers["period_label"].values, text_suffix="%")
+        fig = make_hbar(growth_df.sort_values("growth_pct", ascending=False),
+                        "growth_pct", "display_name", COLOR["success"],
+                        "AUM Growth % (Fastest → Slowest)",
+                        hover_text=growth_df.sort_values("growth_pct", ascending=False)["period_label"].values,
+                        text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
     with col2:
-        all_rev = rev_growth_df.sort_values("growth_pct", ascending=False)
-        fig = make_hbar(all_rev, "growth_pct", "display_name",
-                        COLOR["primary"], "Revenue Growth % (Fastest → Slowest)",
-                        hover_text=all_rev["period_label"].values, text_suffix="%")
+        fig = make_hbar(rev_growth_df.sort_values("growth_pct", ascending=False),
+                        "growth_pct", "display_name", COLOR["primary"],
+                        "Revenue Growth % (Fastest → Slowest)",
+                        hover_text=rev_growth_df.sort_values("growth_pct", ascending=False)["period_label"].values,
+                        text_suffix="%")
+        st.plotly_chart(fig, use_container_width=True)
+    with col3:
+        fig = make_hbar(pat_growth_df.sort_values("growth_pct", ascending=False),
+                        "growth_pct", "display_name", COLOR["accent"],
+                        "PAT Growth % (Fastest → Slowest)",
+                        hover_text=pat_growth_df.sort_values("growth_pct", ascending=False)["period_label"].values,
+                        text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
 
     st.caption("★ = estimated data. 9MFY26 growth annualised: (9M value × 4/3) / FY25 − 1. Otherwise FY25 vs FY24.")
 
-    # ── Row 2: AUM Growth by Sector | Revenue Growth by Sector ───────────────
+    # ── Row 2: AUM | Revenue | PAT Growth by Sector ──────────────────────────
     st.markdown('<div class="section-header">Growth by Sector — Latest 1Y</div>', unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     with col1:
         sector_aum = (
             growth_df.merge(sectors_df, on="name", how="left")
@@ -1218,47 +1229,56 @@ with tabs[0]:
                         "Avg Revenue Growth % by Sector",
                         hover_text=[lbl] * len(sector_rev), text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
+    with col3:
+        sector_pat = (
+            pat_growth_df.merge(sectors_df, on="name", how="left")
+            .groupby("sector")["growth_pct"].mean().reset_index()
+            .sort_values("growth_pct", ascending=False)
+        )
+        fig = make_hbar(sector_pat, "growth_pct", "sector", COLOR["accent"],
+                        "Avg PAT Growth % by Sector",
+                        hover_text=[lbl] * len(sector_pat), text_suffix="%")
+        st.plotly_chart(fig, use_container_width=True)
 
-    # ── Row 3: AUM Growth vs Revenue Growth bubble chart ─────────────────────
-    st.markdown('<div class="section-header">AUM Growth vs Revenue Growth</div>', unsafe_allow_html=True)
+    # ── Row 3: Revenue Growth vs PAT Growth bubble chart ─────────────────────
+    st.markdown('<div class="section-header">Revenue Growth vs PAT Growth</div>', unsafe_allow_html=True)
     latest_lb = get_latest_period_data(fin_filtered)[["name", "loan_book_cr", "sector"]].dropna(subset=["loan_book_cr"])
     bubble_df = (
-        growth_df[["name", "growth_pct"]].rename(columns={"growth_pct": "aum_growth"})
-        .merge(rev_growth_df[["name", "growth_pct"]].rename(columns={"growth_pct": "rev_growth"}), on="name", how="inner")
+        rev_growth_df[["name", "growth_pct"]].rename(columns={"growth_pct": "rev_growth"})
+        .merge(pat_growth_df[["name", "growth_pct"]].rename(columns={"growth_pct": "pat_growth"}), on="name", how="inner")
         .merge(latest_lb, on="name", how="inner")
-        .dropna(subset=["aum_growth", "rev_growth", "loan_book_cr"])
+        .dropna(subset=["rev_growth", "pat_growth", "loan_book_cr"])
     )
     if not bubble_df.empty:
         fig = px.scatter(
-            bubble_df, x="aum_growth", y="rev_growth",
+            bubble_df, x="rev_growth", y="pat_growth",
             size="loan_book_cr", color="sector", hover_name="name",
             color_discrete_sequence=MV_PALETTE,
-            labels={"aum_growth": "AUM Growth %", "rev_growth": "Revenue Growth %"},
-            title="AUM Growth vs Revenue Growth (bubble = AUM size)",
+            labels={"rev_growth": "Revenue Growth %", "pat_growth": "PAT Growth %"},
+            title="Revenue Growth vs PAT Growth (bubble = AUM size)",
             height=520,
         )
         fig.update_traces(
             hovertemplate=(
                 "<b>%{hovertext}</b><br>"
-                "AUM Growth = %{x:.1f}%<br>"
-                "Revenue Growth = %{y:.1f}%"
+                "Revenue Growth = %{x:.1f}%<br>"
+                "PAT Growth = %{y:.1f}%"
                 "<extra></extra>"
             )
         )
-        # Diagonal reference line (equal growth)
-        g_min = min(bubble_df["aum_growth"].min(), bubble_df["rev_growth"].min())
-        g_max = max(bubble_df["aum_growth"].max(), bubble_df["rev_growth"].max())
+        g_min = min(bubble_df["rev_growth"].min(), bubble_df["pat_growth"].min())
+        g_max = max(bubble_df["rev_growth"].max(), bubble_df["pat_growth"].max())
         fig.add_shape(type="line", x0=g_min, y0=g_min, x1=g_max, y1=g_max,
                       line=dict(color=COLOR["text_secondary"], width=1, dash="dot"))
         fig.add_annotation(x=g_max, y=g_max, text="Equal growth", showarrow=False,
                            font=dict(size=10, color=COLOR["text_secondary"]), xanchor="right")
         chart_layout(fig)
         fig.update_layout(
-            xaxis=dict(title="AUM Growth %", title_font=dict(size=12, family=CHART_FONT)),
-            yaxis=dict(title="Revenue Growth %", title_font=dict(size=12, family=CHART_FONT)),
+            xaxis=dict(title="Revenue Growth %", title_font=dict(size=12, family=CHART_FONT)),
+            yaxis=dict(title="PAT Growth %", title_font=dict(size=12, family=CHART_FONT)),
         )
         st.plotly_chart(fig, use_container_width=True)
-    st.caption("Bubbles above the diagonal line = revenue growing faster than AUM (improving yield). Below = AUM growing faster than revenue.")
+    st.caption("Bubbles above the diagonal = PAT growing faster than revenue (margin expansion). Below = revenue outpacing profit.")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 2: PROFITABILITY
