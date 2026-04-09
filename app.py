@@ -1596,12 +1596,21 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
           d.style.letterSpacing = '-0.01em';
         }}
       }});
-      // Select-all on open so user can type immediately; preserves BaseWeb selection state
+      // Blank the input when dropdown opens so user can type immediately.
+      // Uses double-rAF + React native setter so we fire AFTER BaseWeb sets
+      // its own value, and React registers the change properly.
       var inp = sel.querySelector('input');
       if (inp && !inp._clearBound) {{
         inp._clearBound = true;
+        var _reactSetter = Object.getOwnPropertyDescriptor(
+          window.parent.HTMLInputElement.prototype, 'value').set;
         inp.addEventListener('focus', function() {{
-          setTimeout(function() {{ inp.select(); }}, 0);
+          requestAnimationFrame(function() {{
+            requestAnimationFrame(function() {{
+              _reactSetter.call(inp, '');
+              inp.dispatchEvent(new Event('input', {{ bubbles: true }}));
+            }});
+          }});
         }});
       }}
     }});
