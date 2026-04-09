@@ -1050,10 +1050,7 @@ if _AUTH_ENABLED:
 # ── Active filter badge (computed here, injected into page header below) ──────
 _active_filters = []
 if sector_filter and len(sector_filter) < len(all_sectors):
-    if len(sector_filter) == 1:
-        _active_filters.append(f"Sector: {sector_filter[0]}")
-    else:
-        _active_filters.append(f"{len(sector_filter)} Sectors")
+    _active_filters.append(", ".join(sector_filter))
 if rbi_layer != "All":
     _active_filters.append(f"Layer: {rbi_layer}")
 if listing_filter != "All":
