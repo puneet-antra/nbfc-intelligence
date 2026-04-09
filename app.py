@@ -897,7 +897,7 @@ def _title_dict(raw_title, pad_t=10, pad_b=14):
         text = f"<b>{main.replace(' ', chr(160))}</b>"
     return dict(
         text=text,
-        font=dict(color=COLOR["text"], size=15.5, family=CHART_TITLE_FONT),
+        font=dict(color=COLOR["text"], size=13, family=CHART_TITLE_FONT),
         x=0.5, xanchor="center", xref="paper",
         pad=dict(t=pad_t, b=pad_b),
     )
