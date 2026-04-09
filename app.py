@@ -1244,8 +1244,10 @@ with tabs[0]:
     st.markdown('<div class="section-header">Revenue Growth vs PAT Growth</div>', unsafe_allow_html=True)
     latest_lb = get_latest_period_data(fin_filtered)[["name", "loan_book_cr", "sector"]].dropna(subset=["loan_book_cr"])
     bubble_df = (
-        rev_growth_df[["name", "growth_pct"]].rename(columns={"growth_pct": "rev_growth"})
-        .merge(pat_growth_df[["name", "growth_pct"]].rename(columns={"growth_pct": "pat_growth"}), on="name", how="inner")
+        rev_growth_df[["name", "growth_pct", "period_label"]].rename(
+            columns={"growth_pct": "rev_growth", "period_label": "rev_period"})
+        .merge(pat_growth_df[["name", "growth_pct", "period_label"]].rename(
+            columns={"growth_pct": "pat_growth", "period_label": "pat_period"}), on="name", how="inner")
         .merge(latest_lb, on="name", how="inner")
         .dropna(subset=["rev_growth", "pat_growth", "loan_book_cr"])
         .query("name != 'Sammaan Capital'")
@@ -1255,7 +1257,7 @@ with tabs[0]:
             bubble_df, x="rev_growth", y="pat_growth",
             size="loan_book_cr", color="sector",
             hover_name="name",
-            custom_data=["name", "rev_growth", "pat_growth"],
+            custom_data=["name", "rev_growth", "rev_period", "pat_growth", "pat_period"],
             color_discrete_sequence=MV_PALETTE,
             labels={"rev_growth": "Revenue Growth %", "pat_growth": "PAT Growth %"},
             title="Revenue Growth vs PAT Growth (bubble = AUM size)",
@@ -1269,8 +1271,8 @@ with tabs[0]:
         fig.update_traces(
             hovertemplate=(
                 "<b>%{customdata[0]}</b><br>"
-                "Rev Growth = %{customdata[1]:.1f}%<br>"
-                "PAT Growth = %{customdata[2]:.1f}%"
+                "Rev Growth = %{customdata[1]:.1f}% (%{customdata[2]})<br>"
+                "PAT Growth = %{customdata[3]:.1f}% (%{customdata[4]})"
                 "<extra></extra>"
             )
         )
