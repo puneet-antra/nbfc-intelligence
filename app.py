@@ -1698,30 +1698,17 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       return found;
     }}
 
-    // mousedown fires BEFORE BaseWeb hides the display div:
-    // 1. Cache the displayed name for use in focusin
-    // 2. Briefly highlight the display div so the user sees the name selected
+    // mousedown fires BEFORE BaseWeb hides the display div — cache the name only.
     doc.addEventListener('mousedown', function(e) {{
       var box = getNbfcBox(e.target);
       if (!box) return;
       var v = readDisplayVal(box);
       if (v) _nbfcVal = v;
-      // Visual: grey background on the display div container
-      var displayDiv = box.querySelector(
-        '[data-baseweb="select"] > div:first-child > div:first-child');
-      if (displayDiv) {{
-        displayDiv.style.background   = '#E2E4E9';
-        displayDiv.style.borderRadius = '3px';
-        setTimeout(function() {{
-          displayDiv.style.background   = '';
-          displayDiv.style.borderRadius = '';
-        }}, 600);
-      }}
     }});
 
-    // focusin: write cached name directly into input and select-all.
-    // Direct inp.value (no React setter, no event dispatch) keeps BaseWeb
-    // out of filter mode → single-click option selection works.
+    // focusin: 50 ms after focus, BaseWeb has finished its own render cycle.
+    // Write the cached name and select it — direct DOM write (no React event
+    // dispatch) keeps BaseWeb out of filter mode → single-click option works.
     doc.addEventListener('focusin', function(e) {{
       if (!e.target || e.target.tagName !== 'INPUT') return;
       var box = getNbfcBox(e.target);
@@ -1729,32 +1716,16 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       var inp = e.target;
       var val = _nbfcVal;
       if (!val) return;
-      // Two parent-rAFs: fire after BaseWeb's own focusin handler has rendered
-      window.parent.requestAnimationFrame(function() {{
-        window.parent.requestAnimationFrame(function() {{
-          if (inp !== doc.activeElement) return;
-          inp.value = val;           // direct DOM write — no React event dispatch
-          inp.select();              // select all text (primary)
-          inp.setSelectionRange(0, val.length);  // backup in case select() doesn't persist
-          // Third frame: re-assert selection in case BaseWeb reset cursor after rAF2
-          window.parent.requestAnimationFrame(function() {{
-            if (inp !== doc.activeElement) return;
-            inp.setSelectionRange(0, val.length);
-          }});
-        }});
-      }});
+      setTimeout(function() {{
+        if (inp !== doc.activeElement) return;
+        inp.value = val;                    // write name (no React event)
+        inp.setSelectionRange(0, val.length); // highlight all text
+      }}, 50);
     }});
 
     doc.addEventListener('focusout', function(e) {{
       var box = getNbfcBox(e.target);
       if (box) {{
-        // Clear any residual display-div highlight
-        var displayDiv = box.querySelector(
-          '[data-baseweb="select"] > div:first-child > div:first-child');
-        if (displayDiv) {{
-          displayDiv.style.background   = '';
-          displayDiv.style.borderRadius = '';
-        }}
         // Refresh the cache and re-apply bold styling after dropdown closes
         var v = readDisplayVal(box);
         if (v) _nbfcVal = v;
