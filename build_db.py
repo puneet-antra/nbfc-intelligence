@@ -326,17 +326,16 @@ FINANCIALS = [
     # Total assets / equity = consolidated MoneyView balance sheet (per DRHP).
     # Credit loss rate = annualized loss rate on managed AUM (incl. off-book) per DRHP.
     # GNPA = Gross Stage 3 / NPA on WFPL's on-book portfolio (CARE Ratings; DRHP for 9MFY26).
-    # ROA = annualized PAT / avg WFPL on-book loan book. ROE per DRHP (avg equity basis).
+    # ROA = annualized PAT / avg managed AUM. ROE per DRHP (avg equity basis).
     # For 9MFY26: PAT annualized from 9M before exceptional items (₹245 Cr × 4/3 = ₹327 Cr).
-    # ROA note: FY23 ROA high because PAT (₹163 Cr) was mainly fee income; loan book (₹369 Cr) was tiny.
-    ("MoneyView", "FY2023",   369, 1724, 1314,  577, 163, None,  None, None, 44.17, 12.40, "DRHP",
-     "MoneyView DRHP Mar-2026 + CARE Ratings. FY23: WFPL on-book loan book ₹369 Cr; consolidated total assets ₹1,724 Cr; equity ₹1,314 Cr; revenue ₹577 Cr; PAT ₹163 Cr. Managed AUM ₹7,644 Cr. ROA = PAT/ending loan book (no FY22 book; FY23 PAT was mostly fee income). ROE = PAT/ending equity."),
-    ("MoneyView", "FY2024",  1968, 3520, 1607, 1342, 171, None,  7.93, 0.90, 14.63, 11.72, "DRHP",
-     "MoneyView DRHP Mar-2026 + CARE Ratings. FY24: WFPL on-book loan book ₹1,968 Cr; consolidated total assets ₹3,520 Cr; equity ₹1,607 Cr; revenue ₹1,342 Cr; PAT ₹171 Cr; credit loss rate 7.93% (annualized managed AUM basis); GNPA 0.90% (WFPL Gross Stage 3, CARE Ratings). Managed AUM ₹12,885 Cr. ROA = PAT/avg loan book (369+1968)/2; ROE per DRHP."),
-    ("MoneyView", "FY2025",  3933, 5632, 1919, 2339, 240,  346,  7.07, 1.90,  8.13, 13.63, "DRHP",
-     "MoneyView DRHP Mar-2026 + CARE Ratings. FY25: WFPL on-book loan book ₹3,933 Cr; consolidated total assets ₹5,632 Cr; equity ₹1,919 Cr; revenue ₹2,339 Cr (fees ₹1,487 Cr + interest ₹789 Cr); PAT ₹240 Cr; impairment ₹346 Cr + DLG expense ₹322 Cr; credit loss rate 7.07% (annualized managed AUM). GNPA 1.90% (WFPL Gross Stage 3, CARE Ratings). Managed AUM ₹16,715 Cr. ROA = PAT/avg loan book (1968+3933)/2; ROE per DRHP."),
-    ("MoneyView", "FY2026-Q3", 5144, 7719, 2169, 2373, 245,  724,  None, 2.53,  7.20, 15.98, "DRHP",
-     "MoneyView DRHP Mar-2026 + CARE Ratings. 9MFY26 (Apr-Dec 2025): WFPL AUM ₹5,144 Cr (H1FY26 Sep-2025); consolidated total assets ₹7,719 Cr; equity ₹2,169 Cr; revenue ₹2,373 Cr; PAT ₹245 Cr before exceptional items (reported ₹210 Cr); impairment ₹724 Cr; Gross Stage 3 (WFPL) 2.53%. Managed AUM ₹19,815 Cr. ROA = annualized PAT (₹245×4/3=₹327 Cr)/avg loan book (3933+5144)/2; ROE per DRHP avg equity."),
+    ("MoneyView", "FY2023",   369, 1724, 1314,  577, 163, None,  None, None,  2.13, 12.40, "DRHP",
+     "MoneyView DRHP Mar-2026 + CARE Ratings. FY23: WFPL on-book loan book ₹369 Cr; managed AUM ₹7,644 Cr; total assets ₹1,724 Cr; equity ₹1,314 Cr; revenue ₹577 Cr; PAT ₹163 Cr. ROA = PAT/ending managed AUM (no FY22 AUM). ROE = PAT/ending equity."),
+    ("MoneyView", "FY2024",  1968, 3520, 1607, 1342, 171, None,  7.93, 0.90,  1.67, 11.72, "DRHP",
+     "MoneyView DRHP Mar-2026 + CARE Ratings. FY24: WFPL on-book loan book ₹1,968 Cr; managed AUM ₹12,885 Cr; total assets ₹3,520 Cr; equity ₹1,607 Cr; revenue ₹1,342 Cr; PAT ₹171 Cr; credit loss rate 7.93% (annualized managed AUM); GNPA 0.90% (WFPL Gross Stage 3). ROA = PAT/avg managed AUM (7644+12885)/2; ROE per DRHP."),
+    ("MoneyView", "FY2025",  3933, 5632, 1919, 2339, 240,  346,  7.07, 1.90,  1.62, 13.63, "DRHP",
+     "MoneyView DRHP Mar-2026 + CARE Ratings. FY25: WFPL on-book loan book ₹3,933 Cr; managed AUM ₹16,715 Cr; total assets ₹5,632 Cr; equity ₹1,919 Cr; revenue ₹2,339 Cr; PAT ₹240 Cr; impairment ₹346 Cr + DLG expense ₹322 Cr; credit loss rate 7.07% (annualized managed AUM); GNPA 1.90% (WFPL Gross Stage 3). ROA = PAT/avg managed AUM (12885+16715)/2; ROE per DRHP."),
+    ("MoneyView", "FY2026-Q3", 5144, 7719, 2169, 2373, 245,  724,  None, 2.53,  1.79, 15.98, "DRHP",
+     "MoneyView DRHP Mar-2026 + CARE Ratings. 9MFY26 (Apr-Dec 2025): WFPL on-book ₹5,144 Cr (H1FY26); managed AUM ₹19,815 Cr; total assets ₹7,719 Cr; equity ₹2,169 Cr; revenue ₹2,373 Cr; PAT ₹245 Cr before exceptional items (reported ₹210 Cr); impairment ₹724 Cr; GNPA 2.53%. ROA = annualized PAT ₹327 Cr/avg managed AUM (16715+19815)/2; ROE per DRHP avg equity."),
 ]
 
 
