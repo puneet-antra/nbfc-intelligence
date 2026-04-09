@@ -1160,38 +1160,64 @@ tabs = st.tabs([
 # TAB 1: GROWTH
 # ─────────────────────────────────────────────────────────────────────────────
 with tabs[0]:
-    st.markdown('<div class="section-header">AUM Growth — Latest 1 Year (9MFY26 vs FY25 where available, else FY25 vs FY24)</div>',
-                unsafe_allow_html=True)
-
-    growth_df = compute_latest_growth(fin_filtered, "loan_book_cr").dropna(subset=["growth_pct"])
-
+    lbl = latest_period_label(fin_filtered)
     estimated_names = set(
         fin_filtered[fin_filtered["data_quality"] == "estimated"]["name"].unique()
     )
-    growth_df["display_name"] = growth_df["name"].apply(
-        lambda n: n + " ★" if n in estimated_names else n
-    )
+    sectors_df = fin_filtered[["name", "sector"]].drop_duplicates()
 
-    all_growers = growth_df.sort_values("growth_pct", ascending=False)
-    fig = make_hbar(all_growers, "growth_pct", "display_name",
-                    COLOR["success"], "AUM Growth % (Fastest → Slowest)",
-                    hover_text=all_growers["period_label"].values, text_suffix="%")
-    st.plotly_chart(fig, use_container_width=True)
+    growth_df = compute_latest_growth(fin_filtered, "loan_book_cr").dropna(subset=["growth_pct"])
+    rev_growth_df = compute_latest_growth(fin_filtered, "net_interest_income_cr").dropna(subset=["growth_pct"])
 
-    st.caption("★ = estimated data. Where 9MFY26 data exists: growth is annualised ((9M AUM / FY25 AUM)^(12/9) − 1) to make it comparable to a full year. Otherwise: FY25 vs FY24.")
+    def _add_star(df):
+        df = df.copy()
+        df["display_name"] = df["name"].apply(lambda n: n + " ★" if n in estimated_names else n)
+        return df
 
-    # Bubble: growth vs profitability
-    lbl = latest_period_label(fin_filtered)
+    growth_df = _add_star(growth_df)
+    rev_growth_df = _add_star(rev_growth_df)
 
-    # Growth by sector
-    st.markdown('<div class="section-header">AUM Growth by Sector (Latest 1Y)</div>', unsafe_allow_html=True)
-    sector_growth = growth_df.merge(
-        fin_filtered[["name", "sector"]].drop_duplicates(), on="name", how="left"
-    ).groupby("sector")["growth_pct"].mean().reset_index().sort_values("growth_pct", ascending=False)
-    fig = make_hbar(sector_growth, "growth_pct", "sector", COLOR["primary"],
-                    "Avg AUM Growth % by Sector",
-                    hover_text=[lbl] * len(sector_growth), text_suffix="%")
-    st.plotly_chart(fig, use_container_width=True)
+    # ── Row 1: AUM Growth | Revenue Growth ───────────────────────────────────
+    st.markdown('<div class="section-header">Growth — Latest 1 Year</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        all_growers = growth_df.sort_values("growth_pct", ascending=False)
+        fig = make_hbar(all_growers, "growth_pct", "display_name",
+                        COLOR["success"], "AUM Growth % (Fastest → Slowest)",
+                        hover_text=all_growers["period_label"].values, text_suffix="%")
+        st.plotly_chart(fig, use_container_width=True)
+    with col2:
+        all_rev = rev_growth_df.sort_values("growth_pct", ascending=False)
+        fig = make_hbar(all_rev, "growth_pct", "display_name",
+                        COLOR["primary"], "Revenue Growth % (Fastest → Slowest)",
+                        hover_text=all_rev["period_label"].values, text_suffix="%")
+        st.plotly_chart(fig, use_container_width=True)
+
+    st.caption("★ = estimated data. 9MFY26 growth annualised: (9M value × 4/3) / FY25 − 1. Otherwise FY25 vs FY24.")
+
+    # ── Row 2: AUM Growth by Sector | Revenue Growth by Sector ───────────────
+    st.markdown('<div class="section-header">Growth by Sector — Latest 1Y</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        sector_aum = (
+            growth_df.merge(sectors_df, on="name", how="left")
+            .groupby("sector")["growth_pct"].mean().reset_index()
+            .sort_values("growth_pct", ascending=False)
+        )
+        fig = make_hbar(sector_aum, "growth_pct", "sector", COLOR["primary"],
+                        "Avg AUM Growth % by Sector",
+                        hover_text=[lbl] * len(sector_aum), text_suffix="%")
+        st.plotly_chart(fig, use_container_width=True)
+    with col2:
+        sector_rev = (
+            rev_growth_df.merge(sectors_df, on="name", how="left")
+            .groupby("sector")["growth_pct"].mean().reset_index()
+            .sort_values("growth_pct", ascending=False)
+        )
+        fig = make_hbar(sector_rev, "growth_pct", "sector", COLOR["success"],
+                        "Avg Revenue Growth % by Sector",
+                        hover_text=[lbl] * len(sector_rev), text_suffix="%")
+        st.plotly_chart(fig, use_container_width=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 2: PROFITABILITY
