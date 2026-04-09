@@ -1251,6 +1251,7 @@ with tabs[0]:
         .merge(latest_lb, on="name", how="inner")
         .dropna(subset=["rev_growth", "pat_growth", "loan_book_cr"])
         .query("name != 'Sammaan Capital'")
+        .query("pat_growth >= -200 and pat_growth <= 500")
     )
     if not bubble_df.empty:
         # Check if all companies share the same period for both metrics
