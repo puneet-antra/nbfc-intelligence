@@ -819,7 +819,7 @@ def compute_latest_growth(df, metric_col):
     if not ann_9m.empty:
         ann = ann_9m[["nbfc_id", "name", metric_col]].rename(columns={metric_col: "recent"})
         merged = ann.merge(fy25, on=["nbfc_id", "name"], how="inner")
-        merged = merged[(merged["recent"] > 0) & (merged["fy25"] > 0)]
+        merged = merged[merged["fy25"] != 0]  # only exclude zero FY25 (avoid division by zero)
         # Annualise: 9MFY26 covers 9 months vs FY25's 12 months
         merged["growth_pct"] = (merged["recent"] * (4 / 3) / merged["fy25"] - 1) * 100
         merged["period_label"] = "9MFY26 (Ann.) vs FY25"
