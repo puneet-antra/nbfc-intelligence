@@ -750,28 +750,52 @@ HOVER_LABEL = dict(
 )
 
 
-def wrap_title(title, max_len=32):
-    """Insert <br> at a natural break; first line bold, second line normal weight."""
-    if "<br>" in title:          # already wrapped — don't double-process
-        return title
-    def _split(first, rest):
-        return f'<b>{first}</b><br><b><font color="#8B8FA8">{rest}</font></b>'
-    # Any parenthetical qualifier always goes to the second line (checked before length guard)
+def split_title(title, max_len=32):
+    """Split a chart title into (main, subtitle_or_None).
+
+    Uses Plotly's native subtitle support (>=5.18) so no HTML tag hacks needed.
+    """
+    if not title:
+        return "", None
+    # Any parenthetical always becomes the subtitle
     paren_idx = title.find(" (")
     if paren_idx > 0:
-        return _split(title[:paren_idx], title[paren_idx:].lstrip())
-    # Short titles with no parenthetical: no wrapping needed
+        return title[:paren_idx].strip(), title[paren_idx:].strip()
+    # Short titles with no parenthetical: no split
     if len(title) <= max_len:
-        return title
-    # Long titles: split at natural separator or word boundary
-    for sep in [" — ", " (", ": ", " - ", " vs "]:
+        return title, None
+    # Long titles: split at natural separator
+    for sep in [" — ", ": ", " - ", " vs "]:
         idx = title.find(sep)
         if 0 < idx <= max_len:
-            return _split(title[:idx], title[idx:].lstrip())
+            return title[:idx].strip(), title[idx:].strip()
     idx = title.rfind(" ", 0, max_len)
     if idx > 0:
-        return _split(title[:idx], title[idx + 1:])
-    return title
+        return title[:idx].strip(), title[idx + 1:].strip()
+    return title, None
+
+
+def _title_dict(raw_title, pad_t=8, pad_b=12):
+    """Build a Plotly title dict with optional native subtitle (Plotly >=5.18)."""
+    main, sub = split_title(raw_title)
+    d = dict(
+        text=main,
+        font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT, weight="bold"),
+        x=0.5, xanchor="center", xref="paper",
+        pad=dict(t=pad_t, b=pad_b),
+    )
+    if sub:
+        d["subtitle"] = dict(
+            text=sub,
+            font=dict(color="#8B8FA8", size=12, family=CHART_TITLE_FONT, weight="bold"),
+        )
+    return d
+
+
+# Keep wrap_title as a thin shim so any callers that still use it keep working
+def wrap_title(title, max_len=32):
+    main, sub = split_title(title, max_len)
+    return f"{main}<br>{sub}" if sub else main
 
 
 def note(text, kind="info"):
@@ -808,12 +832,7 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None):
         cliponaxis=False,
     )
     fig.update_layout(
-        title=dict(
-            text=wrap_title(title),
-            font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT),
-            x=0.5, xanchor="center", xref="paper",
-            pad=dict(t=8, b=12),
-        ),
+        title=_title_dict(title),
         paper_bgcolor=CHART_PAPER, plot_bgcolor=CHART_BG,
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
         yaxis=dict(autorange="reversed", tickfont=dict(family=CHART_FONT, size=12),
@@ -837,16 +856,11 @@ def chart_layout(fig, title=None):
     existing = ""
     if fig.layout.title and fig.layout.title.text:
         existing = fig.layout.title.text
-    t = wrap_title(title) if title else (wrap_title(existing) if existing else "")
+    raw = title or existing
     fig.update_layout(
         paper_bgcolor=CHART_PAPER, plot_bgcolor=CHART_BG,
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
-        title=dict(
-            text=t,
-            font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT),
-            x=0.5, xanchor="center", xref="paper",
-            pad=dict(t=8, b=12),
-        ),
+        title=_title_dict(raw) if raw else {},
         xaxis=dict(
             showgrid=False,
             tickfont=dict(family=CHART_MONO, size=11, color="#73757A"),
@@ -1120,10 +1134,7 @@ with tabs[1]:
                          text=sector_avg["roe"].round(1), textposition="outside",
                          textfont=dict(family=CHART_MONO, size=10)))
     fig.update_layout(barmode="group", paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
-                      title=dict(text=wrap_title(f"ROA & ROE by Sector ({lbl})"),
-                                 font=dict(color=COLOR["text"], family=CHART_FONT, size=14, weight="bold"),
-                                 x=0.5, xanchor="center", xref="paper",
-                                 pad=dict(t=6, b=10)),
+                      title=_title_dict(f"ROA & ROE by Sector ({lbl})"),
                       font=dict(color=COLOR["text_secondary"], family=CHART_FONT),
                       height=420,
                       margin=dict(t=82, b=80, l=10, r=24),
@@ -1218,9 +1229,7 @@ with tabs[2]:
         showscale=True,
     ))
     fig.update_layout(
-        title=dict(text=wrap_title(f"GNPA % Heatmap (to {lbl})"),
-                   font=dict(color=COLOR["text"], family=CHART_FONT, size=14, weight="bold"),
-                   x=0.5, xanchor="center", xref="paper", pad=dict(t=6, b=8)),
+        title=_title_dict(f"GNPA % Heatmap (to {lbl})"),
         paper_bgcolor=CHART_BG,
         height=max(340, len(stressed_35) * 26),
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
@@ -1312,9 +1321,7 @@ with tabs[3]:
                            cliponaxis=False))
     wf_max = wf["change"].abs().max() if not wf.empty else 1
     fig.update_layout(
-        title=dict(text=wrap_title("Change in Credit Loss Rate: FY2021 → FY2025 (green = improved)"),
-                   font=dict(color=COLOR["text"], family=CHART_FONT, size=14, weight="bold"),
-                   x=0.5, xanchor="center", xref="paper", pad=dict(t=6, b=10)),
+        title=_title_dict("Change in Credit Loss Rate: FY2021 → FY2025 (green = improved)"),
         paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT),
         height=bar_chart_height(len(wf)),
@@ -1347,9 +1354,7 @@ with tabs[3]:
         texttemplate="%{text}", showscale=True,
     ))
     fig.update_layout(
-        title=dict(text=wrap_title(f"Credit Loss Rate % Heatmap (to {lbl})"),
-                   font=dict(color=COLOR["text"], family=CHART_FONT, size=14, weight="bold"),
-                   x=0.5, xanchor="center", xref="paper", pad=dict(t=6, b=8)),
+        title=_title_dict(f"Credit Loss Rate % Heatmap (to {lbl})"),
         paper_bgcolor=CHART_BG, height=max(340, len(top40) * 26),
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
         margin=dict(t=82, b=30, l=10, r=30),
@@ -1710,9 +1715,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
             ))
             title_txt = f"NII & PAT (₹ Crore, to {lbl})" if has_nii else f"PAT (₹ Crore, to {lbl}) — NII not disclosed"
             fig.update_layout(
-                title=dict(text=wrap_title(title_txt),
-                           font=dict(color=COLOR["text"], family=CHART_FONT, size=14, weight="bold"),
-                           x=0.5, xanchor="center", xref="paper", pad=dict(t=6, b=10)),
+                title=_title_dict(title_txt),
                 height=400,
                 xaxis=dict(categoryorder="array", categoryarray=PERIOD_ORDER,
                            showgrid=False, tickcolor="rgba(0,0,0,0)",
