@@ -569,9 +569,11 @@ MV_PALETTE = [
 ]
 
 PERIOD_ORDER = ["FY2021", "FY2022", "FY2023", "FY2024", "FY2025", "9MFY26"]
+PERIOD_ORDER_ANN = ["FY2021", "FY2022", "FY2023", "FY2024", "FY2025", "9MFY26 (Ann.)"]
 PERIOD_SHORT = {
     "FY2021": "FY21", "FY2022": "FY22", "FY2023": "FY23",
     "FY2024": "FY24", "FY2025": "FY25", "9MFY26": "9MFY26",
+    "9MFY26 (Ann.)": "9MFY26 (Ann.)",
 }
 
 # ── Ensure DB exists ─────────────────────────────────────────────────────────
@@ -638,13 +640,14 @@ def annualise_9m(df):
     """
     Build 9MFY26 rows from FY2026-Q3 data.
     - NII: annualised (×4/3) so it is comparable to full-year figures on charts.
-    - PAT, credit_losses_cr: raw 9-month values (adjusted for exceptional items where applicable).
-    - ROA: recalculated using annualised PAT (×4/3) ÷ avg loan book.
-    - ROE: recalculated using annualised PAT (×4/3) ÷ avg equity.
+    - PAT: annualised (×4/3) after exceptional items adjustment.
+    - credit_losses_cr: raw 9-month value (rate is annualised separately).
+    - ROA: annualised PAT ÷ avg loan book (pat_cr already annualised — used directly).
+    - ROE: annualised PAT ÷ avg equity (pat_cr already annualised — used directly).
     - credit_loss_rate_pct: annualised credit losses (×4/3) ÷ avg loan book
       (avg of FY2025 closing and Q3 closing).
     - EXCEPTIONAL_ITEMS_ADJ: company-specific post-tax one-time items subtracted
-      from annualised PAT before computing ROA/ROE (pat_cr column unchanged).
+      from 9M PAT before annualising.
     """
     q3 = df[df["period"] == "FY2026-Q3"].copy()
     if q3.empty:
@@ -662,18 +665,18 @@ def annualise_9m(df):
             adj = adj.where(~mask, adj - adj_cr)
         return adj
 
-    # Adjust pat_cr itself so PAT charts/tables also reflect ex-exceptional figures
+    # Adjust and annualise pat_cr: subtract exceptional items then multiply by 4/3
     if "pat_cr" in ann.columns:
-        ann["pat_cr"] = _adj_9m_pat(ann["pat_cr"])
+        ann["pat_cr"] = _adj_9m_pat(ann["pat_cr"]) * (4 / 3)
 
     # Annualise NII so it is comparable to full-year figures on trend charts
     if "net_interest_income_cr" in ann.columns:
         ann["net_interest_income_cr"] = ann["net_interest_income_cr"] * (4 / 3)
 
     # ROA: annualised adjusted PAT ÷ avg loan book (FY25 + Q3) / 2
-    # pat_cr is already adjusted above — multiply by 4/3 directly, no second adjustment
+    # pat_cr is already annualised (×4/3) — use directly
     if "pat_cr" in ann.columns and "loan_book_cr" in ann.columns and not fy25.empty:
-        ann_pat = ann["pat_cr"] * (4 / 3)
+        ann_pat = ann["pat_cr"]
         fy25_lb = fy25.set_index("nbfc_id")["loan_book_cr"]
         avg_lb = ann.apply(
             lambda r: (fy25_lb.get(r["nbfc_id"], r["loan_book_cr"]) + r["loan_book_cr"]) / 2,
@@ -682,8 +685,9 @@ def annualise_9m(df):
         ann["roa_pct"] = (ann_pat.values / avg_lb.values * 100)
 
     # ROE: annualised adjusted PAT ÷ avg equity (FY25 + Q3) / 2
+    # pat_cr is already annualised (×4/3) — use directly
     if "pat_cr" in ann.columns and "equity_cr" in ann.columns and not fy25.empty:
-        ann_pat = ann["pat_cr"] * (4 / 3)
+        ann_pat = ann["pat_cr"]
         fy25_equity = fy25.set_index("nbfc_id")["equity_cr"]
         avg_equity = ann.apply(
             lambda r: (fy25_equity.get(r["nbfc_id"], r["equity_cr"]) + r["equity_cr"]) / 2,
@@ -1195,7 +1199,7 @@ with tabs[1]:
                f"★ = estimated data.")
     note("KreditBee 9MFY26: ROA & ROE adjusted to exclude ~₹152 Cr post-tax one-time items "
          "(₹104 Cr GST provision reversal after Karnataka HC ruling, Dec 2025 + ₹48 Cr DTA recognition). "
-         "Reported 9M PAT was ₹341 Cr; adjusted figure used for ratios is ~₹189 Cr.", "warning")
+         "Reported 9M PAT was ₹341 Cr; adjusted 9M PAT ~₹189 Cr → annualised ~₹252 Cr used for ratios.", "warning")
     note("Moneyview 9MFY26: Loan book = managed AUM (₹19,815 Cr). ROA = annualised PAT ₹327 Cr / avg managed AUM "
          "₹18,265 Cr = 1.79%. Annualized loss rate = annualised impairment ₹965 Cr / avg managed AUM = 5.29%. "
          "PAT = ₹245 Cr before exceptional items (reported ₹210 Cr). Source: DRHP filed Mar-2026.", "info")
@@ -1241,18 +1245,20 @@ with tabs[1]:
     top10_names = latest_snap.nlargest(10, "pat_cr")["name"].tolist()
     chart_df = get_chart_periods(fin_filtered)
     pat_trend = chart_df[chart_df["name"].isin(top10_names)][["name", "period", "pat_cr"]].dropna()
+    pat_trend = pat_trend.copy()
+    pat_trend["period"] = pat_trend["period"].replace("9MFY26", "9MFY26 (Ann.)")
 
     fig = px.line(pat_trend, x="period", y="pat_cr", color="name",
                   color_discrete_sequence=MV_PALETTE,
                   labels={"pat_cr": "PAT (₹ Crore)", "period": "Period"},
                   title=f"Profit After Tax Trend — incl. {lbl} (₹ Crore)", height=460,
-                  category_orders={"period": PERIOD_ORDER})
+                  category_orders={"period": PERIOD_ORDER_ANN})
     chart_layout(fig)
     st.plotly_chart(fig, use_container_width=True)
-    st.caption("9MFY26 = Q3 FY26 nine-month PAT (raw, not annualised).")
-    note("KreditBee 9MFY26 PAT shown above is adjusted (~₹189 Cr) excluding ~₹152 Cr post-tax "
+    st.caption("9MFY26 (Ann.) = 9-month PAT annualised (×4/3) to be comparable with full-year figures.")
+    note("KreditBee 9MFY26 PAT shown above is adjusted and annualised (~₹252 Cr) excluding ~₹152 Cr post-tax "
          "one-time items (₹104 Cr GST provision reversal + ₹48 Cr DTA recognition). "
-         "Reported 9M PAT was ₹341 Cr.", "warning")
+         "Reported 9M PAT was ₹341 Cr; adjusted 9M PAT ~₹189 Cr → annualised ~₹252 Cr.", "warning")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 3: ASSET QUALITY
@@ -1473,13 +1479,15 @@ with tabs[8]:
         st.markdown(f'<div class="section-header">NII Trend (to {lbl})</div>', unsafe_allow_html=True)
         nii_df = chart_df[chart_df["name"].isin(top10)][
             ["name", "period", "net_interest_income_cr"]].dropna()
+        nii_df = nii_df.copy()
+        nii_df["period"] = nii_df["period"].replace("9MFY26", "9MFY26 (Ann.)")
         fig = px.line(nii_df, x="period", y="net_interest_income_cr", color="name",
                       color_discrete_sequence=MV_PALETTE,
                       title=f"Net Interest Income (₹ Crore, to {lbl})", height=420,
-                      category_orders={"period": PERIOD_ORDER})
+                      category_orders={"period": PERIOD_ORDER_ANN})
         chart_layout(fig)
         st.plotly_chart(fig, use_container_width=True)
-        st.caption("9MFY26 NII is annualised (×4/3) to be comparable with full-year figures.")
+        st.caption("9MFY26 (Ann.) = 9-month NII annualised (×4/3) to be comparable with full-year figures.")
 
     with col2:
         st.markdown(f'<div class="section-header">Industry Assets by RBI Layer (to {lbl})</div>',
@@ -1771,8 +1779,9 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
             m1, m2, m3, m4, m5, m6 = st.columns(6)
             m1.metric("Loan Book", f"₹{r['loan_book_cr']:,.0f} Cr" if pd.notna(r.get("loan_book_cr")) else "N/A")
             m2.metric("Total Assets", f"₹{r['total_assets_cr']:,.0f} Cr" if pd.notna(r.get("total_assets_cr")) else "N/A")
-            m3.metric("NII", f"₹{r['net_interest_income_cr']:,.0f} Cr" if pd.notna(r.get("net_interest_income_cr")) else "N/A")
-            m4.metric("PAT", f"₹{r['pat_cr']:,.0f} Cr" if pd.notna(r.get("pat_cr")) else "N/A")
+            _ann_sfx = " (Ann.)" if has_q3 else ""
+            m3.metric(f"NII{_ann_sfx}", f"₹{r['net_interest_income_cr']:,.0f} Cr" if pd.notna(r.get("net_interest_income_cr")) else "N/A")
+            m4.metric(f"PAT{_ann_sfx}", f"₹{r['pat_cr']:,.0f} Cr" if pd.notna(r.get("pat_cr")) else "N/A")
             m5.metric("GNPA %", f"{r['gnpa_pct']:.2f}%" if pd.notna(r.get("gnpa_pct")) else "N/A")
             m6.metric("ROA %", f"{r['roa_pct']:.2f}%" if pd.notna(r.get("roa_pct")) else "N/A")
 
@@ -1802,8 +1811,10 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
             st.plotly_chart(fig, use_container_width=True)
         with col2:
             # Require PAT; NII is optional — plot whichever series has data
-            pat_df = chart_df[["period", "pat_cr"]].dropna(subset=["pat_cr"])
-            nii_df = chart_df[["period", "net_interest_income_cr"]].dropna(subset=["net_interest_income_cr"])
+            pat_df = chart_df[["period", "pat_cr"]].dropna(subset=["pat_cr"]).copy()
+            nii_df = chart_df[["period", "net_interest_income_cr"]].dropna(subset=["net_interest_income_cr"]).copy()
+            pat_df["period"] = pat_df["period"].replace("9MFY26", "9MFY26 (Ann.)")
+            nii_df["period"] = nii_df["period"].replace("9MFY26", "9MFY26 (Ann.)")
             has_nii = not nii_df.empty
             fig = go.Figure()
             if has_nii:
@@ -1825,7 +1836,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
             fig.update_layout(
                 title=_title_dict(title_txt),
                 height=400,
-                xaxis=dict(categoryorder="array", categoryarray=PERIOD_ORDER,
+                xaxis=dict(categoryorder="array", categoryarray=PERIOD_ORDER_ANN,
                            showgrid=False, tickcolor="rgba(0,0,0,0)",
                            linecolor="rgba(0,0,0,0)", tickfont=dict(family=CHART_FONT, size=11)),
                 yaxis=dict(showgrid=False, tickcolor="rgba(0,0,0,0)"),
@@ -1843,9 +1854,9 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
             fig.update_layout(margin=DD_MARGIN, legend=DD_LEGEND)
             st.plotly_chart(fig, use_container_width=True)
             if selected == "KreditBee" and has_q3:
-                note("9MFY26 PAT adjusted to ~₹189 Cr (ex ~₹152 Cr one-time items). "
-                     "NII (₹978 Cr) is unaffected — the GST provision reversal reduced expenses, "
-                     "not income.", "warning")
+                note("9MFY26 PAT annualised and adjusted to ~₹252 Cr (adj. 9M PAT ~₹189 Cr × 4/3, "
+                     "ex ~₹152 Cr one-time items). "
+                     "NII (₹1,304 Cr annualised) is unaffected by exceptional items.", "warning")
 
         col3, col4 = st.columns(2)
         with col3:
@@ -1886,17 +1897,19 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
         display_cols = ["period", "loan_book_cr", "total_assets_cr", "equity_cr",
                         "net_interest_income_cr", "pat_cr", "credit_loss_rate_pct",
                         "gnpa_pct", "roa_pct", "roe_pct"]
-        table_df = chart_df[[c for c in display_cols if c in chart_df.columns]].set_index("period").T
+        _table_src = chart_df[[c for c in display_cols if c in chart_df.columns]].copy()
+        _table_src["period"] = _table_src["period"].replace("9MFY26", "9MFY26 (Ann.)")
+        table_df = _table_src.set_index("period").T
         table_df.index = ["Loan Book (₹ Cr)", "Total Assets (₹ Cr)", "Equity (₹ Cr)",
                           "NII (₹ Cr)", "PAT (₹ Cr)", "Annualized Loss Rate %",
                           "GNPA %", "ROA %", "ROE %"][:len(table_df)]
         st.dataframe(table_df.style.format("{:.1f}", na_rep="N/A"), use_container_width=True)
         if has_q3:
-            st.caption("9MFY26: PAT & credit losses are raw 9-month values. NII, ROA & ROE are annualised (×4/3).")
+            st.caption("9MFY26: NII & PAT are annualised (×4/3). Credit losses are raw 9-month values. ROA & ROE use annualised PAT.")
         if has_q3 and selected == "KreditBee":
             note("ROA, ROE & PAT exclude ~₹152 Cr post-tax one-time items: ₹104 Cr GST provision reversal "
                  "(Karnataka HC ruling, Dec 2025) + ₹48 Cr DTA recognition. "
-                 "Reported 9M PAT: ₹341 Cr → Adjusted: ~₹189 Cr.", "warning")
+                 "Reported 9M PAT: ₹341 Cr → Adjusted 9M: ~₹189 Cr → Annualised: ~₹252 Cr.", "warning")
         if has_q3 and selected == "Moneyview":
             note("Loan book = managed AUM (on-book + off-book DLG). 9MFY26: ROA = ann. PAT ₹327 Cr / avg managed AUM "
                  "₹18,265 Cr = 1.79%. Annualized loss rate = ann. impairment ₹965 Cr / avg managed AUM = 5.29%. "
