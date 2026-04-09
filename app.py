@@ -1154,12 +1154,15 @@ components.html(f"""
           + '</svg>&nbsp;';
   function toggleSidebar() {{
     var doc = window.parent.document;
-    // Try both collapsed-control (>> button) and expand/collapse button inside sidebar
-    var btn = doc.querySelector('[data-testid="stSidebarCollapsedControl"]')
-           || doc.querySelector('[data-testid="stSidebarCollapseButton"]')
-           || doc.querySelector('[data-testid="stSidebarCollapsedControl"] button')
-           || doc.querySelector('[data-testid="stSidebarCollapseButton"] button');
-    if (btn) btn.click();
+    // Button is always INSIDE the control container — query child button first
+    var btn = doc.querySelector('[data-testid="stSidebarCollapsedControl"] button')
+           || doc.querySelector('[data-testid="stSidebarCollapseButton"] button')
+           || doc.querySelector('[data-testid="stSidebarCollapsedControl"]')
+           || doc.querySelector('[data-testid="stSidebarCollapseButton"]');
+    if (btn) {{
+      // Use dispatchEvent so React's synthetic event system fires reliably
+      btn.dispatchEvent(new MouseEvent('click', {{bubbles: true, cancelable: true, view: window.parent}}));
+    }}
   }}
   function syncBadge() {{
     try {{
