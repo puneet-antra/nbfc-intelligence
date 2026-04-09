@@ -1722,19 +1722,19 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
         if (inp !== doc.activeElement) return;
         inp.value = val;   // write name into input (no React event)
 
-        // Highlight: tint the inner select wrapper so it looks "selected"
-        var wrapper = box.querySelector('[data-baseweb="select"] > div:first-child');
-        if (wrapper) {{
-          wrapper.style.background = '#D8DCE8';
-          wrapper.style.borderRadius = '4px';
-          function clearHL() {{
-            wrapper.style.background = '';
-            wrapper.style.borderRadius = '';
-            inp.removeEventListener('keydown', clearHL);
-          }}
-          inp.addEventListener('keydown', clearHL, {{ once: true }});
-          setTimeout(clearHL, 4000); // failsafe: auto-clear after 4s
+        // Highlight: tint only the input element itself (not the arrow button)
+        inp.style.background = '#D8DCE8';
+        inp.style.borderRadius = '2px';
+
+        function clearHL() {{
+          inp.style.background = '';
+          inp.style.borderRadius = '';
+          // Clear the injected name so the typed key goes into an empty input
+          // and React/BaseWeb filter correctly from a clean state.
+          inp.value = '';
         }}
+        inp.addEventListener('keydown', clearHL, {{ once: true }});
+        setTimeout(clearHL, 5000); // failsafe: auto-clear after 5s
       }}, 50);
     }});
 
