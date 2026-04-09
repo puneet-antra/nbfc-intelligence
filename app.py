@@ -1921,7 +1921,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
             fig = px.bar(bar_df, x="period", y=["Total Assets", "Loan Book"],
                          barmode="group", text_auto=".3s",
                          color_discrete_sequence=["#144835", "#2CA076"],
-                         title=f"Assets & Loan Book (₹ Crore, to {lbl})", height=400,
+                         title=f"Assets & Loan Book (₹ Crore)", height=400,
                          category_orders={"period": PERIOD_ORDER})
             fig.update_traces(textposition="outside", textfont=dict(family=CHART_MONO, size=11),
                               cliponaxis=False)
@@ -1982,7 +1982,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
         with col3:
             gnpa_df = chart_df[["period", "gnpa_pct"]].dropna()
             fig = px.line(gnpa_df, x="period", y="gnpa_pct",
-                          title=f"GNPA % Trend (to {lbl})", markers=True, height=380,
+                          title=f"GNPA % Trend", markers=True, height=380,
                           category_orders={"period": PERIOD_ORDER})
             fig.update_traces(line_color=COLOR["danger"], marker_color=COLOR["danger"])
             chart_layout(fig)
@@ -1994,7 +1994,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                 columns={"roa_pct": "ROA %", "roe_pct": "ROE %"})
             fig = px.line(ror_df, x="period", y=["ROA %", "ROE %"],
                           color_discrete_sequence=["#144835", "#2CA076"],
-                          title=f"ROA & ROE % (to {lbl})", markers=True, height=380,
+                          title=f"ROA & ROE %", markers=True, height=380,
                           category_orders={"period": PERIOD_ORDER})
             chart_layout(fig)
             fig.update_layout(margin=DD_MARGIN, legend=DD_LEGEND)
@@ -2003,7 +2003,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
 
         cl_df = chart_df[["period", "credit_loss_rate_pct"]].dropna()
         fig = px.line(cl_df, x="period", y="credit_loss_rate_pct",
-                      title=f"Annualized Losses % (to {lbl})", markers=True, height=380,
+                      title=f"Annualized Losses %", markers=True, height=380,
                       category_orders={"period": PERIOD_ORDER})
         fig.add_hline(y=2.0, line_dash="dot", line_color=COLOR["warning"],
                       annotation_text="2% reference")
