@@ -2098,6 +2098,13 @@ with tabs[6]:
         st.dataframe(
             display_val[["Ticker", "Company", "Price (₹)", "P/E", "P/B", "Mkt Cap (₹ Cr)", "12M Chg %"]],
             use_container_width=True, hide_index=True,
+            column_config={
+                "Price (₹)":     st.column_config.NumberColumn("Price (₹)",     format="₹%.2f"),
+                "P/E":           st.column_config.NumberColumn("P/E",           format="%.1f"),
+                "P/B":           st.column_config.NumberColumn("P/B",           format="%.2f"),
+                "Mkt Cap (₹ Cr)":st.column_config.NumberColumn("Mkt Cap (₹ Cr)",format="₹%,.0f"),
+                "12M Chg %":     st.column_config.NumberColumn("12M Chg %",     format="%.1f%%"),
+            },
         )
 
 # ─────────────────────────────────────────────────────────────────────────────
