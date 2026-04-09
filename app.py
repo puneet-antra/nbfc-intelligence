@@ -1261,7 +1261,7 @@ with tabs[0]:
         fig.update_traces(
             hovertemplate=(
                 "<b>%{hovertext}</b><br>"
-                "Revenue Growth = %{x:.1f}%<br>"
+                "Rev Growth = %{x:.1f}%<br>"
                 "PAT Growth = %{y:.1f}%"
                 "<extra></extra>"
             )
