@@ -81,6 +81,8 @@ COMPANIES = [
     ("KreditBee", "Middle", "Consumer Finance", 0, 1, 9281, "audited", None, "KreditBee (KrazyBee Services Ltd) - BSE NCD filings"),
     # Unlisted NBFCs — data from rating agency rationales based on company-submitted audited financials
     ("Fibe", "Middle", "Consumer Finance", 0, 1, 3280, "estimated", None, "EarlySalary Services Pvt Ltd (CIN U67120PN1994PTC184868). CareEdge & Acuite rating rationales based on ESPL standalone audited/provisional financials. FY25 provisional."),
+    # Pre-IPO — DRHP filed Aug 2025 (OnEMI Technology Solutions Ltd; NBFC subsidiary: Si Creva Capital Services Pvt Ltd)
+    ("Kissht", "Middle", "Consumer Finance", 0, 1, 2701, "audited", None, "OnEMI Technology Solutions DRHP filed Aug 2025 with SEBI. Restated consolidated financials FY23-FY25."),
 ]
 
 # ── Financial data ────────────────────────────────────────────────────────────
@@ -304,6 +306,16 @@ FINANCIALS = [
     ("Fibe", "FY2023",  1963,  1338,  None, None,  -10.83, None, None, 3.50, -1.20,  None, "audited",   "Fibe (ESPL standalone) FY23 audited. AUM ₹1,963 Cr; Total assets ₹1,337.63 Cr; PAT -₹10.83 Cr (loss); GNPA 3.50%; ROA -1.20%. Source: CareEdge Oct-2023 rating rationale."),
     ("Fibe", "FY2024",  4064,  2259,   739, None,   55.34, None, None, 2.67,  3.09, 10.33, "audited",   "Fibe (ESPL standalone) FY24 audited. AUM ₹4,064 Cr; Total assets ₹2,258.80 Cr; Net worth ₹739.38 Cr; PAT ₹55.34 Cr; GNPA 2.67%; ROA 3.09%; ROE 10.33%. Source: Acuite Oct-2025 rating rationale."),
     ("Fibe", "FY2025",  5287,  3280,   994, None,  100.19, None, None, 3.07,  3.62, 11.56, "estimated", "Fibe (ESPL standalone) FY25 provisional. AUM ₹5,287 Cr; Total assets ₹3,279.89 Cr; Net worth ₹994.28 Cr; PAT ₹100.19 Cr; GNPA 3.07%; ROA 3.62%; ROE 11.56%. Source: CareEdge Nov-2025 & Acuite Oct-2025 (provisional/unaudited)."),
+    # ── Kissht (OnEMI Technology Solutions Ltd / Si Creva Capital Services Pvt Ltd) ──
+    # Source: DRHP filed with SEBI, Aug 18 2025. Restated consolidated financials.
+    # AUM = On-book + Off-book. Total Assets = consolidated balance sheet.
+    # NII proxy = Revenue from operations (interest + fee income).
+    # Credit losses = Impairment on financial instruments (P&L line).
+    # Credit loss rate = Impairment / average on-book loan book (est.).
+    # GNPA = Gross Stage 3 on-book loans / total gross on-book loans.
+    ("Kissht", "FY2023", 1268, 1275,  566,  984,  28, 299, 23.57, 0.05,  3.25,  6.93, "audited",   "Kissht DRHP Aug-2025 (SEBI). Restated consolidated FY23. AUM ₹1,268 Cr (on+off book); Total assets ₹1,275 Cr; Equity ₹566 Cr; Revenue ₹984 Cr; PAT ₹28 Cr; Impairment ₹299 Cr; GNPA 0.05%; ROA 3.25%; ROE 6.93%."),
+    ("Kissht", "FY2024", 2604, 1797,  805, 1674, 197, 621, 23.84, 0.79, 12.85, 28.78, "audited",   "Kissht DRHP Aug-2025 (SEBI). Restated consolidated FY24. AUM ₹2,604 Cr; Total assets ₹1,797 Cr; Equity ₹805 Cr; Revenue ₹1,674 Cr; PAT ₹197 Cr; Impairment ₹621 Cr; GNPA 0.79%; ROA 12.85%; ROE 28.78%."),
+    ("Kissht", "FY2025", 4087, 2701, 1006, 1337, 161, 327,  7.99, 2.89,  7.14, 17.74, "audited",   "Kissht DRHP Aug-2025 (SEBI). Restated consolidated FY25. AUM ₹4,087 Cr; Total assets ₹2,701 Cr; Equity ₹1,006 Cr; Revenue ₹1,337 Cr; PAT ₹161 Cr; Impairment ₹327 Cr; GNPA 2.89%; ROA 7.14%; ROE 17.74%."),
 ]
 
 
