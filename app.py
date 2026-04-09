@@ -1274,7 +1274,7 @@ with tabs[0]:
                            font=dict(size=10, color=COLOR["text_secondary"]), xanchor="right")
         chart_layout(fig)
         fig.update_layout(
-            xaxis=dict(title="Revenue Growth %", title_font=dict(size=12, family=CHART_FONT)),
+            xaxis=dict(title="Revenue Growth %", title_font=dict(size=12, family=CHART_FONT), range=[None, 225]),
             yaxis=dict(title="PAT Growth %", title_font=dict(size=12, family=CHART_FONT)),
         )
         st.plotly_chart(fig, use_container_width=True)
