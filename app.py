@@ -1132,22 +1132,52 @@ st.markdown("""
 }
 </style>
 <div class="page-header-wrap">
-  <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
-    <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;">
-      <span class="page-title">NBFC Intelligence</span>
-      <span class="page-badge">INDIA</span>
-    </div>
-    <div id="filter-badge" title="Click to change filters" onclick="
-      var btns = window.parent.document.querySelectorAll('[data-testid=stSidebar] button');
-      if (btns.length) {{ btns[0].click(); }}
-    " style="display:inline-flex;align-items:center;gap:0.35rem;background:#EAF4EE;border:1px solid #144835;border-radius:20px;padding:0.25rem 0.8rem;cursor:pointer;user-select:none;font-size:0.78rem;font-weight:600;color:#144835;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
-      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M4 8h8M6 12h4" stroke="#144835" stroke-width="2" stroke-linecap="round"/></svg>
-      """ + _badge_label + """
-    </div>
+  <div style="display:flex; align-items:center; gap:0.8rem; flex-wrap:wrap;">
+    <span class="page-title">NBFC Intelligence</span>
+    <span class="page-badge">INDIA</span>
   </div>
   <p class="page-subtitle">Non-Banking Financial Companies &mdash; Growth &middot; Profitability &middot; Asset Quality &middot; Valuation</p>
   <hr class="header-rule"/>
 </div>
+""", unsafe_allow_html=True)
+
+# Inject filter badge into parent document next to the sidebar arrow (top-left)
+st.markdown(f"""
+<script>
+(function() {{
+  var LABEL = {repr(_badge_label)};
+  var SVG = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M4 8h8M6 12h4" stroke="#144835" stroke-width="2" stroke-linecap="round"/></svg>';
+  function injectBadge() {{
+    var pdoc = window.parent.document;
+    var old = pdoc.getElementById('nbfc-filter-badge');
+    if (old) {{ old.remove(); }}
+    var badge = pdoc.createElement('div');
+    badge.id = 'nbfc-filter-badge';
+    badge.title = 'Click to toggle filters';
+    badge.innerHTML = SVG + '\u00a0' + LABEL;
+    badge.style.cssText = [
+      'position:fixed', 'top:0.62rem', 'left:3.3rem', 'z-index:99999',
+      'display:inline-flex', 'align-items:center', 'gap:0.3rem',
+      'background:#EAF4EE', 'border:1px solid #144835', 'border-radius:20px',
+      'padding:0.22rem 0.75rem', 'cursor:pointer', 'user-select:none',
+      'font-size:0.75rem', 'font-weight:600', 'color:#144835',
+      'box-shadow:0 1px 4px rgba(0,0,0,0.12)', 'font-family:Inter,sans-serif',
+      'white-space:nowrap'
+    ].join(';');
+    badge.onclick = function() {{
+      var btn = pdoc.querySelector('[data-testid="stSidebarCollapseButton"] button') ||
+                pdoc.querySelector('[data-testid="stSidebarCollapsedControl"] button') ||
+                pdoc.querySelector('[data-testid="stSidebar"] button');
+      if (btn) btn.click();
+    }};
+    pdoc.body.appendChild(badge);
+  }}
+  if (window.parent.document.readyState === 'complete') {{ injectBadge(); }}
+  else {{ window.parent.addEventListener('load', injectBadge); }}
+  // Re-inject after short delay to handle Streamlit rerenders
+  setTimeout(injectBadge, 800);
+}})();
+</script>
 """, unsafe_allow_html=True)
 
 annual_fin = annual_only(fin_filtered)
