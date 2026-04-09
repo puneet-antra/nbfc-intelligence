@@ -1718,32 +1718,42 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       var inp = e.target;
       var val = _nbfcVal;
       if (!val) return;
-      // 0 ms — next event-loop tick; BaseWeb's sync handlers have run, its
-      // rAFs have not yet fired. We write the name and select all text so the
-      // browser renders it highlighted (::selection CSS above). A once-keydown
-      // listener clears inp.value BEFORE the browser inserts the typed char,
-      // so BaseWeb sees an empty→char transition and filters correctly.
+      // BaseWeb's Select input has color:transparent by default — the value is
+      // rendered in a sibling <div>, not the input itself.  setSelectionRange
+      // therefore selects invisible text and shows nothing.
+      // Fix: write the name, force visible text + blue-highlight background to
+      // SIMULATE a text-selection look.  On first keydown, clear everything
+      // before the browser inserts the typed character so BaseWeb filters from
+      // a clean empty state.
       setTimeout(function() {{
         if (inp !== doc.activeElement) return;
         inp.value = val;
-        inp.setSelectionRange(0, val.length);
-        // Re-assert after one rAF in case BaseWeb collapses the cursor
-        window.parent.requestAnimationFrame(function() {{
-          if (inp === doc.activeElement && inp.value === val) {{
-            inp.setSelectionRange(0, val.length);
-          }}
-        }});
-        // On first keydown: clear the injected name so the typed char lands
-        // in an empty input → correct BaseWeb filter behaviour.
-        inp.addEventListener('keydown', function() {{
-          inp.value = '';
-        }}, {{ once: true }});
+        inp.style.color      = '#1a1a1a';   // make text visible
+        inp.style.background = '#CCE5FF';   // blue-highlight tint
+        inp.style.borderRadius = '2px';
+        inp.setSelectionRange(0, val.length); // also try real selection
+
+        function clearHL() {{
+          inp.style.color      = '';
+          inp.style.background = '';
+          inp.style.borderRadius = '';
+          inp.value = '';   // clear before char is inserted → clean filter state
+        }}
+        inp.addEventListener('keydown', clearHL, {{ once: true }});
+        setTimeout(clearHL, 6000); // failsafe
       }}, 0);
     }});
 
     doc.addEventListener('focusout', function(e) {{
       var box = getNbfcBox(e.target);
       if (box) {{
+        // Reset any injected input styles when dropdown closes
+        var inp2 = box.querySelector('input');
+        if (inp2) {{
+          inp2.style.color = '';
+          inp2.style.background = '';
+          inp2.style.borderRadius = '';
+        }}
         // Refresh the cache and re-apply bold styling after dropdown closes
         var v = readDisplayVal(box);
         if (v) _nbfcVal = v;
@@ -2337,7 +2347,7 @@ with tabs[6]:
         )
         roe_sect = _apply_sector_order(roe_sect)
 
-        # NII revenue growth by sector
+        # Revenue (NII) growth by sector — NII is the primary revenue line for NBFCs
         _nii_growth = compute_latest_growth(fin_filtered, "net_interest_income_cr")
         _nii_growth = _nii_growth.merge(
             fin_filtered[["name", "sector"]].drop_duplicates(), on="name", how="left"
@@ -2374,7 +2384,7 @@ with tabs[6]:
             if not nii_sect.empty:
                 fig = make_hbar(
                     nii_sect, "growth_pct", "sector", COLOR["success"],
-                    f"Median NII Growth by Sector ({_nii_lbl})",
+                    f"Median Revenue Growth by Sector ({_nii_lbl})",
                     height=_chart_h,
                     hover_text=[_nii_lbl] * len(nii_sect), text_suffix="%",
                 )
