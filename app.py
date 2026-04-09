@@ -1700,43 +1700,34 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       cacheDisplayValue(box);
     }});
 
-    // focusin: use cached value (live read already done in mousedown above)
+    // focusin: inject cached name into input + select-all.
+    // Critically: do NOT dispatch an 'input' event — that would put BaseWeb's
+    // filter state out of sync and cause the "two clicks needed" bug.
+    // Natural browser behaviour (typing replaces the selection) handles clearing.
     doc.addEventListener('focusin', function(e) {{
       var box = getNbfcBox(e.target);
       if (!box) return;
       var inp = e.target;
-      // Refresh cache if somehow missed (keyboard navigation, tab)
+      // Refresh cache for keyboard/tab navigation where mousedown didn't fire
       cacheDisplayValue(box);
       var val = box._cachedVal || '';
       if (!val) return;
-      // Two rAFs so we fire after BaseWeb's own focus handler
+      // Three rAFs: ensure we run after BaseWeb's own focusin handler settles
       window.parent.requestAnimationFrame(function() {{
         window.parent.requestAnimationFrame(function() {{
-          _reactSetter.call(inp, val);
-          inp.dispatchEvent(new Event('input', {{ bubbles: true }}));
-          inp.setSelectionRange(0, val.length);
-          inp._pendingClear = true;
+          window.parent.requestAnimationFrame(function() {{
+            _reactSetter.call(inp, val);
+            // No input-event dispatch here — keeps BaseWeb dropdown unfiltered
+            inp.setSelectionRange(0, val.length);
+          }});
         }});
       }});
     }});
 
-    // keydown: first printable key clears the injected text, types that char
-    doc.addEventListener('keydown', function(e) {{
-      var inp = e.target;
-      if (!inp._pendingClear) return;
-      if (!getNbfcBox(inp)) return;
-      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {{
-        inp._pendingClear = false;
-        e.preventDefault();
-        _reactSetter.call(inp, e.key);
-        inp.dispatchEvent(new Event('input', {{ bubbles: true }}));
-      }} else if (e.key !== 'Shift' && e.key !== 'CapsLock') {{
-        inp._pendingClear = false;
-      }}
-    }}, true);
+    // No keydown handler needed: since the full name is selected (setSelectionRange),
+    // the first typed character naturally replaces it via the browser's own input handling.
 
     doc.addEventListener('focusout', function(e) {{
-      if (e.target && e.target._pendingClear) e.target._pendingClear = false;
       var box = getNbfcBox(e.target);
       if (box) {{
         // Re-apply bold styling and refresh cache after dropdown closes
