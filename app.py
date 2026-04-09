@@ -934,7 +934,10 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
     h = height or bar_chart_height(len(df))
     vals = df[x_col].dropna()
     x_max = vals.abs().max() if not vals.empty else 1
-    x_range = [vals.min() * 1.55 if vals.min() < 0 else 0, x_max * 1.55]
+    # Extend left by 12 % of x_max so short bars' "outside" labels
+    # never collide with y-axis tick labels (which end right at x=0).
+    x_left = vals.min() * 1.55 if vals.min() < 0 else -x_max * 0.12
+    x_range = [x_left, x_max * 1.6]
     text_labels = df[x_col].round(1).astype(str) + text_suffix
 
     names = df[y_col].tolist()
