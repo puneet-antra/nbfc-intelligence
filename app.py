@@ -1248,6 +1248,7 @@ with tabs[0]:
         .merge(pat_growth_df[["name", "growth_pct"]].rename(columns={"growth_pct": "pat_growth"}), on="name", how="inner")
         .merge(latest_lb, on="name", how="inner")
         .dropna(subset=["rev_growth", "pat_growth", "loan_book_cr"])
+        .query("name != 'Sammaan Capital'")
     )
     if not bubble_df.empty:
         fig = px.scatter(
@@ -1262,7 +1263,7 @@ with tabs[0]:
         )
         chart_layout(fig)
         fig.update_layout(
-            xaxis=dict(title="Revenue Growth %", title_font=dict(size=12, family=CHART_FONT), range=[None, 175]),
+            xaxis=dict(title="Revenue Growth %", title_font=dict(size=12, family=CHART_FONT), autorange=True),
             yaxis=dict(title="PAT Growth %", title_font=dict(size=12, family=CHART_FONT), autorange=True),
         )
         fig.update_traces(
