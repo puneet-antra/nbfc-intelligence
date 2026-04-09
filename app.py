@@ -1253,6 +1253,28 @@ with tabs[0]:
         .query("name != 'Sammaan Capital'")
     )
     if not bubble_df.empty:
+        # Check if all companies share the same period for both metrics
+        all_same_period = (
+            bubble_df["rev_period"].nunique() == 1
+            and bubble_df["pat_period"].nunique() == 1
+            and bubble_df["rev_period"].iloc[0] == bubble_df["pat_period"].iloc[0]
+        )
+        common_period = bubble_df["rev_period"].iloc[0] if all_same_period else None
+        chart_title = (
+            f"Revenue Growth vs PAT Growth ({common_period})"
+            if common_period else "Revenue Growth vs PAT Growth (bubble = AUM size)"
+        )
+        hover_tmpl = (
+            "<b>%{customdata[0]}</b><br>"
+            "Rev Growth = %{customdata[1]:.1f}%<br>"
+            "PAT Growth = %{customdata[3]:.1f}%"
+            "<extra></extra>"
+        ) if common_period else (
+            "<b>%{customdata[0]}</b><br>"
+            "Rev Growth = %{customdata[1]:.1f}% (%{customdata[2]})<br>"
+            "PAT Growth = %{customdata[3]:.1f}% (%{customdata[4]})"
+            "<extra></extra>"
+        )
         fig = px.scatter(
             bubble_df, x="rev_growth", y="pat_growth",
             size="loan_book_cr", color="sector",
@@ -1260,7 +1282,7 @@ with tabs[0]:
             custom_data=["name", "rev_growth", "rev_period", "pat_growth", "pat_period"],
             color_discrete_sequence=MV_PALETTE,
             labels={"rev_growth": "Revenue Growth %", "pat_growth": "PAT Growth %"},
-            title="Revenue Growth vs PAT Growth (bubble = AUM size)",
+            title=chart_title,
             height=520,
         )
         chart_layout(fig)
@@ -1268,14 +1290,7 @@ with tabs[0]:
             xaxis=dict(title="Revenue Growth %", title_font=dict(size=12, family=CHART_FONT), autorange=True),
             yaxis=dict(title="PAT Growth %", title_font=dict(size=12, family=CHART_FONT), autorange=True),
         )
-        fig.update_traces(
-            hovertemplate=(
-                "<b>%{customdata[0]}</b><br>"
-                "Rev Growth = %{customdata[1]:.1f}% (%{customdata[2]})<br>"
-                "PAT Growth = %{customdata[3]:.1f}% (%{customdata[4]})"
-                "<extra></extra>"
-            )
-        )
+        fig.update_traces(hovertemplate=hover_tmpl)
         st.plotly_chart(fig, use_container_width=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
