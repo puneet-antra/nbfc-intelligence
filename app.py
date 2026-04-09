@@ -1635,6 +1635,17 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
   var activeLabel = {json.dumps(_active_label)};
   var chipLabels  = {_all_labels};
 
+  // Inject light-grey selection highlight for the NBFC dropdown input
+  (function() {{
+    var doc = window.parent.document;
+    if (!doc.getElementById('nbfc-sel-style')) {{
+      var s = doc.createElement('style');
+      s.id = 'nbfc-sel-style';
+      s.textContent = '[data-testid="stSelectbox"] input::selection {{ background: #E2E4E9; color: #1C1E23; }}';
+      doc.head.appendChild(s);
+    }}
+  }})();
+
   function applyStyles() {{
     var doc = window.parent.document;
 
