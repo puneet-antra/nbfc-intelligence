@@ -888,11 +888,13 @@ def _title_dict(raw_title, pad_t=10, pad_b=14):
     """Build a Plotly title dict with optional subtitle via <br> (compatible with all Plotly versions)."""
     main, sub = split_title(raw_title)
     if sub:
-        # Replace spaces with non-breaking spaces in subtitle so it stays on one line
+        # Non-breaking spaces prevent wrapping in both lines
+        main_nbsp = main.replace(" ", "\u00a0")
         sub_nbsp = sub.replace(" ", "\u00a0")
-        text = f"<b>{main}</b><br>{sub_nbsp}"
+        # <b> makes main prominent; <sub> renders subtitle at ~75% font size
+        text = f"<b>{main_nbsp}</b><br><sub>{sub_nbsp}</sub>"
     else:
-        text = f"<b>{main}</b>"
+        text = f"<b>{main.replace(' ', chr(160))}</b>"
     return dict(
         text=text,
         font=dict(color=COLOR["text"], size=15.5, family=CHART_TITLE_FONT),
@@ -1957,7 +1959,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                 marker=dict(size=6),
                 hovertemplate="₹%{y:,.0f} Cr<extra>PAT</extra>",
             ))
-            title_txt = "Revenues & PAT (₹ Crore)" if has_nii else "PAT (₹ Crore) — Revenues not disclosed"
+            title_txt = "Revenues\u00a0&\u00a0PAT (₹\u00a0Crore)" if has_nii else "PAT (₹\u00a0Crore)\u00a0—\u00a0Revenues not disclosed"
             fig.update_layout(
                 title=_title_dict(title_txt),
                 height=400,
