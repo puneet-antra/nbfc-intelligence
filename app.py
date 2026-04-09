@@ -624,6 +624,12 @@ EXCEPTIONAL_ITEMS_ADJ = {
     ("KreditBee", "9MFY26"): 152,  # GST provision reversal ₹104 Cr + DTA recognition ₹48 Cr
 }
 
+# Companies whose ROA (and optionally ROE) use a non-standard denominator stored in the DB.
+# For these, annualise_9m preserves the pre-stored Q3 roa_pct/roe_pct rather than
+# recalculating from loan_book_cr.
+# MoneyView: ROA denominator = managed AUM (not WFPL on-book loan book).
+USE_STORED_ROA_ROE = {"MoneyView"}
+
 
 @st.cache_data(ttl=3600)
 def annualise_9m(df):
@@ -687,6 +693,15 @@ def annualise_9m(df):
             axis=1,
         )
         ann["credit_loss_rate_pct"] = (ann_cl.values / avg_lb.values * 100)
+
+    # For companies with non-standard ROA/ROE denominators, restore the pre-stored Q3 values
+    # instead of the generic loan_book_cr-based recalculation above.
+    for comp_name in USE_STORED_ROA_ROE:
+        mask = ann["name"] == comp_name
+        q3_mask = q3["name"] == comp_name
+        if mask.any() and q3_mask.any():
+            ann.loc[mask, "roa_pct"] = q3.loc[q3_mask, "roa_pct"].values[0]
+            ann.loc[mask, "roe_pct"] = q3.loc[q3_mask, "roe_pct"].values[0]
 
     return ann
 
@@ -1174,6 +1189,9 @@ with tabs[1]:
     note("KreditBee 9MFY26: ROA & ROE adjusted to exclude ~₹152 Cr post-tax one-time items "
          "(₹104 Cr GST provision reversal after Karnataka HC ruling, Dec 2025 + ₹48 Cr DTA recognition). "
          "Reported 9M PAT was ₹341 Cr; adjusted figure used for ratios is ~₹189 Cr.", "warning")
+    note("MoneyView 9MFY26: ROA calculated on managed AUM (₹~18,265 Cr avg) rather than on-book loan book, "
+         "reflecting MoneyView's hybrid DLG lending model. PAT used = ₹245 Cr (before exceptional items; "
+         "reported ₹210 Cr). Annualised ROA ~1.79%, ROE ~15.98%. Source: DRHP filed Mar-2026.", "info")
 
     # Sector breakdown — latest period
     st.markdown(f'<div class="section-header">By Sector — {lbl}</div>', unsafe_allow_html=True)
@@ -1872,6 +1890,11 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
             note("ROA, ROE & PAT exclude ~₹152 Cr post-tax one-time items: ₹104 Cr GST provision reversal "
                  "(Karnataka HC ruling, Dec 2025) + ₹48 Cr DTA recognition. "
                  "Reported 9M PAT: ₹341 Cr → Adjusted: ~₹189 Cr.", "warning")
+        if has_q3 and selected == "MoneyView":
+            note("ROA for 9MFY26 is calculated on managed AUM (~₹18,265 Cr avg of FY25 ₹16,715 Cr + Dec-2025 ₹19,815 Cr), "
+                 "not on-book loan book, reflecting MoneyView's hybrid DLG model. "
+                 "PAT = ₹245 Cr before exceptional items (reported PAT ₹210 Cr). "
+                 "Annualised ROA ~1.79% | ROE ~15.98%. Source: DRHP filed Mar-2026.", "info")
 
     if selected:
         _src = nbfc_filtered[nbfc_filtered["name"] == selected]["source"].values
