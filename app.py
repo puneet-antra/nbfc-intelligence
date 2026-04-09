@@ -36,7 +36,7 @@ st.set_page_config(
 
 # ── Authentication ────────────────────────────────────────────────────────────
 _ALLOWED_DOMAIN = "@moneyview.in"
-_AUTH_ENABLED = hasattr(st.user, "is_logged_in")
+_AUTH_ENABLED = hasattr(st, "user") and hasattr(st.user, "is_logged_in")
 
 if _AUTH_ENABLED:
     if not st.user.is_logged_in:
@@ -79,7 +79,11 @@ html, body, [class*="css"] {
 .block-container {
     padding-top: 2rem !important;
     padding-bottom: 4rem !important;
-    max-width: 1460px !important;
+    padding-left: 3rem !important;
+    padding-right: 3rem !important;
+    max-width: 1360px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 
 /* ── Page title (h1 fallback) ── */
@@ -164,7 +168,7 @@ h1 {
     font-weight: 600;
     letter-spacing: 0.01em;
     color: #28292D;
-    margin: 2.4rem 0 1.0rem 0;
+    margin: 2.6rem 0 1.2rem 0;
     padding: 0.45rem 0.9rem 0.45rem 0.9rem;
     background: #D7F4E9;
     border-left: 3px solid #144835;
@@ -173,6 +177,23 @@ h1 {
     align-items: center;
     gap: 0.5rem;
     line-height: 1.2;
+}
+
+/* ── Chart card wrapper ── */
+[data-testid="stPlotlyChart"] {
+    background: #ffffff !important;
+    border-radius: 14px !important;
+    border: 1px solid #EAEAEA !important;
+    box-shadow: 0 2px 12px 0 rgba(16,16,18,0.06) !important;
+    padding: 0.5rem 0.5rem !important;
+    margin-bottom: 1.2rem !important;
+}
+
+/* ── Caption ── */
+[data-testid="stCaptionContainer"] {
+    margin-top: -0.6rem !important;
+    margin-bottom: 0.8rem !important;
+    padding-left: 0.4rem !important;
 }
 
 /* ── Sidebar ── */
@@ -588,15 +609,13 @@ if not _os.path.exists("data/nbfc_full.db"):
 
 # ── Data loaders ─────────────────────────────────────────────────────────────
 
-@st.cache_resource
-def _load_nbfc_table_raw():
+def load_nbfc_table():
     conn = sqlite3.connect("data/nbfc_full.db")
     df = pd.read_sql("SELECT * FROM nbfc", conn)
     conn.close()
     return df
 
-@st.cache_resource
-def _load_financials_raw():
+def load_financials():
     conn = sqlite3.connect("data/nbfc_full.db")
     df = pd.read_sql("""
         SELECT f.*, n.name, n.rbi_layer, n.sector, n.listed,
@@ -605,13 +624,22 @@ def _load_financials_raw():
         JOIN nbfc n ON f.nbfc_id = n.id
     """, conn)
     conn.close()
+    # ── Recompute credit_loss_rate_pct consistently for all annual periods ──────
+    # Formula: gross credit losses (impairment on financial instruments, P&L) ÷ ending loan book.
+    # - Annual rows: credit_losses_cr / ending loan_book_cr × 100
+    # - Q3 rows: excluded here — annualise_9m() handles them using (credit_losses_cr × 4/3) / avg loan book
+    # Moneyview credit_losses_cr now stores total managed portfolio losses (not on-book only),
+    # and loan_book_cr = managed AUM, so this formula is consistent across all companies.
+    annual_mask = (
+        ~df["period"].str.contains("Q3", na=False)  # Q3 rows handled by annualise_9m
+        & df["credit_losses_cr"].notna()
+        & df["loan_book_cr"].notna()
+        & (df["loan_book_cr"] > 0)
+    )
+    df.loc[annual_mask, "credit_loss_rate_pct"] = (
+        df.loc[annual_mask, "credit_losses_cr"] / df.loc[annual_mask, "loan_book_cr"] * 100
+    ).round(2)
     return df
-
-def load_nbfc_table():
-    return _load_nbfc_table_raw().copy()
-
-def load_financials():
-    return _load_financials_raw().copy()
 
 # ── Helper functions ──────────────────────────────────────────────────────────
 
@@ -620,7 +648,7 @@ def annual_only(df):
     return df[~df["period"].str.contains("Q")]
 
 
-def truncate_name(name, n=24):
+def truncate_name(name, n=28):
     return name[:n] + "…" if len(name) > n else name
 
 
@@ -637,7 +665,7 @@ EXCEPTIONAL_ITEMS_ADJ = {
 USE_STORED_ROA_ROE: set = set()
 
 
-@st.cache_data(ttl=3600)
+
 def annualise_9m(df):
     """
     Build 9MFY26 rows from FY2026-Q3 data.
@@ -719,7 +747,7 @@ def annualise_9m(df):
     return ann
 
 
-@st.cache_data(ttl=3600)
+
 def get_chart_periods(df):
     """Annual FY2021–FY2025 plus annualised 9MFY26, sorted."""
     annual = annual_only(df)
@@ -729,7 +757,7 @@ def get_chart_periods(df):
     return combined.sort_values(["name", "period"])
 
 
-@st.cache_data(ttl=3600)
+
 def get_latest_period_data(df):
     """
     Per company: use 9MFY26 if FY2026-Q3 exists, else FY2025.
@@ -813,7 +841,7 @@ def compute_latest_growth(df, metric_col):
     return result.sort_values("growth_pct", ascending=False)
 
 
-def bar_chart_height(n, min_h=340, max_h=800, px_per_row=30):
+def bar_chart_height(n, min_h=360, max_h=1000, px_per_row=34):
     return max(min_h, min(max_h, n * px_per_row))
 
 
@@ -856,21 +884,22 @@ def split_title(title, max_len=32):
     return title, None
 
 
-def _title_dict(raw_title, pad_t=8, pad_b=12):
-    """Build a Plotly title dict with optional native subtitle (Plotly >=5.18)."""
+def _title_dict(raw_title, pad_t=10, pad_b=14):
+    """Build a Plotly title dict with inline subtitle via <br> (compatible with all Plotly versions)."""
     main, sub = split_title(raw_title)
-    d = dict(
-        text=main,
-        font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT, weight="bold"),
+    if sub:
+        text = (
+            f'<span style="font-size:15.5px;font-weight:bold;color:{COLOR["text"]}">{main}</span>'
+            f'<br><span style="font-size:12px;font-weight:600;color:#8B8FA8">{sub}</span>'
+        )
+    else:
+        text = f'<span style="font-size:15.5px;font-weight:bold;color:{COLOR["text"]}">{main}</span>'
+    return dict(
+        text=text,
+        font=dict(color=COLOR["text"], size=15.5, family=CHART_TITLE_FONT),
         x=0.5, xanchor="center", xref="paper",
         pad=dict(t=pad_t, b=pad_b),
     )
-    if sub:
-        d["subtitle"] = dict(
-            text=sub,
-            font=dict(color="#8B8FA8", size=12, family=CHART_TITLE_FONT, weight="bold"),
-        )
-    return d
 
 
 # Keep wrap_title as a thin shim so any callers that still use it keep working
@@ -922,9 +951,9 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
                  text=text_labels)
     fig.update_traces(
         marker_color=bar_colors, marker_line_width=0,
-        marker_opacity=0.88,
+        marker_opacity=0.85,
         textposition="outside",
-        textfont=dict(family=CHART_MONO, size=11, color=COLOR["text_secondary"]),
+        textfont=dict(family=CHART_MONO, size=11.5, color=COLOR["text_secondary"]),
         cliponaxis=False,
     )
     fig.update_layout(
@@ -933,12 +962,14 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
         yaxis=dict(autorange="reversed",
                    tickmode="array", tickvals=names, ticktext=tick_text,
-                   tickfont=dict(family=CHART_FONT, size=12),
+                   tickfont=dict(family=CHART_FONT, size=12.5),
+                   automargin=True,
                    showgrid=False, tickcolor="rgba(0,0,0,0)", title=""),
         xaxis=dict(showgrid=False, showticklabels=False,
                    range=x_range, zeroline=True, zerolinecolor=CHART_GRID,
-                   zerolinewidth=1.5, tickcolor="rgba(0,0,0,0)", title=""),
-        margin=dict(l=10, r=130, t=86, b=20),
+                   zerolinewidth=1, tickcolor="rgba(0,0,0,0)", title=""),
+        bargap=0.28,
+        margin=dict(l=16, r=110, t=90, b=24),
         hoverlabel=HOVER_LABEL,
     )
     if hover_text is not None:
@@ -1244,7 +1275,7 @@ with tabs[1]:
                       xaxis=dict(showticklabels=True, showgrid=False,
                                  tickcolor="rgba(0,0,0,0)", linecolor="rgba(0,0,0,0)", title="",
                                  tickfont=dict(family=CHART_FONT, size=12, color=COLOR["text"]),
-                                 tickangle=0, ticklabelstandoff=4),
+                                 tickangle=0),
                       yaxis=dict(showgrid=False,
                                  tickcolor="rgba(0,0,0,0)", title=""),
                       hoverlabel=HOVER_LABEL,
@@ -1523,7 +1554,6 @@ with tabs[8]:
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 6: DEEP DIVE
 # ─────────────────────────────────────────────────────────────────────────────
-@st.fragment
 def deep_dive_tab(fin_filtered, nbfc_filtered):
     companies_with_data = (
         fin_filtered[fin_filtered["has_financials"] == 1]["name"]
@@ -2059,7 +2089,7 @@ TICKER_MAP = {
     "SBI Cards and Payment Services": "SBICARD.NS",
 }
 
-@st.cache_data(ttl=3600)
+
 def fetch_valuation_data():
     tickers = list(TICKER_MAP.values())
     rows = []
@@ -2388,7 +2418,7 @@ with tabs[6]:
         chg_max = chg_df["chg_12m"].abs().max() if not chg_df.empty else 1
         fig.update_layout(
             title=dict(text="12-Month Price Change %",
-                       font=dict(color=COLOR["text"], family=CHART_FONT, size=14, weight="bold"),
+                       font=dict(color=COLOR["text"], family=CHART_FONT, size=14),
                        x=0.5, xanchor="center", xref="paper", pad=dict(t=6, b=10)),
             paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
             font=dict(color=COLOR["text_secondary"], family=CHART_FONT),
