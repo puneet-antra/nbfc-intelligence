@@ -1117,7 +1117,7 @@ c5.metric("Avg GNPA", f"{avg_gnpa:.2f}%", help="FY25")
 
 tabs = st.tabs([
     "Growth", "Profitability", "Asset Quality",
-    "Annualized Losses", "NBFC Specific", "Top Ranked",
+    "Credit Cost", "NBFC Specific", "Top Ranked",
     "Valuation", "Data", "Trends",
 ])
 
@@ -1336,10 +1336,10 @@ with tabs[2]:
     st.plotly_chart(fig, use_container_width=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TAB 4: CREDIT LOSSES
+# TAB 4: CREDIT COST
 # ─────────────────────────────────────────────────────────────────────────────
 with tabs[3]:
-    note("Annualized Loss Rate = (Net Provisions + Write-offs − Recoveries) ÷ Loan Book. "
+    note("Credit Cost Ratio = (Net Provisions + Write-offs − Recoveries) ÷ Loan Book. "
          "This is the actual P&L cost of defaults — different from GNPA which is a stock measure.")
 
     lbl = latest_period_label(fin_filtered)
@@ -1347,15 +1347,15 @@ with tabs[3]:
 
     all_loss = latest_snap.sort_values("credit_loss_rate_pct", ascending=True)
     fig = make_hbar(all_loss, "credit_loss_rate_pct", "name", COLOR["success"],
-                    f"Annualized Loss Rate % — All NBFCs, Lowest → Highest ({period_label_for(all_loss)})",
+                    f"Credit Cost Ratio — All NBFCs, Lowest → Highest ({period_label_for(all_loss)})",
                     hover_text=all_loss["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                     text_suffix="%")
     st.plotly_chart(fig, use_container_width=True)
 
-    st.caption(f"Annualized loss rate % shown as of {lbl}. 9MFY26 uses Q3 ratio — not annualised.")
+    st.caption(f"Credit cost ratio shown as of {lbl}. 9MFY26 uses Q3 ratio — not annualised.")
 
     # Trend for top stressed
-    st.markdown(f'<div class="section-header">Annualized Loss Rate Trend — FY2021 to {lbl}</div>',
+    st.markdown(f'<div class="section-header">Credit Cost Ratio Trend — FY2021 to {lbl}</div>',
                 unsafe_allow_html=True)
     high12 = latest_snap.nlargest(12, "credit_loss_rate_pct")["name"].tolist()
     chart_df = get_chart_periods(fin_filtered)
@@ -1364,28 +1364,28 @@ with tabs[3]:
 
     fig = px.line(trend_df, x="period", y="credit_loss_rate_pct", color="name",
                   color_discrete_sequence=MV_PALETTE,
-                  title=f"Annualized Loss Rate % Trend (to {lbl})", height=460,
+                  title=f"Credit Cost Ratio % Trend (to {lbl})", height=460,
                   category_orders={"period": PERIOD_ORDER})
     fig.add_hline(y=2.0, line_dash="dot", line_color=COLOR["warning"],
                   annotation_text="2% Reference Line")
     chart_layout(fig)
     st.plotly_chart(fig, use_container_width=True)
 
-    # Scatter: credit loss vs GNPA
-    st.markdown('<div class="section-header">Annualized Loss Rate vs GNPA</div>', unsafe_allow_html=True)
+    # Scatter: credit cost vs GNPA
+    st.markdown('<div class="section-header">Credit Cost Ratio vs GNPA</div>', unsafe_allow_html=True)
     scatter_df = latest_snap.dropna(subset=["credit_loss_rate_pct", "gnpa_pct", "loan_book_cr"])
     if not scatter_df.empty:
         fig = px.scatter(scatter_df, x="gnpa_pct", y="credit_loss_rate_pct",
                          size="loan_book_cr", color="sector", hover_name="name",
                          color_discrete_sequence=MV_PALETTE,
-                         labels={"gnpa_pct": "GNPA %", "credit_loss_rate_pct": "Annualized Loss Rate %"},
-                         title=f"Annualized Loss Rate vs GNPA — {lbl} (bubble = loan book)", height=520)
+                         labels={"gnpa_pct": "GNPA %", "credit_loss_rate_pct": "Credit Cost Ratio %"},
+                         title=f"Credit Cost Ratio vs GNPA — {lbl} (bubble = loan book)", height=520)
         chart_layout(fig)
         fig.update_traces(hovertemplate="%{hovertext}<extra></extra>")
         st.plotly_chart(fig, use_container_width=True)
 
     # Waterfall: FY2021 → FY2025 (annual only)
-    st.markdown('<div class="section-header">Annualized Loss Rate Change — FY2021 to FY2025</div>',
+    st.markdown('<div class="section-header">Credit Cost Ratio Change — FY2021 to FY2025</div>',
                 unsafe_allow_html=True)
     st.caption("Uses FY2021 vs FY2025 annual data only — 9MFY26 excluded to avoid period mismatch.")
     ann = annual_only(fin_filtered)
@@ -1406,7 +1406,7 @@ with tabs[3]:
                            cliponaxis=False))
     wf_max = wf["change"].abs().max() if not wf.empty else 1
     fig.update_layout(
-        title=_title_dict("Change in Annualized Loss Rate: FY2021 → FY2025 (green = improved)"),
+        title=_title_dict("Change in Credit Cost Ratio: FY2021 → FY2025 (green = improved)"),
         paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT),
         height=bar_chart_height(len(wf)),
@@ -1422,7 +1422,7 @@ with tabs[3]:
     st.plotly_chart(fig, use_container_width=True)
 
     # Heatmap
-    st.markdown(f'<div class="section-header">Annualized Loss Rate Heatmap — to {lbl}</div>',
+    st.markdown(f'<div class="section-header">Credit Cost Ratio Heatmap — to {lbl}</div>',
                 unsafe_allow_html=True)
     top40 = latest_snap.nlargest(40, "credit_loss_rate_pct")["name"].tolist()
     hm_source = get_chart_periods(fin_filtered)
@@ -1439,7 +1439,7 @@ with tabs[3]:
         texttemplate="%{text}", showscale=True,
     ))
     fig.update_layout(
-        title=_title_dict(f"Annualized Loss Rate % Heatmap (to {lbl})"),
+        title=_title_dict(f"Credit Cost Ratio % Heatmap (to {lbl})"),
         paper_bgcolor=CHART_BG, height=max(340, len(top40) * 26),
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
         margin=dict(t=82, b=30, l=10, r=30),
@@ -1979,7 +1979,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
 
         cl_df = chart_df[["period", "credit_loss_rate_pct"]].dropna()
         fig = px.line(cl_df, x="period", y="credit_loss_rate_pct",
-                      title=f"Annualized Loss Rate % (to {lbl})", markers=True, height=380,
+                      title=f"Credit Cost Ratio % (to {lbl})", markers=True, height=380,
                       category_orders={"period": PERIOD_ORDER})
         fig.add_hline(y=2.0, line_dash="dot", line_color=COLOR["warning"],
                       annotation_text="2% reference")
@@ -1997,7 +1997,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
         _table_src["period"] = _table_src["period"].astype(str).replace("9MFY26", "9MFY26 (Ann.)")
         table_df = _table_src.set_index("period").T
         table_df.index = ["Loan Book (₹ Cr)", "Total Assets (₹ Cr)", "Equity (₹ Cr)",
-                          "NII (₹ Cr)", "PAT (₹ Cr)", "Annualized Loss Rate %",
+                          "NII (₹ Cr)", "PAT (₹ Cr)", "Credit Cost Ratio %",
                           "GNPA %", "ROA %", "ROE %"][:len(table_df)]
         st.dataframe(table_df.style.format("{:.1f}", na_rep="N/A"), use_container_width=True)
         if has_q3:
