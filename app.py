@@ -973,7 +973,7 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
                    range=x_range, zeroline=True, zerolinecolor=CHART_GRID,
                    zerolinewidth=1, tickcolor="rgba(0,0,0,0)", title=""),
         bargap=0.28,
-        margin=dict(l=16, r=110, t=90, b=24),
+        margin=dict(l=180, r=110, t=90, b=24),
         hoverlabel=HOVER_LABEL,
     )
     if hover_text is not None:
