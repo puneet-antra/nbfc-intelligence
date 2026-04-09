@@ -1151,8 +1151,8 @@ c5.metric("Avg GNPA", f"{avg_gnpa:.2f}%", help="FY25")
 # ── Tabs ──────────────────────────────────────────────────────────────────────
 
 tabs = st.tabs([
-    "Growth", "Profitability", "Asset Quality",
-    "Credit Cost", "NBFC Specific", "Top Ranked",
+    "Growth", "Profitability", "Credit Quality",
+    "NBFC Specific", "Top Ranked",
     "Valuation", "Data", "Trends",
 ])
 
@@ -1284,118 +1284,134 @@ with tabs[1]:
          "Reported 9M PAT was ₹341 Cr; adjusted 9M PAT ~₹189 Cr → annualised ~₹252 Cr.", "warning")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TAB 3: ASSET QUALITY
+# TAB 3: ASSET QUALITY (GNPA + Annualized Losses combined)
 # ─────────────────────────────────────────────────────────────────────────────
 with tabs[2]:
-    lbl = latest_period_label(fin_filtered)
-    latest_snap = get_latest_period_data(fin_filtered).dropna(subset=["gnpa_pct"])
-
-    st.markdown(f'<div class="section-header">GNPA % — {lbl}</div>', unsafe_allow_html=True)
-    all_gnpa = latest_snap.dropna(subset=["gnpa_pct"]).sort_values("gnpa_pct", ascending=True)
-    fig = make_hbar(all_gnpa, "gnpa_pct", "name", COLOR["success"],
-                    f"GNPA % ({period_label_for(all_gnpa)})",
-                    hover_text=all_gnpa["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values,
-                    text_suffix="%")
-    st.plotly_chart(fig, use_container_width=True)
-
-    st.caption(f"GNPA % is a stock/point-in-time metric — 9MFY26 uses Q3 value directly, no annualisation.")
-
-    # Trend by sector
-    st.markdown(f'<div class="section-header">GNPA Trend by Sector — FY2021 to {lbl}</div>',
-                unsafe_allow_html=True)
-    chart_df = get_chart_periods(fin_filtered)
-    sector_gnpa = chart_df.groupby(["period", "sector"])["gnpa_pct"].mean().reset_index()
-    fig = px.line(sector_gnpa, x="period", y="gnpa_pct", color="sector",
-                  color_discrete_sequence=MV_PALETTE,
-                  labels={"gnpa_pct": "Avg GNPA %", "period": "Period"},
-                  title=f"Average GNPA % by Sector (FY2021–{lbl})", height=460,
-                  category_orders={"period": PERIOD_ORDER})
-    chart_layout(fig)
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Heatmap — top 35 most stressed
-    st.markdown('<div class="section-header">GNPA Heatmap — Top 35 Most Stressed</div>',
-                unsafe_allow_html=True)
-    stressed_35 = latest_snap.nlargest(35, "gnpa_pct")["name"].tolist()
-    hm_source = get_chart_periods(fin_filtered)
-    hm_df = hm_source[hm_source["name"].isin(stressed_35)].pivot_table(
-        index="name", columns="period", values="gnpa_pct")
-    col_order = [c for c in PERIOD_ORDER if c in hm_df.columns]
-    hm_df = hm_df[col_order]
-    hm_df.index = [truncate_name(n) for n in hm_df.index]
-
-    fig = go.Figure(data=go.Heatmap(
-        z=hm_df.values,
-        x=hm_df.columns.tolist(),
-        y=hm_df.index.tolist(),
-        colorscale=[[0, COLOR["success"]], [0.5, "#FCC945"], [1, COLOR["danger"]]],
-        text=[[f"{v:.1f}%" if not np.isnan(v) else "N/A" for v in row] for row in hm_df.values],
-        texttemplate="%{text}",
-        showscale=True,
-    ))
-    fig.update_layout(
-        title=_title_dict(f"GNPA % Heatmap (to {lbl})"),
-        paper_bgcolor=CHART_BG,
-        height=max(340, len(stressed_35) * 26),
-        font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
-        margin=dict(t=82, b=30, l=10, r=30),
-        xaxis=dict(title=""),
-        yaxis=dict(title=""),
-        hoverlabel=HOVER_LABEL,
-    )
-    fig.update_traces(hovertemplate="%{x}<extra></extra>")
-    st.plotly_chart(fig, use_container_width=True)
-
-# ─────────────────────────────────────────────────────────────────────────────
-# TAB 4: CREDIT COST
-# ─────────────────────────────────────────────────────────────────────────────
-with tabs[3]:
-    note("Annualized Losses = (Net Provisions + Write-offs − Recoveries) ÷ Loan Book. "
-         "This is the actual P&L cost of defaults — different from GNPA which is a stock measure.")
+    note("Annualized Losses = (Net Provisions + Write-offs − Recoveries) ÷ Loan Book — "
+         "the P&L cost of defaults. GNPA is a stock/point-in-time measure of bad loans.")
 
     lbl = latest_period_label(fin_filtered)
-    latest_snap = get_latest_period_data(fin_filtered).dropna(subset=["credit_loss_rate_pct"])
-
-    all_loss = latest_snap.sort_values("credit_loss_rate_pct", ascending=True)
-    fig = make_hbar(all_loss, "credit_loss_rate_pct", "name", COLOR["success"],
-                    f"Annualized Losses ({period_label_for(all_loss)})",
-                    hover_text=all_loss["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
-                    text_suffix="%")
-    st.plotly_chart(fig, use_container_width=True)
-
-    st.caption(f"Credit cost ratio shown as of {lbl}. 9MFY26 uses Q3 ratio — not annualised.")
-
-    # Trend for top stressed
-    st.markdown(f'<div class="section-header">Annualized Losses Trend — FY2021 to {lbl}</div>',
-                unsafe_allow_html=True)
-    high12 = latest_snap.nlargest(12, "credit_loss_rate_pct")["name"].tolist()
     chart_df = get_chart_periods(fin_filtered)
-    trend_df = chart_df[chart_df["name"].isin(high12)][
-        ["name", "period", "credit_loss_rate_pct"]].dropna()
+    latest_snap_all = get_latest_period_data(fin_filtered)
+    all_gnpa = latest_snap_all.dropna(subset=["gnpa_pct"]).sort_values("gnpa_pct", ascending=True)
+    all_loss = latest_snap_all.dropna(subset=["credit_loss_rate_pct"]).sort_values("credit_loss_rate_pct", ascending=True)
 
-    fig = px.line(trend_df, x="period", y="credit_loss_rate_pct", color="name",
-                  color_discrete_sequence=MV_PALETTE,
-                  title=f"Annualized Losses % Trend (to {lbl})", height=460,
-                  category_orders={"period": PERIOD_ORDER})
-    fig.add_hline(y=2.0, line_dash="dot", line_color=COLOR["warning"],
-                  annotation_text="2% Reference Line")
-    chart_layout(fig)
-    st.plotly_chart(fig, use_container_width=True)
+    # ── Row 1: GNPA bar | Annualized Losses bar ──────────────────────────────
+    col1, col2 = st.columns(2)
+    with col1:
+        fig = make_hbar(all_gnpa, "gnpa_pct", "name", COLOR["success"],
+                        f"GNPA % ({period_label_for(all_gnpa)})",
+                        hover_text=all_gnpa["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values,
+                        text_suffix="%")
+        st.plotly_chart(fig, use_container_width=True)
+        st.caption("Point-in-time metric — 9MFY26 uses Q3 value, no annualisation.")
+    with col2:
+        fig = make_hbar(all_loss, "credit_loss_rate_pct", "name", COLOR["success"],
+                        f"Annualized Losses ({period_label_for(all_loss)})",
+                        hover_text=all_loss["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
+                        text_suffix="%")
+        st.plotly_chart(fig, use_container_width=True)
+        st.caption("9MFY26: annualised credit losses (×4/3) ÷ avg loan book.")
 
-    # Scatter: credit cost vs GNPA
+    # ── Row 2: Latest GNPA by Sector | Latest Annualized Losses by Sector ────
+    st.markdown('<div class="section-header">By Sector — Latest Period</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        sector_gnpa_latest = (
+            all_gnpa.groupby("sector")["gnpa_pct"].mean().reset_index()
+            .sort_values("gnpa_pct", ascending=True)
+        )
+        fig = make_hbar(sector_gnpa_latest, "gnpa_pct", "sector", COLOR["primary"],
+                        "GNPA % by Sector", text_suffix="%")
+        st.plotly_chart(fig, use_container_width=True)
+    with col2:
+        sector_loss_latest = (
+            all_loss.groupby("sector")["credit_loss_rate_pct"].mean().reset_index()
+            .sort_values("credit_loss_rate_pct", ascending=True)
+        )
+        fig = make_hbar(sector_loss_latest, "credit_loss_rate_pct", "sector", COLOR["primary"],
+                        "Annualized Losses % by Sector", text_suffix="%")
+        st.plotly_chart(fig, use_container_width=True)
+
+    # ── Row 3: Trend charts ───────────────────────────────────────────────────
+    st.markdown(f'<div class="section-header">Trends — FY2021 to {lbl}</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        sector_gnpa = chart_df.groupby(["period", "sector"])["gnpa_pct"].mean().reset_index()
+        fig = px.line(sector_gnpa, x="period", y="gnpa_pct", color="sector",
+                      color_discrete_sequence=MV_PALETTE,
+                      labels={"gnpa_pct": "Avg GNPA %", "period": "Period"},
+                      title=f"Avg GNPA % by Sector (FY2021–{lbl})", height=420,
+                      category_orders={"period": PERIOD_ORDER})
+        chart_layout(fig)
+        st.plotly_chart(fig, use_container_width=True)
+    with col2:
+        high12 = all_loss.nlargest(12, "credit_loss_rate_pct")["name"].tolist()
+        trend_df = chart_df[chart_df["name"].isin(high12)][
+            ["name", "period", "credit_loss_rate_pct"]].dropna()
+        fig = px.line(trend_df, x="period", y="credit_loss_rate_pct", color="name",
+                      color_discrete_sequence=MV_PALETTE,
+                      title=f"Annualized Losses % Trend (to {lbl})", height=420,
+                      category_orders={"period": PERIOD_ORDER})
+        fig.add_hline(y=2.0, line_dash="dot", line_color=COLOR["warning"],
+                      annotation_text="2% Reference Line")
+        chart_layout(fig)
+        st.plotly_chart(fig, use_container_width=True)
+
+    # ── Row 4: Heatmaps side by side ─────────────────────────────────────────
+    st.markdown('<div class="section-header">Heatmaps</div>', unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+
+    def _heatmap_fig(df_source, value_col, names, title_str):
+        hm_df = df_source[df_source["name"].isin(names)].pivot_table(
+            index="name", columns="period", values=value_col)
+        col_order = [c for c in PERIOD_ORDER if c in hm_df.columns]
+        hm_df = hm_df[col_order]
+        hm_df.index = [truncate_name(n) for n in hm_df.index]
+        fig = go.Figure(data=go.Heatmap(
+            z=hm_df.values, x=hm_df.columns.tolist(), y=hm_df.index.tolist(),
+            colorscale=[[0, COLOR["success"]], [0.5, "#FCC945"], [1, COLOR["danger"]]],
+            text=[[f"{v:.1f}%" if not np.isnan(v) else "N/A" for v in row] for row in hm_df.values],
+            texttemplate="%{text}", showscale=True,
+        ))
+        fig.update_layout(
+            title=_title_dict(title_str),
+            paper_bgcolor=CHART_BG,
+            height=max(340, len(names) * 22),
+            font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=11),
+            margin=dict(t=82, b=30, l=10, r=30),
+            xaxis=dict(title=""), yaxis=dict(title=""),
+            hoverlabel=HOVER_LABEL,
+        )
+        fig.update_traces(hovertemplate="%{y} %{x}<extra></extra>")
+        return fig
+
+    hm_source = chart_df
+    stressed_35 = all_gnpa.nlargest(35, "gnpa_pct")["name"].tolist()
+    top35_loss = all_loss.nlargest(35, "credit_loss_rate_pct")["name"].tolist()
+
+    with col1:
+        fig = _heatmap_fig(hm_source, "gnpa_pct", stressed_35, f"GNPA % Heatmap (to {lbl})")
+        st.plotly_chart(fig, use_container_width=True)
+    with col2:
+        fig = _heatmap_fig(hm_source, "credit_loss_rate_pct", top35_loss,
+                           f"Annualized Losses % Heatmap (to {lbl})")
+        st.plotly_chart(fig, use_container_width=True)
+
+    # ── Scatter: Annualized Losses vs GNPA ───────────────────────────────────
     st.markdown('<div class="section-header">Annualized Losses vs GNPA</div>', unsafe_allow_html=True)
-    scatter_df = latest_snap.dropna(subset=["credit_loss_rate_pct", "gnpa_pct", "loan_book_cr"])
+    scatter_df = latest_snap_all.dropna(subset=["credit_loss_rate_pct", "gnpa_pct", "loan_book_cr"])
     if not scatter_df.empty:
         fig = px.scatter(scatter_df, x="gnpa_pct", y="credit_loss_rate_pct",
                          size="loan_book_cr", color="sector", hover_name="name",
                          color_discrete_sequence=MV_PALETTE,
                          labels={"gnpa_pct": "GNPA %", "credit_loss_rate_pct": "Annualized Losses %"},
-                         title=f"Annualized Losses vs GNPA — {lbl} (bubble = loan book)", height=520)
+                         title=f"Annualized Losses vs GNPA — {lbl} (bubble = loan book)", height=500)
         chart_layout(fig)
         fig.update_traces(hovertemplate="%{hovertext}<extra></extra>")
         st.plotly_chart(fig, use_container_width=True)
 
-    # Waterfall: FY2021 → FY2025 (annual only)
+    # ── Waterfall: FY2021 → FY2025 change ────────────────────────────────────
     st.markdown('<div class="section-header">Annualized Losses Change — FY2021 to FY2025</div>',
                 unsafe_allow_html=True)
     st.caption("Uses FY2021 vs FY2025 annual data only — 9MFY26 excluded to avoid period mismatch.")
@@ -1409,7 +1425,6 @@ with tabs[3]:
     wf = wf.sort_values("change")
     wf["color"] = wf["change"].apply(lambda x: COLOR["success"] if x < 0 else COLOR["danger"])
     wf["label"] = wf["name"].apply(truncate_name)
-
     fig = go.Figure(go.Bar(x=wf["change"], y=wf["label"], orientation="h",
                            marker_color=wf["color"],
                            text=wf["change"].round(2), textposition="outside",
@@ -1424,46 +1439,17 @@ with tabs[3]:
         xaxis=dict(title="", showgrid=False, showticklabels=False,
                    range=[-(wf_max * 1.5), wf_max * 1.5], zeroline=True,
                    zerolinecolor="#EAEAEA", zerolinewidth=1, tickcolor="rgba(0,0,0,0)"),
-        yaxis=dict(showgrid=False,
-                   tickcolor="rgba(0,0,0,0)", title=""),
+        yaxis=dict(showgrid=False, tickcolor="rgba(0,0,0,0)", title=""),
         margin=dict(t=82, b=20, l=10, r=130),
         hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6",
                         font=dict(family=CHART_FONT, size=12)),
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    # Heatmap
-    st.markdown(f'<div class="section-header">Annualized Losses Heatmap — to {lbl}</div>',
-                unsafe_allow_html=True)
-    top40 = latest_snap.nlargest(40, "credit_loss_rate_pct")["name"].tolist()
-    hm_source = get_chart_periods(fin_filtered)
-    hm_df = hm_source[hm_source["name"].isin(top40)].pivot_table(
-        index="name", columns="period", values="credit_loss_rate_pct")
-    col_order = [c for c in PERIOD_ORDER if c in hm_df.columns]
-    hm_df = hm_df[col_order]
-    hm_df.index = [truncate_name(n) for n in hm_df.index]
-
-    fig = go.Figure(data=go.Heatmap(
-        z=hm_df.values, x=hm_df.columns.tolist(), y=hm_df.index.tolist(),
-        colorscale=[[0, COLOR["success"]], [0.5, "#FCC945"], [1, COLOR["danger"]]],
-        text=[[f"{v:.1f}%" if not np.isnan(v) else "N/A" for v in row] for row in hm_df.values],
-        texttemplate="%{text}", showscale=True,
-    ))
-    fig.update_layout(
-        title=_title_dict(f"Annualized Losses % Heatmap (to {lbl})"),
-        paper_bgcolor=CHART_BG, height=max(340, len(top40) * 26),
-        font=dict(color=COLOR["text_secondary"], family=CHART_FONT, size=12),
-        margin=dict(t=82, b=30, l=10, r=30),
-        xaxis=dict(title=""),
-        yaxis=dict(title=""),
-        hoverlabel=HOVER_LABEL,
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
 # ─────────────────────────────────────────────────────────────────────────────
-# TAB 9: TRENDS
+# TAB 8: TRENDS
 # ─────────────────────────────────────────────────────────────────────────────
-with tabs[8]:
+with tabs[7]:
     lbl = latest_period_label(fin_filtered)
     latest_snap = get_latest_period_data(fin_filtered)
     top10 = latest_snap.nlargest(10, "loan_book_cr")["name"].tolist()
@@ -2035,7 +2021,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                 unsafe_allow_html=True,
             )
 
-with tabs[4]:
+with tabs[3]:
     deep_dive_tab(fin_filtered, nbfc_filtered)
 
 TICKER_MAP = {
@@ -2120,7 +2106,7 @@ def fetch_valuation_data():
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 6: TOP RANKED
 # ─────────────────────────────────────────────────────────────────────────────
-with tabs[5]:
+with tabs[4]:
     _lbl_tr = latest_period_label(fin_filtered)
     _snap   = get_latest_period_data(fin_filtered)
 
@@ -2205,7 +2191,7 @@ with tabs[5]:
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 7: VALUATION
 # ─────────────────────────────────────────────────────────────────────────────
-with tabs[6]:
+with tabs[5]:
     note("Live data from Yahoo Finance. P/E is trailing twelve months. Refreshes every hour.")
 
     VAL_CACHE_PATH = "data/valuation_cache.json"
@@ -2464,7 +2450,7 @@ with tabs[6]:
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 9: DATA
 # ─────────────────────────────────────────────────────────────────────────────
-with tabs[7]:
+with tabs[6]:
     lbl = latest_period_label(fin_filtered)
     all_names = sorted(fin_filtered["name"].dropna().unique().tolist())
     selected_name = st.selectbox(
