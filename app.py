@@ -1596,15 +1596,12 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
           d.style.letterSpacing = '-0.01em';
         }}
       }});
-      // Clear the typed/display input when user opens the dropdown
+      // Select-all on open so user can type immediately; preserves BaseWeb selection state
       var inp = sel.querySelector('input');
       if (inp && !inp._clearBound) {{
         inp._clearBound = true;
         inp.addEventListener('focus', function() {{
-          setTimeout(function() {{ inp.value = ''; }}, 0);
-        }});
-        inp.addEventListener('mousedown', function() {{
-          setTimeout(function() {{ inp.value = ''; }}, 0);
+          setTimeout(function() {{ inp.select(); }}, 0);
         }});
       }}
     }});
