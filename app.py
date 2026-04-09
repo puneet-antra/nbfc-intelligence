@@ -1952,7 +1952,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                 marker=dict(size=6),
                 hovertemplate="₹%{y:,.0f} Cr<extra>PAT</extra>",
             ))
-            title_txt = f"NII & PAT (₹ Crore, to {lbl})" if has_nii else f"PAT (₹ Crore, to {lbl}) — NII not disclosed"
+            title_txt = "NII & PAT (₹ Crore)" if has_nii else "PAT (₹ Crore) — NII not disclosed"
             fig.update_layout(
                 title=_title_dict(title_txt),
                 height=400,
