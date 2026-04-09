@@ -1252,7 +1252,9 @@ with tabs[0]:
     if not bubble_df.empty:
         fig = px.scatter(
             bubble_df, x="rev_growth", y="pat_growth",
-            size="loan_book_cr", color="sector", hover_name="name",
+            size="loan_book_cr", color="sector",
+            hover_name="name",
+            custom_data=["name", "rev_growth", "pat_growth"],
             color_discrete_sequence=MV_PALETTE,
             labels={"rev_growth": "Revenue Growth %", "pat_growth": "PAT Growth %"},
             title="Revenue Growth vs PAT Growth (bubble = AUM size)",
@@ -1260,9 +1262,9 @@ with tabs[0]:
         )
         fig.update_traces(
             hovertemplate=(
-                "<b>%{hovertext}</b><br>"
-                "Rev Growth = %{x:.1f}%<br>"
-                "PAT Growth = %{y:.1f}%"
+                "<b>%{customdata[0]}</b><br>"
+                "Rev Growth = %{customdata[1]:.1f}%<br>"
+                "PAT Growth = %{customdata[2]:.1f}%"
                 "<extra></extra>"
             )
         )
