@@ -1662,36 +1662,43 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       return box;
     }}
 
-    // Get the currently displayed selected-value text from the display div
-    // (BaseWeb keeps it in a leaf div separate from the <input>)
-    function getDisplayValue(box) {{
+    // Read the live display-div text (only visible when dropdown is CLOSED)
+    function readLiveDisplayValue(box) {{
       var sel = box.querySelector('[data-baseweb="select"]');
       if (!sel) return '';
       var found = '';
-      sel.querySelectorAll('[data-baseweb="select"] > div > div > div').forEach(function(d) {{
+      sel.querySelectorAll('div').forEach(function(d) {{
         if (!found && d.children.length === 0) {{
           var t = d.textContent.trim();
           if (t.length > 1) found = t;
         }}
       }});
-      if (!found) {{
-        // Fallback: any leaf div with text
-        sel.querySelectorAll('div').forEach(function(d) {{
-          if (!found && d.children.length === 0) {{
-            var t = d.textContent.trim();
-            if (t.length > 1) found = t;
-          }}
-        }});
-      }}
       return found;
     }}
 
-    // focusin: inject current display value into input, then select-all
+    // Cache the display value whenever it is readable (dropdown closed)
+    function cacheDisplayValue(box) {{
+      var v = readLiveDisplayValue(box);
+      if (v) box._cachedVal = v;
+    }}
+
+    // mousedown fires BEFORE focusin, while the display div is still visible
+    doc.addEventListener('mousedown', function(e) {{
+      var box = e.target.closest('[data-testid="stSelectbox"]');
+      if (!box) return;
+      var lbl = box.querySelector('[data-testid="stWidgetLabel"] p');
+      if (!lbl || lbl.textContent.trim() !== 'Select an NBFC to explore') return;
+      cacheDisplayValue(box);
+    }});
+
+    // focusin: use cached value (live read already done in mousedown above)
     doc.addEventListener('focusin', function(e) {{
       var box = getNbfcBox(e.target);
       if (!box) return;
       var inp = e.target;
-      var val = getDisplayValue(box);
+      // Refresh cache if somehow missed (keyboard navigation, tab)
+      cacheDisplayValue(box);
+      var val = box._cachedVal || '';
       if (!val) return;
       // Two rAFs so we fire after BaseWeb's own focus handler
       window.parent.requestAnimationFrame(function() {{
@@ -1721,21 +1728,29 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
 
     doc.addEventListener('focusout', function(e) {{
       if (e.target && e.target._pendingClear) e.target._pendingClear = false;
-      // Re-apply bold styling after a selection is made
-      if (getNbfcBox(e.target)) {{
-        setTimeout(applyStyles, 80);
-        setTimeout(applyStyles, 300);
-        setTimeout(applyStyles, 700);
+      var box = getNbfcBox(e.target);
+      if (box) {{
+        // Re-apply bold styling and refresh cache after dropdown closes
+        setTimeout(function() {{ cacheDisplayValue(box); applyStyles(); }}, 80);
+        setTimeout(function() {{ cacheDisplayValue(box); applyStyles(); }}, 300);
+        setTimeout(function() {{ cacheDisplayValue(box); applyStyles(); }}, 700);
       }}
     }});
 
-    // MutationObserver: re-apply bold styling whenever the selectbox display text changes
+    // MutationObserver: re-apply bold styling and refresh cache on DOM changes
     var _observer = new MutationObserver(function(mutations) {{
       var relevant = mutations.some(function(m) {{
         var node = m.target;
         return node.closest && node.closest('[data-testid="stSelectbox"]');
       }});
-      if (relevant) applyStyles();
+      if (relevant) {{
+        applyStyles();
+        // Refresh cache for all NBFC selectboxes
+        doc.querySelectorAll('[data-testid="stSelectbox"]').forEach(function(box) {{
+          var lbl = box.querySelector('[data-testid="stWidgetLabel"] p');
+          if (lbl && lbl.textContent.trim() === 'Select an NBFC to explore') cacheDisplayValue(box);
+        }});
+      }}
     }});
     _observer.observe(doc.body, {{ childList: true, subtree: true }});
   }})();
