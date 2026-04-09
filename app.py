@@ -1676,9 +1676,9 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
           d.style.letterSpacing = '-0.01em';
         }}
       }});
-      // Blank the input when dropdown opens so user can type immediately.
-      // Uses double-rAF + React native setter so we fire AFTER BaseWeb sets
-      // its own value, and React registers the change properly.
+      // UX: on focus → select-all (highlights current name); first printable
+      // keypress → clear and type that character instead of appending.
+      // Uses React's native setter so the controlled input registers changes.
       var inp = sel.querySelector('input');
       if (inp && !inp._clearBound) {{
         inp._clearBound = true;
@@ -1687,10 +1687,23 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
         inp.addEventListener('focus', function() {{
           requestAnimationFrame(function() {{
             requestAnimationFrame(function() {{
-              _reactSetter.call(inp, '');
-              inp.dispatchEvent(new Event('input', {{ bubbles: true }}));
+              inp.setSelectionRange(0, inp.value.length);
+              inp._pendingClear = true;
             }});
           }});
+        }});
+        inp.addEventListener('keydown', function(e) {{
+          if (inp._pendingClear && e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {{
+            inp._pendingClear = false;
+            e.preventDefault();
+            _reactSetter.call(inp, e.key);
+            inp.dispatchEvent(new Event('input', {{ bubbles: true }}));
+          }} else if (e.key !== 'Shift' && e.key !== 'CapsLock') {{
+            inp._pendingClear = false;
+          }}
+        }});
+        inp.addEventListener('blur', function() {{
+          inp._pendingClear = false;
         }});
       }}
     }});
