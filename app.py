@@ -2172,14 +2172,21 @@ with tabs[6]:
 # TAB 9: DATA
 # ─────────────────────────────────────────────────────────────────────────────
 with tabs[7]:
-    search = st.text_input("Search companies", placeholder="Type company name…")
     lbl = latest_period_label(fin_filtered)
+    all_names = sorted(fin_filtered["name"].dropna().unique().tolist())
+    selected_name = st.selectbox(
+        "Type company name…",
+        options=["All companies"] + all_names,
+        index=0,
+        label_visibility="collapsed",
+    )
 
     st.markdown(f'<div class="section-header">All Companies — Financial Metrics as of {lbl}</div>',
                 unsafe_allow_html=True)
     metrics_df = get_latest_period_data(fin_filtered).copy()
-    if search:
-        metrics_df = metrics_df[metrics_df["name"].str.contains(search, case=False, na=False)]
+    if selected_name != "All companies":
+        metrics_df = metrics_df[metrics_df["name"] == selected_name]
+    search = "" if selected_name == "All companies" else selected_name
 
     metrics_df["Audited"] = metrics_df["data_quality"].apply(
         lambda x: "⚠️ Est." if x == "estimated" else ("❌ Unverified" if x == "unverified" else "✓")
@@ -2237,8 +2244,8 @@ with tabs[7]:
     st.markdown('<div class="section-header">Full Financial History (Annual + 9MFY26)</div>',
                 unsafe_allow_html=True)
     raw = get_chart_periods(fin_filtered).copy()
-    if search:
-        raw = raw[raw["name"].str.contains(search, case=False, na=False)]
+    if selected_name != "All companies":
+        raw = raw[raw["name"] == selected_name]
     st.dataframe(raw.drop(columns=["id", "nbfc_id"], errors="ignore"),
                  use_container_width=True, hide_index=True)
     st.caption("Raw quarterly rows (Q1, Q2, Q3) are excluded. Only annual (FY2021–FY2025) and annualised 9MFY26 rows shown.")
