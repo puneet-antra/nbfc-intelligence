@@ -2311,8 +2311,9 @@ with tabs[6]:
                             hover_text=["Latest"] * len(pb_df), text_suffix="×")
             st.plotly_chart(fig, use_container_width=True)
 
-        # P/E by sector
-        st.markdown('<div class="section-header">Median P/E by Sector</div>', unsafe_allow_html=True)
+        # P/E by sector  ·  ROE by sector
+        st.markdown('<div class="section-header">Valuations &amp; Returns by Sector</div>',
+                    unsafe_allow_html=True)
         _sector_map = nbfc_df.set_index("name")["sector"].to_dict()
         val_sect = val_with_price.copy()
         val_sect["sector"] = val_sect["company"].map(_sector_map)
@@ -2323,13 +2324,35 @@ with tabs[6]:
             .reset_index()
             .sort_values("pe", ascending=False)
         )
-        if not pe_sect.empty:
-            fig = make_hbar(
-                pe_sect, "pe", "sector", COLOR["primary"], "Median P/E by Sector (TTM)",
-                height=bar_chart_height(len(pe_sect)),
-                hover_text=["TTM"] * len(pe_sect), text_suffix="×",
-            )
-            st.plotly_chart(fig, use_container_width=True)
+        # ROE by sector — from latest financials snapshot
+        _roe_snap = get_latest_period_data(fin_filtered)
+        _lbl_val  = latest_period_label(fin_filtered)
+        roe_sect  = (
+            _roe_snap.dropna(subset=["roe_pct", "sector"])
+            .groupby("sector")["roe_pct"]
+            .median()
+            .reset_index()
+            .sort_values("roe_pct", ascending=False)
+        )
+
+        col_pe, col_roe = st.columns(2)
+        with col_pe:
+            if not pe_sect.empty:
+                fig = make_hbar(
+                    pe_sect, "pe", "sector", COLOR["primary"], "Median P/E by Sector (TTM)",
+                    height=bar_chart_height(len(pe_sect)),
+                    hover_text=["TTM"] * len(pe_sect), text_suffix="×",
+                )
+                st.plotly_chart(fig, use_container_width=True)
+        with col_roe:
+            if not roe_sect.empty:
+                fig = make_hbar(
+                    roe_sect, "roe_pct", "sector", COLOR["accent"],
+                    f"Median ROE by Sector ({_lbl_val})",
+                    height=bar_chart_height(len(roe_sect)),
+                    hover_text=[_lbl_val] * len(roe_sect), text_suffix="%",
+                )
+                st.plotly_chart(fig, use_container_width=True)
 
         # 12M price change
         st.markdown('<div class="section-header">12-Month Stock Price Change</div>',
