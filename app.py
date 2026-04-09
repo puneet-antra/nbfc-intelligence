@@ -181,11 +181,10 @@ h1 {
 
 /* ── Chart card wrapper ── */
 [data-testid="stPlotlyChart"] {
-    background: #ffffff !important;
-    border-radius: 14px !important;
-    border: 1px solid #EAEAEA !important;
-    box-shadow: 0 2px 12px 0 rgba(16,16,18,0.06) !important;
-    padding: 0.5rem 0.5rem !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
     margin-bottom: 1.2rem !important;
 }
 
