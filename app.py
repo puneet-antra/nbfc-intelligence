@@ -260,31 +260,26 @@ h1 {
     font-size: 0.84rem !important;
 }
 /* Universal catch-all: force all text inside any select to be readable */
-[data-testid="stSidebar"] [data-baseweb="select"] * {
-    color: #e8eaef !important;
-    font-weight: 500 !important;
-    font-family: 'Inter', sans-serif !important;
-}
-/* BaseWeb renders the selected single value as a placeholder-style div — override opacity */
-[data-testid="stSidebar"] [data-baseweb="select"] [class*="placeholder"],
-[data-testid="stSidebar"] [data-baseweb="select"] [class*="singleValue"],
-[data-testid="stSidebar"] [data-baseweb="select"] [class*="value"],
-[data-testid="stSidebar"] [data-baseweb="select"] > div > div > div {
+[data-testid="stSidebar"] [data-baseweb="select"] *,
+[data-testid="stSidebar"] [data-testid="stSelectbox"] * {
     color: #e8eaef !important;
     opacity: 1 !important;
     font-weight: 500 !important;
+    font-family: 'Inter', sans-serif !important;
 }
-/* Multiselect chips — match selectbox: no fill, subtle border, same text */
+/* Multiselect chips — subtle border, same text color as selectbox value */
 [data-testid="stSidebar"] [data-baseweb="tag"] {
     background: transparent !important;
     border: 1px solid #3a4a40 !important;
     border-radius: 4px !important;
     padding: 1px 6px !important;
     margin: 2px 2px !important;
+    opacity: 1 !important;
 }
 [data-testid="stSidebar"] [data-baseweb="tag"] *,
 [data-testid="stSidebar"] [data-baseweb="tag"] span {
     color: #e8eaef !important;
+    opacity: 1 !important;
     font-weight: 500 !important;
     font-size: 0.84rem !important;
     background: transparent !important;
