@@ -1745,8 +1745,8 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
         .dropna().unique().tolist()
     )
 
-    # Default to KreditBee on first load
-    if "dd_company_select" not in st.session_state and "KreditBee" in companies_with_data:
+    # Default to KreditBee when nothing is selected
+    if not st.session_state.get("dd_company_select") and "KreditBee" in companies_with_data:
         st.session_state["dd_company_select"] = "KreditBee"
 
     # ── Company selector + inline filter icon ─────────────────────────────────
