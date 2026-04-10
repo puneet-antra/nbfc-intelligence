@@ -2460,6 +2460,11 @@ with tabs[5]:
     else:
         st.caption(f"Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
 
+    # Apply sidebar sector filter — keep only companies in nbfc_filtered
+    if sector_filter and not val_with_price.empty:
+        _filtered_names = set(nbfc_filtered["name"].tolist())
+        val_with_price = val_with_price[val_with_price["company"].isin(_filtered_names)]
+
     if not val_with_price.empty:
         med_pe = val_with_price["pe"].median()
         med_pb = val_with_price["pb"].median()
