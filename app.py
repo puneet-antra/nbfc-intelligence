@@ -267,12 +267,12 @@ h1 {
     font-weight: 500 !important;
     font-family: 'Inter', sans-serif !important;
 }
-/* Multiselect chips — subtle border, same text color as selectbox value */
+/* Multiselect chips — same style for both RBI Layer and Sector */
 [data-testid="stSidebar"] [data-baseweb="tag"] {
-    background: transparent !important;
-    border: 1px solid #3a4a40 !important;
+    background: #1e3028 !important;
+    border: 1px solid #2e7d54 !important;
     border-radius: 4px !important;
-    padding: 1px 6px !important;
+    padding: 2px 8px !important;
     margin: 2px 2px !important;
     opacity: 1 !important;
 }
