@@ -2395,6 +2395,13 @@ with tabs[4]:
     _lbl_tr = latest_period_label(fin_filtered)
     _snap   = get_latest_period_data(fin_filtered)
 
+    # Compute profit margin: PAT / NII × 100
+    _snap = _snap.copy()
+    _snap["pat_margin_pct"] = (
+        (_snap["pat_cr"] / _snap["net_interest_income_cr"] * 100)
+        .where(_snap["net_interest_income_cr"].notna() & (_snap["net_interest_income_cr"] != 0))
+    )
+
     # Map each company to the period used in _snap
     _snap_period = _snap.set_index("name")["period"].to_dict() if "period" in _snap.columns else {}
 
@@ -2458,6 +2465,11 @@ with tabs[4]:
         _top20_hbar("roa_pct", "Return on Assets (ROA)", "#217858", bar_fmt="{:.2f}%", show_exc_note=True)
     with col4:
         _top20_hbar("roe_pct", "Return on Equity (ROE)", "#2CA076", bar_fmt="{:.2f}%", show_exc_note=True)
+
+    col5, col6 = st.columns(2)
+    with col5:
+        _top20_hbar("pat_margin_pct", "Profit Margin (PAT / Revenue)", "#6366f1",
+                    bar_fmt="{:.1f}%", show_exc_note=True)
 
     # Market cap — live from Yahoo Finance (listed NBFCs only)
     st.markdown('<div class="section-header">Market Capitalisation (Listed NBFCs)</div>',
