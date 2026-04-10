@@ -250,31 +250,31 @@ h1 {
     border-color: #1e1e20 !important;
     margin: 1rem 0 !important;
 }
-/* Selectbox / multiselect container */
+/* ── Selectbox + Multiselect: consistent container ── */
 [data-testid="stSidebar"] [data-baseweb="select"] > div,
 [data-testid="stSidebar"] [data-testid="stSelectbox"] > div > div {
     background: #1a1a1c !important;
-    border-color: #2a2a2e !important;
-    color: #c8ccd6 !important;
+    border-color: #2e3a33 !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 0.84rem !important;
-    font-weight: 500 !important;
 }
-/* Selectbox selected value — broad catch-all for BaseWeb's generated class names */
-[data-testid="stSidebar"] [data-baseweb="select"] span,
-[data-testid="stSidebar"] [data-baseweb="select"] div,
-[data-testid="stSidebar"] [data-baseweb="select"] p {
+/* Universal catch-all: force all text inside any select to be readable */
+[data-testid="stSidebar"] [data-baseweb="select"] * {
     color: #c8ccd6 !important;
     font-weight: 500 !important;
+    font-family: 'Inter', sans-serif !important;
 }
-/* Multiselect chips (selected sector tags) */
+/* Multiselect chips — same pill style, subtle green tint */
 [data-testid="stSidebar"] [data-baseweb="tag"] {
-    background: #144835 !important;
-    border-color: #217858 !important;
+    background: #1d3a2c !important;
+    border: 1px solid #2d5c44 !important;
+    border-radius: 6px !important;
+    padding: 2px 8px !important;
 }
-[data-testid="stSidebar"] [data-baseweb="tag"] span {
-    color: #ffffff !important;
-    font-weight: 600 !important;
+[data-testid="stSidebar"] [data-baseweb="tag"] span,
+[data-testid="stSidebar"] [data-baseweb="tag"] * {
+    color: #c8ccd6 !important;
+    font-weight: 500 !important;
     font-size: 0.82rem !important;
 }
 /* Radio — all options */
