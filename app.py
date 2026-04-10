@@ -2557,11 +2557,17 @@ with tabs[5]:
     else:
         st.caption(f"Last updated: {cache_ts}")
 
-    # Apply sidebar sector filter — use pre-computed inclusion set for reliability
-    if sector_filter and not val_with_price.empty:
-        _sector_set = set(sector_filter)
-        _keep_companies = {c for c, s in TICKER_SECTOR.items() if s in _sector_set}
-        val_with_price = val_with_price[val_with_price["company"].isin(_keep_companies)]
+    # Apply sidebar sector filter to Valuation tab
+    _val_sector_filter = sector_filter  # explicit local copy to avoid any closure issue
+    if _val_sector_filter and not val_with_price.empty:
+        val_with_price = val_with_price[
+            val_with_price["company"].apply(
+                lambda c: TICKER_SECTOR.get(c, "Other") in _val_sector_filter
+            )
+        ]
+        st.caption(f"Showing: {', '.join(_val_sector_filter)} — {len(val_with_price)} companies")
+    else:
+        st.caption(f"Showing: All sectors — {len(val_with_price)} companies")
 
     if not val_with_price.empty:
         med_pe = val_with_price["pe"].median()
