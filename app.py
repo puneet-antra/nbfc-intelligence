@@ -2511,7 +2511,7 @@ with tabs[4]:
 with tabs[5]:
     note("Live data from Yahoo Finance. P/E is forward (next twelve months); falls back to trailing if forward estimate unavailable. Refreshes once a day.")
 
-    VAL_CACHE_PATH = "data/valuation_cache.json"
+    VAL_CACHE_PATH = "data/valuation_cache_v2.json"
 
     def save_val_cache(df):
         import json
