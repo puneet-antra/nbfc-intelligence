@@ -255,17 +255,17 @@ h1 {
 [data-testid="stSidebar"] [data-testid="stSelectbox"] > div > div {
     background: #1a1a1c !important;
     border-color: #2a2a2e !important;
-    color: #ffffff !important;
+    color: #c8ccd6 !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 0.84rem !important;
     font-weight: 500 !important;
 }
-/* Selectbox selected value text */
-[data-testid="stSidebar"] [data-baseweb="select"] [data-testid="stMarkdownContainer"] p,
-[data-testid="stSidebar"] [data-baseweb="select"] div[class*="ValueContainer"] span,
-[data-testid="stSidebar"] [data-baseweb="select"] div[class*="singleValue"] {
-    color: #ffffff !important;
-    font-weight: 600 !important;
+/* Selectbox selected value — broad catch-all for BaseWeb's generated class names */
+[data-testid="stSidebar"] [data-baseweb="select"] span,
+[data-testid="stSidebar"] [data-baseweb="select"] div,
+[data-testid="stSidebar"] [data-baseweb="select"] p {
+    color: #c8ccd6 !important;
+    font-weight: 500 !important;
 }
 /* Multiselect chips (selected sector tags) */
 [data-testid="stSidebar"] [data-baseweb="tag"] {
