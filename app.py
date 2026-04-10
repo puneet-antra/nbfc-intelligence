@@ -1110,6 +1110,10 @@ st.sidebar.caption(
     "❌ = unverified. "
     "Live valuations from Yahoo Finance."
 )
+st.sidebar.caption(
+    "📌 Moneyview figures reflect the consolidated platform business (WFPL + WFL). "
+    "All other NBFCs report lending/NBFC entity financials only."
+)
 st.sidebar.markdown("---")
 if _AUTH_ENABLED:
     st.sidebar.caption(f"Signed in as **{st.user.email}**")
@@ -2250,8 +2254,9 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                  "Reported 9M PAT ₹341 Cr − ₹152 Cr exceptional (₹104 Cr GST provision reversal, Karnataka HC Dec 2025 "
                  "+ ₹48 Cr DTA recognition) = Adjusted 9M PAT ₹189 Cr × 4/3 = Annualised PAT ₹252 Cr.  "
                  "Adjusted ROA = ₹252 Cr ÷ avg loan book ₹7,049 Cr [(₹5,649 + ₹8,448) ÷ 2] = 3.58%.", "warning")
-        if has_q3 and selected == "Moneyview":
-            note("Loan book = managed AUM (on-book + off-book DLG). "
+        if selected == "Moneyview":
+            note("Moneyview figures are for the consolidated platform business (WFPL + WFL), "
+                 "not the standalone NBFC entity. Loan book = managed AUM (on-book + off-book DLG, ₹19,815 Cr incl. co-lending). "
                  "9MFY26: ROA & ROE use PAT before exceptional items (₹245 Cr, 9M → annualised ₹327 Cr). "
                  "Reported 9M PAT = ₹210 Cr (after ₹35 Cr one-time charges). "
                  "Annualised loss rate = ₹965 Cr / avg AUM ₹18,265 Cr = 5.29%. Source: DRHP Mar-2026.", "info")
@@ -2400,7 +2405,8 @@ with tabs[4]:
 
     _EXC_NOTE = ("* KreditBee 9MFY26: annualised adj. PAT ₹252 Cr "
                  "(₹341 Cr reported − ₹152 Cr exceptional items × 4/3).  "
-                 "Moneyview 9MFY26: pre-exceptional PAT ₹245 Cr × 4/3 = ₹327 Cr annualised.")
+                 "Moneyview 9MFY26: pre-exceptional PAT ₹245 Cr × 4/3 = ₹327 Cr annualised.  "
+                 "Moneyview figures are for the consolidated platform business (WFPL + WFL), not the standalone NBFC.")
 
     def _top20_hbar(metric, label, color, bar_fmt=None, hover_fmt=None, is_inr=False, show_exc_note=False):
         cols = ["name", metric] + (["period"] if "period" in _snap.columns else [])
