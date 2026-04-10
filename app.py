@@ -966,7 +966,7 @@ def note(text, kind="info"):
 
 MONEYVIEW_GREEN = "#1B5E20"   # Moneyview brand dark green
 
-def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text_suffix=""):
+def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text_suffix="", text_labels=None):
     """Standard horizontal bar chart — pass data sorted DESCENDING (chart reverses y-axis).
     Moneyview is automatically highlighted: dark-green bar + bold dark-green label."""
     df = df.copy()
@@ -976,7 +976,8 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
     x_max = vals.abs().max() if not vals.empty else 1
     x_left = vals.min() * 1.55 if vals.min() < 0 else 0
     x_range = [x_left, x_max * 1.05]  # bars fill most of plot; labels go in right margin via annotations
-    text_labels = df[x_col].round(1).astype(str) + text_suffix
+    if text_labels is None:
+        text_labels = df[x_col].round(1).astype(str) + text_suffix
 
     names = df[y_col].tolist()
     # Per-bar colours: dark green for Moneyview, default for everyone else
@@ -2366,9 +2367,8 @@ with tabs[4]:
             df, metric, "name", color,
             f"Top 10 by {label} (as of {_chart_lbl})",
             hover_text=df["hover"].tolist(),
+            text_labels=df["bar_label"].tolist(),
         )
-        # Override bar text with formatted labels
-        fig.update_traces(text=df["bar_label"].tolist(), texttemplate="%{text}")
         st.plotly_chart(fig, use_container_width=True)
 
     st.markdown(f'<div class="section-header">Rankings as of {_lbl_tr}</div>',
@@ -2402,8 +2402,8 @@ with tabs[4]:
         _mc["hover"]     = _mc["mktcap_cr"].apply(lambda v: f"₹{v:,.0f} Cr  ·  Live")
         fig_mc = make_hbar(_mc, "mktcap_cr", "name", "#1e40af",
                            "Top 10 by Market Cap (Live)",
-                           hover_text=_mc["hover"].tolist())
-        fig_mc.update_traces(text=_mc["bar_label"].tolist(), texttemplate="%{text}")
+                           hover_text=_mc["hover"].tolist(),
+                           text_labels=_mc["bar_label"].tolist())
         st.plotly_chart(fig_mc, use_container_width=True)
     else:
         st.info("Market cap data unavailable.")
