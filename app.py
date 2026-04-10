@@ -2187,9 +2187,6 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
             if selected == "KreditBee" and has_q3:
                 st.caption("* 9MFY26 PAT annualised (×4/3) and adjusted for one-time exceptional items: "
                            "₹341 Cr reported − ₹152 Cr = ₹189 Cr × 4/3 = ₹252 Cr annualised.")
-                note("9MFY26 PAT annualised and adjusted to ~₹252 Cr (adj. 9M PAT ~₹189 Cr × 4/3, "
-                     "ex ~₹152 Cr one-time items). "
-                     "NII (₹1,304 Cr annualised) is unaffected by exceptional items.", "warning")
             if selected == "Moneyview" and has_q3:
                 st.caption("* 9MFY26 PAT annualised (×4/3) using pre-exceptional PAT: "
                            "₹245 Cr × 4/3 = ₹327 Cr annualised.")
