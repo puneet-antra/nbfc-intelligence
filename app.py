@@ -2616,16 +2616,27 @@ with tabs[5]:
 
         col1, col2 = st.columns(2)
         with col1:
-            pe_df = val_with_price.dropna(subset=["pe"]).sort_values("pe", ascending=False)
+            # Include all priced companies; companies with no P/E estimate show "N/A"
+            pe_has  = val_with_price.dropna(subset=["pe"]).sort_values("pe", ascending=False).copy()
+            pe_miss = val_with_price[val_with_price["pe"].isna()].copy()
+            pe_miss["pe"] = 0  # zero-width bar for N/A companies
+            pe_df = pd.concat([pe_has, pe_miss], ignore_index=True)
+            _pe_labels = (pe_has["pe"].round(1).astype(str) + "×").tolist() + ["N/A"] * len(pe_miss)
             fig = make_hbar(pe_df, "pe", "company", COLOR["primary"], "P/E Ratio (Fwd)",
                             height=bar_chart_height(len(pe_df)),
-                            hover_text=["Fwd"] * len(pe_df), text_suffix="×")
+                            hover_text=(["Fwd"] * len(pe_has) + ["N/A"] * len(pe_miss)),
+                            text_labels=_pe_labels)
             st.plotly_chart(fig, use_container_width=True)
         with col2:
-            pb_df = val_with_price.dropna(subset=["pb"]).sort_values("pb", ascending=False)
+            pb_has  = val_with_price.dropna(subset=["pb"]).sort_values("pb", ascending=False).copy()
+            pb_miss = val_with_price[val_with_price["pb"].isna()].copy()
+            pb_miss["pb"] = 0
+            pb_df = pd.concat([pb_has, pb_miss], ignore_index=True)
+            _pb_labels = (pb_has["pb"].round(2).astype(str) + "×").tolist() + ["N/A"] * len(pb_miss)
             fig = make_hbar(pb_df, "pb", "company", COLOR["accent"], "P/B Ratio",
                             height=bar_chart_height(len(pb_df)),
-                            hover_text=["Latest"] * len(pb_df), text_suffix="×")
+                            hover_text=(["Latest"] * len(pb_has) + ["N/A"] * len(pb_miss)),
+                            text_labels=_pb_labels)
             st.plotly_chart(fig, use_container_width=True)
 
         # P/E by sector  ·  ROE by sector
