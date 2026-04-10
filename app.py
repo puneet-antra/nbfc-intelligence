@@ -2370,13 +2370,15 @@ def fetch_valuation_data():
             t = yf.Ticker(ticker)
             try:
                 fi = t.fast_info
-                pe = getattr(fi, "trailing_pe", None) or t.info.get("trailingPE")
-                pb = getattr(fi, "price_to_book", None) or t.info.get("priceToBook")
-                price = getattr(fi, "last_price", None) or t.info.get("currentPrice")
-                mktcap = getattr(fi, "market_cap", None) or t.info.get("marketCap")
+                info = t.info
+                # Forward P/E preferred; fall back to trailing if forward not available
+                pe = info.get("forwardPE") or info.get("trailingPE")
+                pb = getattr(fi, "price_to_book", None) or info.get("priceToBook")
+                price = getattr(fi, "last_price", None) or info.get("currentPrice")
+                mktcap = getattr(fi, "market_cap", None) or info.get("marketCap")
             except Exception:
                 info = t.info
-                pe = info.get("trailingPE")
+                pe = info.get("forwardPE") or info.get("trailingPE")
                 pb = info.get("priceToBook")
                 price = info.get("currentPrice")
                 mktcap = info.get("marketCap")
@@ -2507,7 +2509,7 @@ with tabs[4]:
 # TAB 7: VALUATION
 # ─────────────────────────────────────────────────────────────────────────────
 with tabs[5]:
-    note("Live data from Yahoo Finance. P/E is trailing twelve months. Refreshes once a day.")
+    note("Live data from Yahoo Finance. P/E is forward (next twelve months); falls back to trailing if forward estimate unavailable. Refreshes once a day.")
 
     VAL_CACHE_PATH = "data/valuation_cache.json"
 
@@ -2594,7 +2596,7 @@ with tabs[5]:
             <div style="flex:1;background:#f8fafb;border:1px solid #EAEAEA;border-radius:14px;
                         padding:1.1rem 1.5rem;text-align:center;">
                 <div style="font-size:0.68rem;font-weight:600;color:#8B8FA8;letter-spacing:0.08em;
-                            text-transform:uppercase;margin-bottom:0.45rem;">Median P/E (TTM)</div>
+                            text-transform:uppercase;margin-bottom:0.45rem;">Median P/E (Fwd)</div>
                 <div style="font-size:1.65rem;font-weight:700;color:#1a1a1a;line-height:1.1;">{pe_val}</div>
             </div>
             <div style="flex:1;background:#f8fafb;border:1px solid #EAEAEA;border-radius:14px;
@@ -2615,9 +2617,9 @@ with tabs[5]:
         col1, col2 = st.columns(2)
         with col1:
             pe_df = val_with_price.dropna(subset=["pe"]).sort_values("pe", ascending=False)
-            fig = make_hbar(pe_df, "pe", "company", COLOR["primary"], "P/E Ratio (TTM)",
+            fig = make_hbar(pe_df, "pe", "company", COLOR["primary"], "P/E Ratio (Fwd)",
                             height=bar_chart_height(len(pe_df)),
-                            hover_text=["TTM"] * len(pe_df), text_suffix="×")
+                            hover_text=["Fwd"] * len(pe_df), text_suffix="×")
             st.plotly_chart(fig, use_container_width=True)
         with col2:
             pb_df = val_with_price.dropna(subset=["pb"]).sort_values("pb", ascending=False)
@@ -2682,9 +2684,9 @@ with tabs[5]:
         with col_pe:
             if not pe_sect.empty:
                 fig = make_hbar(
-                    pe_sect, "pe", "sector", COLOR["primary"], "Median P/E by Sector (TTM)",
+                    pe_sect, "pe", "sector", COLOR["primary"], "Median P/E by Sector (Fwd)",
                     height=_chart_h,
-                    hover_text=["TTM"] * len(pe_sect), text_suffix="×",
+                    hover_text=["Fwd"] * len(pe_sect), text_suffix="×",
                 )
                 st.plotly_chart(fig, use_container_width=True)
         with col_roe:
@@ -2746,7 +2748,7 @@ with tabs[5]:
         display_val = val_df.sort_values("mktcap_cr", ascending=False, na_position="last")
 
         _cols   = ["ticker", "company", "price", "pe", "pb", "mktcap_cr", "chg_12m"]
-        _heads  = ["Ticker", "Company", "Price (₹)", "P/E", "P/B", "Mkt Cap (₹ Cr)", "12M Chg %"]
+        _heads  = ["Ticker", "Company", "Price (₹)", "P/E (Fwd)", "P/B", "Mkt Cap (₹ Cr)", "12M Chg %"]
         _right  = {2, 3, 4, 5, 6}   # 0-indexed columns that should be right-aligned
 
         def _fmt_val_cell(col, val):
