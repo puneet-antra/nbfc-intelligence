@@ -640,7 +640,13 @@ PERIOD_SHORT_ANN = {**PERIOD_SHORT, "9MFY26": "9MFY26 (Ann.)"}
 
 # ── Ensure DB exists ─────────────────────────────────────────────────────────
 import os as _os
-if not _os.path.exists("data/nbfc_full.db"):
+_DB_PATH    = "data/nbfc_full.db"
+_BUILD_PATH = "build_db.py"
+_db_stale = (
+    not _os.path.exists(_DB_PATH) or
+    _os.path.getmtime(_BUILD_PATH) > _os.path.getmtime(_DB_PATH)
+)
+if _db_stale:
     import build_db as _build_db
     _build_db.build()
     st.cache_resource.clear()
