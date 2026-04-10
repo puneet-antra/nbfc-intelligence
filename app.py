@@ -694,10 +694,9 @@ def truncate_name(name, n=15):
 # Post-tax one-time exceptional items excluded from ROA/ROE calculations (₹ Crore).
 # These inflate reported PAT but do not reflect recurring earnings power.
 EXCEPTIONAL_ITEMS_ADJ = {
-    ("KreditBee",   "9MFY26"): 152,  # GST provision reversal ₹104 Cr + DTA recognition ₹48 Cr
-    # DB stores ₹245 Cr (pre-exceptional PAT per DRHP); reported 9M PAT = ₹210 Cr after ₹35 Cr
-    # of one-time exceptional charges. Subtract ₹35 Cr so ROA/ROE reflect reported earnings.
-    ("Moneyview",   "9MFY26"):  35,  # One-time exceptional charges ₹35 Cr (245 reported → 210 Cr)
+    ("KreditBee", "9MFY26"): 152,  # GST provision reversal ₹104 Cr + DTA recognition ₹48 Cr
+    # Moneyview DB stores ₹245 Cr (PAT before exceptional charges per DRHP) — no further
+    # adjustment needed; annualise_9m() uses this directly for ROA/ROE calculations.
 }
 
 # Companies whose ROA (and optionally ROE) use a non-standard denominator stored in the DB.
@@ -1458,9 +1457,8 @@ with tabs[1]:
     note("KreditBee 9MFY26: ROA & ROE adjusted to exclude ~₹152 Cr post-tax one-time items "
          "(₹104 Cr GST provision reversal after Karnataka HC ruling, Dec 2025 + ₹48 Cr DTA recognition). "
          "Reported 9M PAT was ₹341 Cr; adjusted 9M PAT ~₹189 Cr → annualised ~₹252 Cr used for ratios.", "warning")
-    note("Moneyview 9MFY26: Loan book = managed AUM (₹19,815 Cr). ROA & ROE adjusted to exclude ₹35 Cr exceptional charges "
-         "(DB stores ₹245 Cr pre-exceptional PAT; reported 9M PAT per DRHP = ₹210 Cr). "
-         "Adjusted 9M PAT ₹210 Cr → annualised ₹280 Cr. "
+    note("Moneyview 9MFY26: Loan book = managed AUM (₹19,815 Cr). ROA & ROE use PAT before exceptional items "
+         "(₹245 Cr, 9M → annualised ₹327 Cr). Reported 9M PAT per DRHP = ₹210 Cr (after ₹35 Cr exceptional charges). "
          "Annualised credit loss rate = ₹965 Cr / avg AUM ₹18,265 Cr = 5.29%. Source: DRHP Mar-2026.", "info")
 
     # Sector breakdown — latest period (always all sectors, ignore filter)
@@ -2235,8 +2233,8 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                  "Reported 9M PAT: ₹341 Cr → Adjusted 9M: ~₹189 Cr → Annualised: ~₹252 Cr.", "warning")
         if has_q3 and selected == "Moneyview":
             note("Loan book = managed AUM (on-book + off-book DLG). "
-                 "9MFY26: ROA & ROE exclude ₹35 Cr one-time exceptional charges "
-                 "(DB stores ₹245 Cr pre-exceptional PAT; reported 9M PAT = ₹210 Cr → annualised ₹280 Cr). "
+                 "9MFY26: ROA & ROE use PAT before exceptional items (₹245 Cr, 9M → annualised ₹327 Cr). "
+                 "Reported 9M PAT = ₹210 Cr (after ₹35 Cr one-time charges). "
                  "Annualised loss rate = ₹965 Cr / avg AUM ₹18,265 Cr = 5.29%. Source: DRHP Mar-2026.", "info")
         if selected == "Kissht":
             note("Kissht FY2025 (latest): ROA = ₹161 Cr PAT / avg total assets ₹2,249 Cr = 7.14%. "
@@ -2434,8 +2432,8 @@ with tabs[4]:
          "(₹104 Cr GST provision reversal, Karnataka HC ruling Dec 2025 + ₹48 Cr DTA recognition). "
          "Reported 9M PAT was ₹341 Cr.", "warning")
     note("Moneyview 9MFY26: Loan book = managed AUM (₹19,815 Cr incl. co-lending & off-book). "
-         "ROA & ROE exclude ₹35 Cr one-time exceptional charges (reported 9M PAT ₹210 Cr → annualised ₹280 Cr). "
-         "Source: DRHP Mar-2026.", "info")
+         "ROA & ROE use PAT before exceptional items (₹245 Cr, 9M → annualised ₹327 Cr). "
+         "Reported 9M PAT = ₹210 Cr (after ₹35 Cr one-time charges). Source: DRHP Mar-2026.", "info")
 
     # Market cap — live from Yahoo Finance (listed NBFCs only)
     st.markdown('<div class="section-header">Market Capitalisation (Listed NBFCs)</div>',
