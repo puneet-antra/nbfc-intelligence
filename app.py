@@ -694,7 +694,10 @@ def truncate_name(name, n=15):
 # Post-tax one-time exceptional items excluded from ROA/ROE calculations (₹ Crore).
 # These inflate reported PAT but do not reflect recurring earnings power.
 EXCEPTIONAL_ITEMS_ADJ = {
-    ("KreditBee", "9MFY26"): 152,  # GST provision reversal ₹104 Cr + DTA recognition ₹48 Cr
+    ("KreditBee",   "9MFY26"): 152,  # GST provision reversal ₹104 Cr + DTA recognition ₹48 Cr
+    # DB stores ₹245 Cr (pre-exceptional PAT per DRHP); reported 9M PAT = ₹210 Cr after ₹35 Cr
+    # of one-time exceptional charges. Subtract ₹35 Cr so ROA/ROE reflect reported earnings.
+    ("Moneyview",   "9MFY26"):  35,  # One-time exceptional charges ₹35 Cr (245 reported → 210 Cr)
 }
 
 # Companies whose ROA (and optionally ROE) use a non-standard denominator stored in the DB.
@@ -1455,9 +1458,10 @@ with tabs[1]:
     note("KreditBee 9MFY26: ROA & ROE adjusted to exclude ~₹152 Cr post-tax one-time items "
          "(₹104 Cr GST provision reversal after Karnataka HC ruling, Dec 2025 + ₹48 Cr DTA recognition). "
          "Reported 9M PAT was ₹341 Cr; adjusted 9M PAT ~₹189 Cr → annualised ~₹252 Cr used for ratios.", "warning")
-    note("Moneyview 9MFY26: Loan book = managed AUM (₹19,815 Cr). ROA = annualised PAT ₹327 Cr / avg managed AUM "
-         "₹18,265 Cr = 1.79%. Annualized loss rate = annualised impairment ₹965 Cr / avg managed AUM = 5.29%. "
-         "PAT = ₹245 Cr before exceptional items (reported ₹210 Cr). Source: DRHP filed Mar-2026.", "info")
+    note("Moneyview 9MFY26: Loan book = managed AUM (₹19,815 Cr). ROA & ROE adjusted to exclude ₹35 Cr exceptional charges "
+         "(DB stores ₹245 Cr pre-exceptional PAT; reported 9M PAT per DRHP = ₹210 Cr). "
+         "Adjusted 9M PAT ₹210 Cr → annualised ₹280 Cr. "
+         "Annualised credit loss rate = ₹965 Cr / avg AUM ₹18,265 Cr = 5.29%. Source: DRHP Mar-2026.", "info")
 
     # Sector breakdown — latest period (always all sectors, ignore filter)
     st.markdown(f'<div class="section-header">By Sector — {lbl}</div>', unsafe_allow_html=True)
@@ -2230,9 +2234,10 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                  "(Karnataka HC ruling, Dec 2025) + ₹48 Cr DTA recognition. "
                  "Reported 9M PAT: ₹341 Cr → Adjusted 9M: ~₹189 Cr → Annualised: ~₹252 Cr.", "warning")
         if has_q3 and selected == "Moneyview":
-            note("Loan book = managed AUM (on-book + off-book DLG). 9MFY26: ROA = ann. PAT ₹327 Cr / avg managed AUM "
-                 "₹18,265 Cr = 1.79%. Annualized loss rate = ann. impairment ₹965 Cr / avg managed AUM = 5.29%. "
-                 "PAT = ₹245 Cr before exceptional items (reported ₹210 Cr). Source: DRHP filed Mar-2026.", "info")
+            note("Loan book = managed AUM (on-book + off-book DLG). "
+                 "9MFY26: ROA & ROE exclude ₹35 Cr one-time exceptional charges "
+                 "(DB stores ₹245 Cr pre-exceptional PAT; reported 9M PAT = ₹210 Cr → annualised ₹280 Cr). "
+                 "Annualised loss rate = ₹965 Cr / avg AUM ₹18,265 Cr = 5.29%. Source: DRHP Mar-2026.", "info")
         if selected == "Kissht":
             note("Kissht FY2025 (latest): ROA = ₹161 Cr PAT / avg total assets ₹2,249 Cr = 7.14%. "
                  "ROE = ₹161 Cr / avg equity ₹906 Cr = 17.74%. "
@@ -2428,8 +2433,9 @@ with tabs[4]:
     note("KreditBee 9MFY26: PAT (₹252 Cr) and ROA/ROE exclude ~₹152 Cr post-tax one-time items "
          "(₹104 Cr GST provision reversal, Karnataka HC ruling Dec 2025 + ₹48 Cr DTA recognition). "
          "Reported 9M PAT was ₹341 Cr.", "warning")
-    note("Moneyview 9MFY26: Loan book reflects managed AUM (₹19,815 Cr incl. co-lending & off-book). "
-         "PAT (₹327 Cr) and ROA/ROE include exceptional items. Source: DRHP Mar-2026.", "info")
+    note("Moneyview 9MFY26: Loan book = managed AUM (₹19,815 Cr incl. co-lending & off-book). "
+         "ROA & ROE exclude ₹35 Cr one-time exceptional charges (reported 9M PAT ₹210 Cr → annualised ₹280 Cr). "
+         "Source: DRHP Mar-2026.", "info")
 
     # Market cap — live from Yahoo Finance (listed NBFCs only)
     st.markdown('<div class="section-header">Market Capitalisation (Listed NBFCs)</div>',
