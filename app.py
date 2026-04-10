@@ -1075,9 +1075,10 @@ nbfc_df = load_nbfc_table()
 fin_df = load_financials()
 
 all_layers = ["Upper", "Middle", "Base"]
-rbi_layer_filter = st.sidebar.multiselect("RBI Layer", all_layers, default=[], placeholder="All layers")
+rbi_layer_filter = st.sidebar.multiselect("RBI Layer", all_layers, default=all_layers, placeholder="All layers")
 all_sectors = sorted(nbfc_df["sector"].dropna().unique().tolist())
-sector_filter = st.sidebar.multiselect("Sector", all_sectors, default=[], placeholder="All sectors")
+_default_sectors = ["Consumer Finance"] if "Consumer Finance" in all_sectors else []
+sector_filter = st.sidebar.multiselect("Sector", all_sectors, default=_default_sectors, placeholder="All sectors")
 listing_filter = st.sidebar.radio("Listing Status", ["All", "Listed Only", "Unlisted Only"])
 include_estimated = st.sidebar.checkbox("Include Estimated Data", value=True)
 
@@ -1096,10 +1097,18 @@ if _AUTH_ENABLED:
 
 # ── Active filter badge (computed here, injected into page header below) ──────
 _active_filters = []
-if sector_filter:  # non-empty → filter active
-    _active_filters.append(", ".join(sector_filter))
-if rbi_layer_filter:  # non-empty → filter active
-    _active_filters.append("Layer: " + ", ".join(rbi_layer_filter))
+# Sector: show first item + "+N" if multiple, skip if nothing selected
+if sector_filter:
+    if len(sector_filter) == 1:
+        _active_filters.append(sector_filter[0])
+    else:
+        _active_filters.append(f"{sector_filter[0]} +{len(sector_filter)-1}")
+# RBI Layer: "All Layers" if all 3 selected or none selected; else list them
+if rbi_layer_filter and set(rbi_layer_filter) != set(all_layers):
+    if len(rbi_layer_filter) == 1:
+        _active_filters.append(f"Layer: {rbi_layer_filter[0]}")
+    else:
+        _active_filters.append("Layer: " + ", ".join(rbi_layer_filter))
 if listing_filter != "All":
     _active_filters.append(listing_filter.replace(" Only", ""))
 _badge_label = " · ".join(_active_filters) if _active_filters else "All NBFCs"
@@ -1193,11 +1202,12 @@ components.html(f"""
   var LABEL  = {repr(_badge_label)};
   var MY_TS  = String(Date.now());
   var CSS    = "position:fixed;top:0.62rem;left:3.4rem;z-index:2147483647;"
-             + "display:inline-flex;align-items:center;gap:0.35rem;"
-             + "background:#EAF4EE;border:1px solid #144835;border-radius:20px;"
-             + "padding:0.22rem 0.75rem;cursor:pointer;user-select:none;"
-             + "font-size:0.75rem;font-weight:600;color:#144835;"
-             + "box-shadow:0 2px 6px rgba(0,0,0,0.15);font-family:Inter,sans-serif;white-space:nowrap;";
+             + "display:inline-flex;align-items:center;gap:0.4rem;"
+             + "background:#EAF4EE;border:1.5px solid #144835;border-radius:20px;"
+             + "padding:0.26rem 0.8rem 0.26rem 0.65rem;cursor:pointer;user-select:none;"
+             + "font-size:0.78rem;font-weight:700;color:#144835;"
+             + "box-shadow:0 2px 8px rgba(0,0,0,0.18);font-family:Inter,sans-serif;"
+             + "max-width:calc(100vw - 9rem);";
 
   function toggleSidebar() {{
     var doc = window.parent.document;
@@ -1208,9 +1218,13 @@ components.html(f"""
     if (btn) btn.dispatchEvent(new MouseEvent('click', {{bubbles:true, cancelable:true, view:window.parent}}));
   }}
 
-  var INNER = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none">'
-            + '<path d="M2 4h12M4 8h8M6 12h4" stroke="#144835" stroke-width="2" stroke-linecap="round"/>'
-            + '</svg>&nbsp;<span class="nbfc-bl">' + LABEL + '</span>';
+  var INNER = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="flex-shrink:0">'
+            + '<path d="M2 4h12M4 8h8M6 12h4" stroke="#144835" stroke-width="2.2" stroke-linecap="round"/>'
+            + '</svg>'
+            + '<span class="nbfc-bl" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0">' + LABEL + '</span>'
+            + '<svg width="10" height="10" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-left:1px">'
+            + '<path d="M6 3l5 5-5 5" stroke="#144835" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'
+            + '</svg>';
   function syncBadge() {{
     try {{
       var doc = window.parent.document;
