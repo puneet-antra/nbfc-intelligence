@@ -2237,7 +2237,8 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                  "Reported 9M PAT = ₹210 Cr (after ₹35 Cr one-time charges). "
                  "Annualised loss rate = ₹965 Cr / avg AUM ₹18,265 Cr = 5.29%. Source: DRHP Mar-2026.", "info")
         if selected == "Kissht":
-            note("Kissht FY2025 (latest): ROA = ₹161 Cr PAT / avg total assets ₹2,249 Cr = 7.14%. "
+            note("Kissht FY2025 (latest): ROA = ₹161 Cr PAT / avg Loan Book AUM ₹3,346 Cr = 4.81% "
+                 "(DRHP reported 7.14% using avg total assets ₹2,249 Cr). "
                  "ROE = ₹161 Cr / avg equity ₹906 Cr = 17.74%. "
                  "Source: Kissht DRHP (OnEMI Technology Solutions) filed Aug 2025.", "info")
 

@@ -326,9 +326,9 @@ FINANCIALS = [
     # Credit losses = Impairment on financial instruments (P&L line).
     # Credit loss rate = Impairment / average on-book loan book (est.).
     # GNPA = Gross Stage 3 on-book loans / total gross on-book loans.
-    ("Kissht", "FY2023", 1268, 1275,  566,  984,  28, 299, 23.57, 0.05,  3.25,  6.93, "DRHP",   "Kissht DRHP Aug-2025 (SEBI). Restated consolidated FY23. AUM ₹1,268 Cr (on+off book); Total assets ₹1,275 Cr; Equity ₹566 Cr; Revenue ₹984 Cr; PAT ₹28 Cr; Impairment ₹299 Cr; GNPA 0.05%; ROA 3.25%; ROE 6.93%."),
-    ("Kissht", "FY2024", 2604, 1797,  805, 1674, 197, 621, 23.84, 0.79, 12.85, 28.78, "DRHP",   "Kissht DRHP Aug-2025 (SEBI). Restated consolidated FY24. AUM ₹2,604 Cr; Total assets ₹1,797 Cr; Equity ₹805 Cr; Revenue ₹1,674 Cr; PAT ₹197 Cr; Impairment ₹621 Cr; GNPA 0.79%; ROA 12.85%; ROE 28.78%."),
-    ("Kissht", "FY2025", 4087, 2701, 1006, 1337, 161, 327,  7.99, 2.89,  7.14, 17.74, "DRHP",   "Kissht DRHP Aug-2025 (SEBI). Restated consolidated FY25. AUM ₹4,087 Cr; Total assets ₹2,701 Cr; Equity ₹1,006 Cr; Revenue ₹1,337 Cr; PAT ₹161 Cr; Impairment ₹327 Cr; GNPA 2.89%; ROA 7.14%; ROE 17.74%."),
+    ("Kissht", "FY2023", 1268, 1275,  566,  984,  28, 299, 23.57, 0.05,  2.21,  6.93, "DRHP",   "Kissht DRHP Aug-2025 (SEBI). Restated consolidated FY23. AUM ₹1,268 Cr (on+off book); Total assets ₹1,275 Cr; Equity ₹566 Cr; Revenue ₹984 Cr; PAT ₹28 Cr; Impairment ₹299 Cr; GNPA 0.05%; ROA 2.21% (PAT/ending AUM, no prior yr); ROE 6.93%."),
+    ("Kissht", "FY2024", 2604, 1797,  805, 1674, 197, 621, 23.84, 0.79, 10.18, 28.78, "DRHP",   "Kissht DRHP Aug-2025 (SEBI). Restated consolidated FY24. AUM ₹2,604 Cr; Total assets ₹1,797 Cr; Equity ₹805 Cr; Revenue ₹1,674 Cr; PAT ₹197 Cr; Impairment ₹621 Cr; GNPA 0.79%; ROA 10.18% (PAT/avg AUM 1936 Cr); ROE 28.78%."),
+    ("Kissht", "FY2025", 4087, 2701, 1006, 1337, 161, 327,  7.99, 2.89,  4.81, 17.74, "DRHP",   "Kissht DRHP Aug-2025 (SEBI). Restated consolidated FY25. AUM ₹4,087 Cr; Total assets ₹2,701 Cr; Equity ₹1,006 Cr; Revenue ₹1,337 Cr; PAT ₹161 Cr; Impairment ₹327 Cr; GNPA 2.89%; ROA 4.81% (PAT/avg AUM 3346 Cr); ROE 17.74%."),
     # ── Moneyview (Moneyview Limited / Whizdm Finance Pvt Ltd) ───────────────
     # Source: Moneyview Limited DRHP filed Mar-2026 with SEBI. Restated consolidated financials.
     # Business model: Primarily off-book DLG lending platform + direct NBFC (Whizdm Finance / WFPL) lending.
