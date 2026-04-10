@@ -2462,14 +2462,6 @@ with tabs[4]:
     with col4:
         _top20_hbar("roe_pct", "Return on Equity (ROE)", "#2CA076", bar_fmt="{:.2f}%", show_exc_note=True)
 
-    note("KreditBee 9MFY26 — PAT & ROA adjusted for one-time exceptional items:  "
-         "Reported 9M PAT ₹341 Cr − ₹152 Cr exceptional (₹104 Cr GST provision reversal, Karnataka HC Dec 2025 "
-         "+ ₹48 Cr DTA recognition) = Adjusted 9M PAT ₹189 Cr × 4/3 = Annualised PAT ₹252 Cr.  "
-         "Adjusted ROA = ₹252 Cr ÷ avg loan book ₹7,049 Cr [(₹5,649 + ₹8,448) ÷ 2] = 3.58%.", "warning")
-    note("Moneyview 9MFY26: Loan book = managed AUM (₹19,815 Cr incl. co-lending & off-book). "
-         "ROA & ROE use PAT before exceptional items (₹245 Cr, 9M → annualised ₹327 Cr). "
-         "Reported 9M PAT = ₹210 Cr (after ₹35 Cr one-time charges). Source: DRHP Mar-2026.", "info")
-
     # Market cap — live from Yahoo Finance (listed NBFCs only)
     st.markdown('<div class="section-header">Market Capitalisation (Listed NBFCs)</div>',
                 unsafe_allow_html=True)
