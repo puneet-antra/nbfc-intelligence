@@ -260,22 +260,24 @@ h1 {
 }
 /* Universal catch-all: force all text inside any select to be readable */
 [data-testid="stSidebar"] [data-baseweb="select"] * {
-    color: #c8ccd6 !important;
+    color: #e8eaef !important;
     font-weight: 500 !important;
     font-family: 'Inter', sans-serif !important;
 }
-/* Multiselect chips — same pill style, subtle green tint */
+/* Multiselect chips — match selectbox: no fill, subtle border, same text */
 [data-testid="stSidebar"] [data-baseweb="tag"] {
-    background: #1d3a2c !important;
-    border: 1px solid #2d5c44 !important;
-    border-radius: 6px !important;
-    padding: 2px 8px !important;
+    background: transparent !important;
+    border: 1px solid #3a4a40 !important;
+    border-radius: 4px !important;
+    padding: 1px 6px !important;
+    margin: 2px 2px !important;
 }
-[data-testid="stSidebar"] [data-baseweb="tag"] span,
-[data-testid="stSidebar"] [data-baseweb="tag"] * {
-    color: #c8ccd6 !important;
+[data-testid="stSidebar"] [data-baseweb="tag"] *,
+[data-testid="stSidebar"] [data-baseweb="tag"] span {
+    color: #e8eaef !important;
     font-weight: 500 !important;
-    font-size: 0.82rem !important;
+    font-size: 0.84rem !important;
+    background: transparent !important;
 }
 /* Radio — all options */
 [data-testid="stSidebar"] [data-baseweb="radio"] label span,
