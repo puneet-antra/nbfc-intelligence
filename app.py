@@ -1502,11 +1502,10 @@ with tabs[1]:
                   labels={"pat_cr": "PAT (₹ Crore)", "period": "Period"},
                   title=f"Profit After Tax Trend — incl. {lbl} (₹ Crore)", height=460,
                   category_orders={"period": PERIOD_ORDER_ANN})
-    fig.update_traces(
-        hovertemplate="<b>%{fullData.name}</b><br>%{x}<br>PAT: ₹%{y:,.0f} Cr<extra></extra>",
-        mode="lines+markers",
-    )
+    fig.update_traces(mode="lines+markers")
     chart_layout(fig)
+    # Must set hovertemplate AFTER chart_layout (which overwrites all hovertemplates)
+    fig.update_traces(hovertemplate="<b>%{fullData.name}</b><br>%{x}<br>PAT: ₹%{y:,.0f} Cr<extra></extra>")
     st.plotly_chart(fig, use_container_width=True)
     st.caption("9MFY26 (Ann.) = 9-month PAT annualised (×4/3) to be comparable with full-year figures.")
     note("KreditBee 9MFY26 PAT shown above is adjusted and annualised (~₹252 Cr) excluding ~₹152 Cr post-tax "
