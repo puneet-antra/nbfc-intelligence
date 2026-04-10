@@ -2409,7 +2409,11 @@ with tabs[4]:
     # Map each company to the period used in _snap
     _snap_period = _snap.set_index("name")["period"].to_dict() if "period" in _snap.columns else {}
 
-    def _top20_hbar(metric, label, color, bar_fmt=None, hover_fmt=None, is_inr=False):
+    _EXC_NOTE = ("* KreditBee 9MFY26: annualised adj. PAT ₹252 Cr "
+                 "(₹341 Cr reported − ₹152 Cr exceptional items × 4/3).  "
+                 "Moneyview 9MFY26: pre-exceptional PAT ₹245 Cr × 4/3 = ₹327 Cr annualised.")
+
+    def _top20_hbar(metric, label, color, bar_fmt=None, hover_fmt=None, is_inr=False, show_exc_note=False):
         cols = ["name", metric] + (["period"] if "period" in _snap.columns else [])
         df = _snap[cols].dropna(subset=[metric]).sort_values(metric, ascending=False).head(10).copy()
         period_col = df["period"] if "period" in df.columns else df["name"].map(_snap_period)
@@ -2445,26 +2449,23 @@ with tabs[4]:
             text_labels=df["bar_label"].tolist(),
         )
         st.plotly_chart(fig, use_container_width=True)
+        if show_exc_note:
+            st.caption(_EXC_NOTE)
 
     st.markdown(f'<div class="section-header">Rankings as of {_lbl_tr}</div>',
                 unsafe_allow_html=True)
 
-    _exc_caption_tr = ("* KreditBee 9MFY26: annualised adj. PAT ₹252 Cr "
-                       "(₹341 Cr reported − ₹152 Cr exceptional items × 4/3).  "
-                       "Moneyview 9MFY26: pre-exceptional PAT ₹245 Cr × 4/3 = ₹327 Cr annualised.")
     col1, col2 = st.columns(2)
     with col1:
         _top20_hbar("loan_book_cr", "AUM (Loan Book)", COLOR["accent"], is_inr=True)
     with col2:
-        _top20_hbar("pat_cr", "PAT", COLOR["success"], is_inr=True)
-    st.caption(_exc_caption_tr)
+        _top20_hbar("pat_cr", "PAT", COLOR["success"], is_inr=True, show_exc_note=True)
 
     col3, col4 = st.columns(2)
     with col3:
-        _top20_hbar("roa_pct", "Return on Assets (ROA)", "#217858", bar_fmt="{:.2f}%")
+        _top20_hbar("roa_pct", "Return on Assets (ROA)", "#217858", bar_fmt="{:.2f}%", show_exc_note=True)
     with col4:
-        _top20_hbar("roe_pct", "Return on Equity (ROE)", "#2CA076", bar_fmt="{:.2f}%")
-    st.caption(_exc_caption_tr)
+        _top20_hbar("roe_pct", "Return on Equity (ROE)", "#2CA076", bar_fmt="{:.2f}%", show_exc_note=True)
 
     note("KreditBee 9MFY26 — PAT & ROA adjusted for one-time exceptional items:  "
          "Reported 9M PAT ₹341 Cr − ₹152 Cr exceptional (₹104 Cr GST provision reversal, Karnataka HC Dec 2025 "
