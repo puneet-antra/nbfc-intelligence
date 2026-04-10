@@ -2327,7 +2327,7 @@ TICKER_SECTOR = {
     "Bajaj Finance":                          "Consumer Finance",
     "Bajaj Housing Finance":                  "Housing Finance",
     "LIC Housing Finance":                    "Housing Finance",
-    "Mahindra & Mahindra Financial Services": "Consumer Finance",
+    "Mahindra & Mahindra Financial Services": "Other",
     "Shriram Finance":                        "Other",
     "Muthoot Finance":                        "Gold Loan",
     "Cholamandalam Investment and Finance":   "Other",
