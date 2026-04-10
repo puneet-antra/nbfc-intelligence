@@ -2282,6 +2282,39 @@ TICKER_MAP = {
     "SBI Cards and Payment Services": "SBICARD.NS",
 }
 
+# Explicit sector classification for listed NBFCs — keyed by TICKER_MAP company names
+# so Valuation tab sector filter is reliable regardless of DB name matching.
+TICKER_SECTOR = {
+    "Bajaj Finance":                          "Consumer Finance",
+    "Bajaj Housing Finance":                  "Housing Finance",
+    "LIC Housing Finance":                    "Housing Finance",
+    "Mahindra & Mahindra Financial Services": "Consumer Finance",
+    "Shriram Finance":                        "Consumer Finance",
+    "Muthoot Finance":                        "Gold Loan",
+    "Cholamandalam Investment and Finance":   "Consumer Finance",
+    "L&T Finance":                            "Consumer Finance",
+    "Poonawalla Fincorp":                     "Consumer Finance",
+    "IIFL Finance":                           "Consumer Finance",
+    "CreditAccess Grameen":                   "Microfinance",
+    "Spandana Sphoorty":                      "Microfinance",
+    "Fusion Micro Finance":                   "Microfinance",
+    "Five-Star Business Finance":             "SME",
+    "Home First Finance":                     "Housing Finance",
+    "Aavas Financiers":                       "Housing Finance",
+    "Aptus Value Housing Finance":            "Housing Finance",
+    "India Shelter Finance":                  "Housing Finance",
+    "Satin Creditcare Network":               "Microfinance",
+    "Manappuram Finance":                     "Gold Loan",
+    "MAS Financial Services":                 "SME",
+    "Repco Home Finance":                     "Housing Finance",
+    "SK Finance":                             "Consumer Finance",
+    "Jio Financial Services":                 "Consumer Finance",
+    "Sammaan Capital":                        "Consumer Finance",
+    "Ugro Capital":                           "SME",
+    "Muthoot Microfin":                       "Microfinance",
+    "SBI Cards and Payment Services":         "Consumer Finance",
+}
+
 
 def fetch_valuation_data():
     tickers = list(TICKER_MAP.values())
@@ -2466,12 +2499,11 @@ with tabs[5]:
     else:
         st.caption(f"Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
 
-    # Apply sidebar sector filter using sector map (more robust than name matching)
+    # Apply sidebar sector filter using the explicit TICKER_SECTOR map
     if sector_filter and not val_with_price.empty:
-        _sector_map_val = nbfc_df.set_index("name")["sector"].to_dict()
-        val_with_price = val_with_price.copy()
-        val_with_price["_sector"] = val_with_price["company"].map(_sector_map_val)
-        val_with_price = val_with_price[val_with_price["_sector"].isin(sector_filter)].drop(columns=["_sector"])
+        val_with_price = val_with_price[
+            val_with_price["company"].map(TICKER_SECTOR).isin(sector_filter)
+        ]
 
     if not val_with_price.empty:
         med_pe = val_with_price["pe"].median()
