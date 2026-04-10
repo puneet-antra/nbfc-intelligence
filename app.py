@@ -406,7 +406,7 @@ h1 {
 .stCaption, [data-testid="stCaptionContainer"] {
     font-size: 0.70rem !important;
     font-weight: 400 !important;
-    color: #B9BABD !important;
+    color: #555 !important;
     font-family: 'Inter', sans-serif !important;
 }
 
@@ -1469,7 +1469,7 @@ with tabs[1]:
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
     st.markdown(
-        f"<p style='font-size:0.78rem;color:#444;margin-top:-0.4rem;'>{_exc_caption}</p>",
+        f"<p style='font-size:0.78rem;color:#555;margin-top:-0.4rem;'>{_exc_caption}</p>",
         unsafe_allow_html=True,
     )
 
@@ -2440,7 +2440,7 @@ with tabs[4]:
         st.plotly_chart(fig, use_container_width=True)
         if show_exc_note:
             st.markdown(
-                f"<p style='font-size:0.78rem;color:#444;margin-top:-0.4rem;'>{_EXC_NOTE}</p>",
+                f"<p style='font-size:0.78rem;color:#555;margin-top:-0.4rem;'>{_EXC_NOTE}</p>",
                 unsafe_allow_html=True,
             )
 
