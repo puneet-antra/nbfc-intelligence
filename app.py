@@ -993,13 +993,21 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
     fig = px.bar(df, x=x_col, y=y_col, orientation="h", height=h)
 
     if label_position == "bar_end":
-        # Labels sit immediately after each bar — widen x_range to make room
-        x_range = [x_left, x_max * 1.6]
+        # Labels anchored to each bar's end — explicit annotations so label tracks
+        # the bar, not the paper edge (avoids all labels clustering at the right).
+        x_range = [x_left, x_max * 1.55]
         fig.update_traces(
             marker_color=bar_colors, marker_line_width=0, marker_opacity=0.85,
-            text=list(text_labels), textposition="outside", cliponaxis=False,
-            textfont=dict(family=CHART_MONO, size=11.5, color=COLOR["text_secondary"]),
         )
+        bar_vals = df[x_col].tolist()
+        for name, label, val in zip(names, list(text_labels), bar_vals):
+            fig.add_annotation(
+                x=max(val, 0) if x_left == 0 else val,
+                y=name,
+                text=label, showarrow=False,
+                xanchor="left", yanchor="middle", xshift=5,
+                font=dict(family=CHART_MONO, size=11.5, color=COLOR["text_secondary"]),
+            )
         r_margin = 16
     else:
         # Fixed annotations at the far right edge (safe for charts with negative values)
@@ -1436,6 +1444,9 @@ with tabs[1]:
 
     st.markdown(f'<div class="section-header">Return on Assets & Equity — {lbl}</div>',
                 unsafe_allow_html=True)
+    _exc_caption = ("* KreditBee 9MFY26: annualised adj. PAT ₹252 Cr "
+                    "(₹341 Cr reported − ₹152 Cr exceptional items × 4/3).  "
+                    "Moneyview 9MFY26: pre-exceptional PAT ₹245 Cr × 4/3 = ₹327 Cr annualised.")
     col1, col2 = st.columns(2)
     with col1:
         all_roa = latest_snap.sort_values("roa_pct", ascending=False)
@@ -1444,6 +1455,7 @@ with tabs[1]:
                         hover_text=all_roa["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
+        st.caption(_exc_caption)
     with col2:
         all_roe = latest_snap.sort_values("roe_pct", ascending=False)
         fig = make_hbar(all_roe, "roe_pct", "name", COLOR["accent"],
@@ -1451,6 +1463,7 @@ with tabs[1]:
                         hover_text=all_roe["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
+        st.caption(_exc_caption)
 
     st.caption(f"Where 9MFY26 data exists: 9MFY26 ROA/ROE used. Otherwise FY25. "
                f"★ = estimated data.")
@@ -2177,9 +2190,14 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
             fig.update_layout(margin=DD_MARGIN, legend=DD_LEGEND)
             st.plotly_chart(fig, use_container_width=True)
             if selected == "KreditBee" and has_q3:
+                st.caption("* 9MFY26 PAT annualised (×4/3) and adjusted for one-time exceptional items: "
+                           "₹341 Cr reported − ₹152 Cr = ₹189 Cr × 4/3 = ₹252 Cr annualised.")
                 note("9MFY26 PAT annualised and adjusted to ~₹252 Cr (adj. 9M PAT ~₹189 Cr × 4/3, "
                      "ex ~₹152 Cr one-time items). "
                      "NII (₹1,304 Cr annualised) is unaffected by exceptional items.", "warning")
+            if selected == "Moneyview" and has_q3:
+                st.caption("* 9MFY26 PAT annualised (×4/3) using pre-exceptional PAT: "
+                           "₹245 Cr × 4/3 = ₹327 Cr annualised.")
 
         col3, col4 = st.columns(2)
         with col3:
@@ -2203,6 +2221,12 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
             fig.update_layout(margin=DD_MARGIN, legend=DD_LEGEND)
             fig.update_traces(hovertemplate="%{y:.2f}%<extra></extra>")
             st.plotly_chart(fig, use_container_width=True)
+            if selected == "KreditBee" and has_q3:
+                st.caption("* 9MFY26 ROA & ROE annualised (×4/3) and adjusted for one-time exceptional items "
+                           "(₹341 Cr reported PAT → ₹252 Cr after −₹152 Cr exceptional).")
+            if selected == "Moneyview" and has_q3:
+                st.caption("* 9MFY26 ROA & ROE annualised (×4/3) using pre-exceptional PAT "
+                           "(₹245 Cr × 4/3 = ₹327 Cr annualised).")
 
         cl_df = chart_df[["period", "credit_loss_rate_pct"]].dropna()
         fig = px.line(cl_df, x="period", y="credit_loss_rate_pct",
@@ -2420,17 +2444,23 @@ with tabs[4]:
     st.markdown(f'<div class="section-header">Rankings as of {_lbl_tr}</div>',
                 unsafe_allow_html=True)
 
+    _exc_caption_tr = ("* KreditBee 9MFY26: annualised adj. PAT ₹252 Cr "
+                       "(₹341 Cr reported − ₹152 Cr exceptional items × 4/3).  "
+                       "Moneyview 9MFY26: pre-exceptional PAT ₹245 Cr × 4/3 = ₹327 Cr annualised.")
     col1, col2 = st.columns(2)
     with col1:
         _top20_hbar("loan_book_cr", "AUM (Loan Book)", COLOR["accent"], is_inr=True)
     with col2:
         _top20_hbar("pat_cr", "PAT", COLOR["success"], is_inr=True)
+        st.caption(_exc_caption_tr)
 
     col3, col4 = st.columns(2)
     with col3:
         _top20_hbar("roa_pct", "Return on Assets (ROA)", "#217858", bar_fmt="{:.2f}%")
+        st.caption(_exc_caption_tr)
     with col4:
         _top20_hbar("roe_pct", "Return on Equity (ROE)", "#2CA076", bar_fmt="{:.2f}%")
+        st.caption(_exc_caption_tr)
 
     note("KreditBee 9MFY26 — PAT & ROA adjusted for one-time exceptional items:  "
          "Reported 9M PAT ₹341 Cr − ₹152 Cr exceptional (₹104 Cr GST provision reversal, Karnataka HC Dec 2025 "
