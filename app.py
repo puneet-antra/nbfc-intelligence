@@ -1075,9 +1075,9 @@ nbfc_df = load_nbfc_table()
 fin_df = load_financials()
 
 all_layers = ["Upper", "Middle", "Base"]
-rbi_layer_filter = st.sidebar.multiselect("RBI Layer", all_layers, default=[])
+rbi_layer_filter = st.sidebar.multiselect("RBI Layer", all_layers, default=[], placeholder="All layers")
 all_sectors = sorted(nbfc_df["sector"].dropna().unique().tolist())
-sector_filter = st.sidebar.multiselect("Sector", all_sectors, default=[])
+sector_filter = st.sidebar.multiselect("Sector", all_sectors, default=[], placeholder="All sectors")
 listing_filter = st.sidebar.radio("Listing Status", ["All", "Listed Only", "Unlisted Only"])
 include_estimated = st.sidebar.checkbox("Include Estimated Data", value=True)
 
