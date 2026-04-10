@@ -2308,8 +2308,8 @@ TICKER_SECTOR = {
     "MAS Financial Services":                 "SME",
     "Repco Home Finance":                     "Housing Finance",
     "SK Finance":                             "Consumer Finance",
-    "Jio Financial Services":                 "Consumer Finance",
-    "Sammaan Capital":                        "Consumer Finance",
+    "Jio Financial Services":                 "Other",
+    "Sammaan Capital":                        "Other",
     "Ugro Capital":                           "SME",
     "Muthoot Microfin":                       "Microfinance",
     "SBI Cards and Payment Services":         "Consumer Finance",
@@ -2451,18 +2451,22 @@ with tabs[4]:
 # TAB 7: VALUATION
 # ─────────────────────────────────────────────────────────────────────────────
 with tabs[5]:
-    note("Live data from Yahoo Finance. P/E is trailing twelve months. Refreshes every hour.")
+    note("Live data from Yahoo Finance. P/E is trailing twelve months. Refreshes once a day.")
 
     VAL_CACHE_PATH = "data/valuation_cache.json"
 
     def save_val_cache(df):
+        import json
         record = {
             "fetched_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
             "data": df.to_dict(orient="records"),
         }
-        import json
-        with open(VAL_CACHE_PATH, "w") as f:
-            json.dump(record, f)
+        try:
+            os.makedirs("data", exist_ok=True)
+            with open(VAL_CACHE_PATH, "w") as f:
+                json.dump(record, f)
+        except Exception:
+            pass
 
     def load_val_cache():
         import json
@@ -2473,37 +2477,46 @@ with tabs[5]:
         except Exception:
             return None, None
 
-    with st.spinner("Fetching live market data…"):
-        val_df = fetch_valuation_data()
+    def _cache_is_fresh(fetched_at_str, hours=24):
+        try:
+            ts = datetime.strptime(fetched_at_str, "%Y-%m-%d %H:%M")
+            return (datetime.now() - ts).total_seconds() < hours * 3600
+        except Exception:
+            return False
 
-    # If live fetch returned no prices, fall back to disk cache
-    val_with_price = val_df.dropna(subset=["price"])
+    # Use disk cache if fresh (< 24 h); only hit Yahoo Finance when stale / missing
+    cached_df, cache_ts = load_val_cache()
     using_cache = False
-    cache_ts = None
+    val_with_price = pd.DataFrame()
 
-    if val_with_price.empty:
-        cached_df, cache_ts = load_val_cache()
-        if cached_df is not None:
-            val_df = cached_df
-            val_with_price = val_df.dropna(subset=["price"])
+    if cached_df is not None and _cache_is_fresh(cache_ts, hours=24):
+        val_with_price = cached_df.dropna(subset=["price"])
+        using_cache = True
+    else:
+        with st.spinner("Fetching market data…"):
+            val_df = fetch_valuation_data()
+        val_with_price = val_df.dropna(subset=["price"])
+        if not val_with_price.empty:
+            save_val_cache(val_with_price)
+            cache_ts = datetime.now().strftime("%Y-%m-%d %H:%M")
+        elif cached_df is not None:
+            # Live fetch failed — fall back to stale cache
+            val_with_price = cached_df.dropna(subset=["price"])
             using_cache = True
         else:
             note("Could not fetch live data and no cached data available. Try again later.", "error")
             st.stop()
-    else:
-        # Successful fetch — save to disk cache for next time
-        save_val_cache(val_with_price)
 
     if using_cache:
-        note(f"Live fetch failed (Yahoo Finance rate limit). Showing cached data from {cache_ts}.", "warning")
+        note(f"Showing cached data from {cache_ts}. Refreshes once a day.", "warning")
     else:
-        st.caption(f"Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+        st.caption(f"Last updated: {cache_ts}")
 
-    # Apply sidebar sector filter using the explicit TICKER_SECTOR map
+    # Apply sidebar sector filter — use pre-computed inclusion set for reliability
     if sector_filter and not val_with_price.empty:
-        val_with_price = val_with_price[
-            val_with_price["company"].map(TICKER_SECTOR).isin(sector_filter)
-        ]
+        _sector_set = set(sector_filter)
+        _keep_companies = {c for c, s in TICKER_SECTOR.items() if s in _sector_set}
+        val_with_price = val_with_price[val_with_price["company"].isin(_keep_companies)]
 
     if not val_with_price.empty:
         med_pe = val_with_price["pe"].median()
