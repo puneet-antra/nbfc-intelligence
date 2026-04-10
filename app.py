@@ -1475,14 +1475,6 @@ with tabs[1]:
 
     st.caption(f"Where 9MFY26 data exists: 9MFY26 ROA/ROE used. Otherwise FY25. "
                f"★ = estimated data.")
-    note("KreditBee 9MFY26 — PAT & ROA adjusted for one-time exceptional items:  "
-         "Reported 9M PAT ₹341 Cr − ₹152 Cr exceptional (₹104 Cr GST provision reversal, Karnataka HC Dec 2025 "
-         "+ ₹48 Cr DTA recognition) = Adjusted 9M PAT ₹189 Cr × 4/3 = Annualised PAT ₹252 Cr.  "
-         "Adjusted ROA = ₹252 Cr ÷ avg loan book ₹7,049 Cr [(₹5,649 + ₹8,448) ÷ 2] = 3.58%.", "warning")
-    note("Moneyview 9MFY26: Loan book = managed AUM (₹19,815 Cr). ROA & ROE use PAT before exceptional items "
-         "(₹245 Cr, 9M → annualised ₹327 Cr). Reported 9M PAT per DRHP = ₹210 Cr (after ₹35 Cr exceptional charges). "
-         "Annualised credit loss rate = ₹965 Cr / avg AUM ₹18,265 Cr = 5.29%. Source: DRHP Mar-2026.", "info")
-
     # Sector breakdown — latest period (always all sectors, ignore filter)
     st.markdown(f'<div class="section-header">By Sector — {lbl}</div>', unsafe_allow_html=True)
     _snap_all = get_latest_period_data(fin_df).dropna(subset=["roa_pct", "roe_pct"])
@@ -1540,11 +1532,6 @@ with tabs[1]:
     fig.update_traces(hovertemplate="<b>%{customdata[0]}</b><br>PAT: ₹%{y:,.0f} Cr<extra></extra>")
     st.plotly_chart(fig, use_container_width=True)
     st.caption("9MFY26 (Ann.) = 9-month PAT annualised (×4/3) to be comparable with full-year figures.")
-    note("KreditBee 9MFY26 — PAT & ROA adjusted for one-time exceptional items:  "
-         "Reported 9M PAT ₹341 Cr − ₹152 Cr exceptional (₹104 Cr GST provision reversal, Karnataka HC Dec 2025 "
-         "+ ₹48 Cr DTA recognition) = Adjusted 9M PAT ₹189 Cr × 4/3 = Annualised PAT ₹252 Cr.  "
-         "Adjusted ROA = ₹252 Cr ÷ avg loan book ₹7,049 Cr [(₹5,649 + ₹8,448) ÷ 2] = 3.58%.", "warning")
-
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 3: ASSET QUALITY (GNPA + Annualized Losses combined)
 # ─────────────────────────────────────────────────────────────────────────────
