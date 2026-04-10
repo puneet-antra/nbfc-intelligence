@@ -2344,6 +2344,32 @@ TICKER_SECTOR = {
 }
 
 
+# ── Valuation cache helpers (module-level so both Top Ranked and Valuation tabs share them) ──
+_VAL_CACHE_PATH = "data/valuation_cache_v2.json"
+
+def save_val_cache(df):
+    import json
+    record = {
+        "fetched_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "data": df.to_dict(orient="records"),
+    }
+    try:
+        os.makedirs("data", exist_ok=True)
+        with open(_VAL_CACHE_PATH, "w") as f:
+            json.dump(record, f)
+    except Exception:
+        pass
+
+def load_val_cache():
+    import json
+    try:
+        with open(_VAL_CACHE_PATH) as f:
+            record = json.load(f)
+        return pd.DataFrame(record["data"]), record["fetched_at"]
+    except Exception:
+        return None, None
+
+
 def fetch_valuation_data():
     tickers = list(TICKER_MAP.values())
     rows = []
@@ -2465,12 +2491,18 @@ with tabs[4]:
     with col4:
         _top20_hbar("roe_pct", "Return on Equity (ROE)", "#2CA076", bar_fmt="{:.2f}%", show_exc_note=True)
 
-    # Market cap — live from Yahoo Finance (listed NBFCs only)
+    # Market cap — from cache (same cache as Valuation tab)
     st.markdown('<div class="section-header">Market Capitalisation (Listed NBFCs)</div>',
                 unsafe_allow_html=True)
-    note("Live market cap from Yahoo Finance. Only listed NBFCs shown. Refreshes every hour.")
-    with st.spinner("Fetching live market cap…"):
-        _val_df = fetch_valuation_data()
+    _mc_cache, _mc_ts = load_val_cache()
+    if _mc_cache is not None:
+        _val_df = _mc_cache
+        st.caption(f"Market cap data as of {_mc_ts}. Visit the Valuation tab to refresh.")
+    else:
+        with st.spinner("Fetching market cap…"):
+            _val_df = fetch_valuation_data()
+        if not _val_df.empty:
+            save_val_cache(_val_df.dropna(subset=["price"]))
     _mc = (_val_df[["company", "mktcap_cr"]]
            .dropna(subset=["mktcap_cr"])
            .sort_values("mktcap_cr", ascending=False)
@@ -2491,66 +2523,39 @@ with tabs[4]:
 # TAB 7: VALUATION
 # ─────────────────────────────────────────────────────────────────────────────
 with tabs[5]:
-    note("Live data from Yahoo Finance. P/E is forward (next twelve months); falls back to trailing if forward estimate unavailable. Refreshes once a day.")
+    note("Market data from Yahoo Finance. P/E is forward (next twelve months); falls back to trailing if unavailable.")
 
-    VAL_CACHE_PATH = "data/valuation_cache_v2.json"
+    # Always serve from cache; only hit Yahoo Finance when cache is absent or user requests refresh
+    if "val_force_refresh" not in st.session_state:
+        st.session_state.val_force_refresh = False
 
-    def save_val_cache(df):
-        import json
-        record = {
-            "fetched_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
-            "data": df.to_dict(orient="records"),
-        }
-        try:
-            os.makedirs("data", exist_ok=True)
-            with open(VAL_CACHE_PATH, "w") as f:
-                json.dump(record, f)
-        except Exception:
-            pass
-
-    def load_val_cache():
-        import json
-        try:
-            with open(VAL_CACHE_PATH) as f:
-                record = json.load(f)
-            return pd.DataFrame(record["data"]), record["fetched_at"]
-        except Exception:
-            return None, None
-
-    def _cache_is_fresh(fetched_at_str, hours=24):
-        try:
-            ts = datetime.strptime(fetched_at_str, "%Y-%m-%d %H:%M")
-            return (datetime.now() - ts).total_seconds() < hours * 3600
-        except Exception:
-            return False
-
-    # Use disk cache if fresh (< 24 h); only hit Yahoo Finance when stale / missing
     cached_df, cache_ts = load_val_cache()
-    using_cache = False
     val_with_price = pd.DataFrame()
 
-    if cached_df is not None and _cache_is_fresh(cache_ts, hours=24):
+    if cached_df is not None and not st.session_state.val_force_refresh:
+        # Serve from cache — instant load
         val_with_price = cached_df.dropna(subset=["price"])
-        using_cache = True
+        _info_col, _btn_col = st.columns([5, 1])
+        with _info_col:
+            st.caption(f"Data as of {cache_ts}.")
+        with _btn_col:
+            if st.button("🔄 Refresh", key="val_refresh_btn"):
+                st.session_state.val_force_refresh = True
+                st.rerun()
     else:
-        with st.spinner("Fetching market data…"):
+        with st.spinner("Fetching market data from Yahoo Finance…"):
             val_df = fetch_valuation_data()
         val_with_price = val_df.dropna(subset=["price"])
         if not val_with_price.empty:
             save_val_cache(val_with_price)
             cache_ts = datetime.now().strftime("%Y-%m-%d %H:%M")
         elif cached_df is not None:
-            # Live fetch failed — fall back to stale cache
             val_with_price = cached_df.dropna(subset=["price"])
-            using_cache = True
         else:
-            note("Could not fetch live data and no cached data available. Try again later.", "error")
+            note("Could not fetch data and no cached data available. Try again later.", "error")
             st.stop()
-
-    if using_cache:
-        note(f"Showing cached data from {cache_ts}. Refreshes once a day.", "warning")
-    else:
-        st.caption(f"Last updated: {cache_ts}")
+        st.session_state.val_force_refresh = False
+        st.caption(f"Data as of {cache_ts}.")
 
     # Keep unfiltered copy for sector-level charts (always show all sectors)
     val_with_price_all = val_with_price.copy()
@@ -2826,6 +2831,10 @@ with tabs[6]:
     _mth = ("padding:9px 14px;font-size:12px;font-weight:700;color:#1a1a1a;"
             "border-bottom:2px solid #DCDCDE;white-space:nowrap;background:#f8fafb;")
     _mtd = "padding:8px 14px;font-size:12px;border-bottom:1px solid #f0f0f0;white-space:nowrap;"
+
+    # Only keep columns that actually exist (guard against schema changes)
+    _m_cols  = [c for c in _m_cols  if c in metrics_df.columns]
+    _m_heads = _m_heads[:len(_m_cols)]
 
     _m_rows = ""
     for _, r in metrics_df[_m_cols].iterrows():
