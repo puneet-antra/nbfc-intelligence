@@ -1074,8 +1074,6 @@ def chart_layout(fig, title=None):
 nbfc_df = load_nbfc_table()
 fin_df = load_financials()
 
-all_layers = ["Upper", "Middle", "Base"]
-rbi_layer_filter = st.sidebar.multiselect("RBI Layer", all_layers, default=all_layers, placeholder="All layers")
 all_sectors = sorted(nbfc_df["sector"].dropna().unique().tolist())
 _default_sectors = ["Consumer Finance"] if "Consumer Finance" in all_sectors else []
 sector_filter = st.sidebar.multiselect("Sector", all_sectors, default=_default_sectors, placeholder="All sectors")
@@ -1103,12 +1101,6 @@ if sector_filter:
         _active_filters.append(sector_filter[0])
     else:
         _active_filters.append(f"{sector_filter[0]} +{len(sector_filter)-1}")
-# RBI Layer: "All Layers" if all 3 selected or none selected; else list them
-if rbi_layer_filter and set(rbi_layer_filter) != set(all_layers):
-    if len(rbi_layer_filter) == 1:
-        _active_filters.append(f"Layer: {rbi_layer_filter[0]}")
-    else:
-        _active_filters.append("Layer: " + ", ".join(rbi_layer_filter))
 if listing_filter != "All":
     _active_filters.append(listing_filter.replace(" Only", ""))
 _badge_label = " · ".join(_active_filters) if _active_filters else "All NBFCs"
@@ -1116,8 +1108,6 @@ _badge_label = " · ".join(_active_filters) if _active_filters else "All NBFCs"
 
 def apply_filters(df):
     d = df.copy()
-    if rbi_layer_filter:  # non-empty list → filter active
-        d = d[d["rbi_layer"].isin(rbi_layer_filter)]
     if sector_filter:  # non-empty list → filter active
         d = d[d["sector"].isin(sector_filter)]
     if listing_filter == "Listed Only":
