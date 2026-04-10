@@ -1514,7 +1514,7 @@ with tabs[1]:
     # PAT trend — top 10
     st.markdown(f'<div class="section-header">PAT Trend — Top 10 Companies (incl. {lbl})</div>',
                 unsafe_allow_html=True)
-    top10_names = latest_snap.nlargest(10, "pat_cr")["name"].tolist()
+    top10_names = latest_snap.dropna(subset=["pat_cr"]).nlargest(10, "pat_cr")["name"].tolist()
     chart_df = get_chart_periods(fin_filtered)
     pat_trend = chart_df[chart_df["name"].isin(top10_names)][["name", "period", "pat_cr"]].dropna()
     pat_trend = pat_trend.copy()
@@ -1616,8 +1616,8 @@ with tabs[2]:
         return fig
 
     hm_source = chart_df
-    stressed_35 = all_gnpa.nlargest(35, "gnpa_pct")["name"].tolist()
-    top35_loss = all_loss.nlargest(35, "credit_loss_rate_pct")["name"].tolist()
+    stressed_35 = all_gnpa.dropna(subset=["gnpa_pct"]).nlargest(35, "gnpa_pct")["name"].tolist()
+    top35_loss = all_loss.dropna(subset=["credit_loss_rate_pct"]).nlargest(35, "credit_loss_rate_pct")["name"].tolist()
 
     with col1:
         fig = _heatmap_fig(hm_source, "gnpa_pct", stressed_35, f"GNPA % Heatmap (to {lbl})")
@@ -1694,7 +1694,7 @@ with tabs[2]:
 with tabs[7]:
     lbl = latest_period_label(fin_filtered)
     latest_snap = get_latest_period_data(fin_filtered)
-    top10 = latest_snap.nlargest(10, "loan_book_cr")["name"].tolist()
+    top10 = latest_snap.dropna(subset=["loan_book_cr"]).nlargest(10, "loan_book_cr")["name"].tolist()
     chart_df = get_chart_periods(fin_filtered)
 
     # Stacked area — loan book (stock, Q3 as-is)
