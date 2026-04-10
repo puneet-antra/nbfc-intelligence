@@ -2160,12 +2160,9 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                 hoverlabel=HOVER_LABEL,
             )
             chart_layout(fig)
-            # Re-apply per-trace hovertemplates after chart_layout (which sets a global override)
+            # Re-apply per-trace hovertemplates after chart_layout (which resets all to %{x})
             for trace in fig.data:
-                if trace.name == "NII":
-                    trace.hovertemplate = "₹%{y:,.0f} Cr<extra>NII</extra>"
-                elif trace.name == "PAT":
-                    trace.hovertemplate = "₹%{y:,.0f} Cr<extra>PAT</extra>"
+                trace.update(hovertemplate="₹%{y:,.0f} Cr<extra>" + trace.name + "</extra>")
             fig.update_layout(margin=DD_MARGIN, legend=DD_LEGEND)
             st.plotly_chart(fig, use_container_width=True)
             if selected == "KreditBee" and has_q3:
