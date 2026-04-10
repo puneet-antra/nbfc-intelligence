@@ -2425,6 +2425,12 @@ with tabs[4]:
     with col4:
         _top20_hbar("roe_pct", "Return on Equity (ROE)", "#2CA076", bar_fmt="{:.2f}%")
 
+    note("KreditBee 9MFY26: PAT (₹252 Cr) and ROA/ROE exclude ~₹152 Cr post-tax one-time items "
+         "(₹104 Cr GST provision reversal, Karnataka HC ruling Dec 2025 + ₹48 Cr DTA recognition). "
+         "Reported 9M PAT was ₹341 Cr.", "warning")
+    note("Moneyview 9MFY26: Loan book reflects managed AUM (₹19,815 Cr incl. co-lending & off-book). "
+         "PAT (₹327 Cr) and ROA/ROE include exceptional items. Source: DRHP Mar-2026.", "info")
+
     # Market cap — live from Yahoo Finance (listed NBFCs only)
     st.markdown('<div class="section-header">Market Capitalisation (Listed NBFCs)</div>',
                 unsafe_allow_html=True)
