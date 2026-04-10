@@ -966,23 +966,22 @@ def note(text, kind="info"):
 
 MONEYVIEW_GREEN = "#1B5E20"   # Moneyview brand dark green
 
-def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text_suffix="", text_labels=None):
+def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text_suffix="", text_labels=None, label_position="bar_end"):
     """Standard horizontal bar chart — pass data sorted DESCENDING (chart reverses y-axis).
-    Moneyview is automatically highlighted: dark-green bar + bold dark-green label."""
+    Moneyview is automatically highlighted: dark-green bar + bold dark-green label.
+    label_position: 'bar_end' = text right after each bar (default);
+                    'right_edge' = fixed annotations at paper right edge (for charts with negatives)."""
     df = df.copy()
     df[y_col] = df[y_col].apply(lambda n: truncate_name(str(n)))
     h = height or bar_chart_height(len(df))
     vals = df[x_col].dropna()
     x_max = vals.abs().max() if not vals.empty else 1
     x_left = vals.min() * 1.55 if vals.min() < 0 else 0
-    x_range = [x_left, x_max * 1.05]  # bars fill most of plot; labels go in right margin via annotations
     if text_labels is None:
         text_labels = df[x_col].round(1).astype(str) + text_suffix
 
     names = df[y_col].tolist()
-    # Per-bar colours: dark green for Moneyview, default for everyone else
     bar_colors = [MONEYVIEW_GREEN if n == "Moneyview" else color for n in names]
-    # Y-axis tick labels: bold dark-green for Moneyview
     tick_text = [
         f"<b><span style='color:{MONEYVIEW_GREEN}'>{n}</span></b>"
         if n == "Moneyview" else n
@@ -990,22 +989,29 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
     ]
 
     fig = px.bar(df, x=x_col, y=y_col, orientation="h", height=h)
-    fig.update_traces(
-        marker_color=bar_colors, marker_line_width=0,
-        marker_opacity=0.85,
-    )
-    # Value labels as fixed-position annotations at the right edge of the plot —
-    # this guarantees no overlap with y-axis labels regardless of bar length.
-    for name, label in zip(names, text_labels):
-        fig.add_annotation(
-            x=1.0, xref="paper",
-            y=name, yref="y",
-            text=label,
-            showarrow=False,
-            xanchor="left", yanchor="middle",
-            xshift=6,
-            font=dict(family=CHART_MONO, size=11.5, color=COLOR["text_secondary"]),
+
+    if label_position == "bar_end":
+        # Labels sit immediately after each bar — widen x_range to make room
+        x_range = [x_left, x_max * 1.6]
+        fig.update_traces(
+            marker_color=bar_colors, marker_line_width=0, marker_opacity=0.85,
+            text=list(text_labels), textposition="outside", cliponaxis=False,
+            textfont=dict(family=CHART_MONO, size=11.5, color=COLOR["text_secondary"]),
         )
+        r_margin = 16
+    else:
+        # Fixed annotations at the far right edge (safe for charts with negative values)
+        x_range = [x_left, x_max * 1.05]
+        fig.update_traces(marker_color=bar_colors, marker_line_width=0, marker_opacity=0.85)
+        for name, label in zip(names, text_labels):
+            fig.add_annotation(
+                x=1.0, xref="paper", y=name, yref="y",
+                text=label, showarrow=False,
+                xanchor="left", yanchor="middle", xshift=6,
+                font=dict(family=CHART_MONO, size=11.5, color=COLOR["text_secondary"]),
+            )
+        r_margin = 70
+
     fig.update_layout(
         title=_title_dict(title),
         paper_bgcolor=CHART_PAPER, plot_bgcolor=CHART_BG,
@@ -1018,7 +1024,7 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
                    range=x_range, zeroline=True, zerolinecolor=CHART_GRID,
                    zerolinewidth=1, tickcolor="rgba(0,0,0,0)", title=""),
         bargap=0.28,
-        margin=dict(l=90, r=70, t=90, b=24),
+        margin=dict(l=90, r=r_margin, t=90, b=24),
         hoverlabel=HOVER_LABEL,
     )
     if hover_text is not None:
@@ -1308,21 +1314,21 @@ with tabs[0]:
                         "growth_pct", "display_name", COLOR["success"],
                         "AUM Growth % (Fastest → Slowest)",
                         hover_text=growth_df.sort_values("growth_pct", ascending=False)["period_label"].values,
-                        text_suffix="%")
+                        text_suffix="%", label_position="right_edge")
         st.plotly_chart(fig, use_container_width=True)
     with col2:
         fig = make_hbar(rev_growth_df.sort_values("growth_pct", ascending=False),
                         "growth_pct", "display_name", COLOR["primary"],
                         "Revenue Growth % (Fastest → Slowest)",
                         hover_text=rev_growth_df.sort_values("growth_pct", ascending=False)["period_label"].values,
-                        text_suffix="%")
+                        text_suffix="%", label_position="right_edge")
         st.plotly_chart(fig, use_container_width=True)
     with col3:
         fig = make_hbar(pat_growth_df.sort_values("growth_pct", ascending=False),
                         "growth_pct", "display_name", COLOR["accent"],
                         "PAT Growth % (Fastest → Slowest)",
                         hover_text=pat_growth_df.sort_values("growth_pct", ascending=False)["period_label"].values,
-                        text_suffix="%")
+                        text_suffix="%", label_position="right_edge")
         st.plotly_chart(fig, use_container_width=True)
 
     st.caption("★ = estimated data. 9MFY26 growth annualised: (9M value × 4/3) / FY25 − 1. Otherwise FY25 vs FY24.")
@@ -1343,7 +1349,7 @@ with tabs[0]:
         )
         fig = make_hbar(sector_aum, "growth_pct", "sector", COLOR["primary"],
                         "Avg AUM Growth % by Sector",
-                        hover_text=[lbl] * len(sector_aum), text_suffix="%")
+                        hover_text=[lbl] * len(sector_aum), text_suffix="%", label_position="right_edge")
         st.plotly_chart(fig, use_container_width=True)
     with col2:
         sector_rev = (
@@ -1352,7 +1358,7 @@ with tabs[0]:
         )
         fig = make_hbar(sector_rev, "growth_pct", "sector", COLOR["success"],
                         "Avg Revenue Growth % by Sector",
-                        hover_text=[lbl] * len(sector_rev), text_suffix="%")
+                        hover_text=[lbl] * len(sector_rev), text_suffix="%", label_position="right_edge")
         st.plotly_chart(fig, use_container_width=True)
     with col3:
         sector_pat = (
@@ -1361,7 +1367,7 @@ with tabs[0]:
         )
         fig = make_hbar(sector_pat, "growth_pct", "sector", COLOR["accent"],
                         "Avg PAT Growth % by Sector",
-                        hover_text=[lbl] * len(sector_pat), text_suffix="%")
+                        hover_text=[lbl] * len(sector_pat), text_suffix="%", label_position="right_edge")
         st.plotly_chart(fig, use_container_width=True)
 
     # ── Row 3: Revenue Growth vs PAT Growth bubble chart ─────────────────────
@@ -2460,10 +2466,12 @@ with tabs[5]:
     else:
         st.caption(f"Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
 
-    # Apply sidebar sector filter — keep only companies in nbfc_filtered
+    # Apply sidebar sector filter using sector map (more robust than name matching)
     if sector_filter and not val_with_price.empty:
-        _filtered_names = set(nbfc_filtered["name"].tolist())
-        val_with_price = val_with_price[val_with_price["company"].isin(_filtered_names)]
+        _sector_map_val = nbfc_df.set_index("name")["sector"].to_dict()
+        val_with_price = val_with_price.copy()
+        val_with_price["_sector"] = val_with_price["company"].map(_sector_map_val)
+        val_with_price = val_with_price[val_with_price["_sector"].isin(sector_filter)].drop(columns=["_sector"])
 
     if not val_with_price.empty:
         med_pe = val_with_price["pe"].median()
