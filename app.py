@@ -1455,7 +1455,6 @@ with tabs[1]:
                         hover_text=all_roa["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
-        st.caption(_exc_caption)
     with col2:
         all_roe = latest_snap.sort_values("roe_pct", ascending=False)
         fig = make_hbar(all_roe, "roe_pct", "name", COLOR["accent"],
@@ -1463,7 +1462,7 @@ with tabs[1]:
                         hover_text=all_roe["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
-        st.caption(_exc_caption)
+    st.caption(_exc_caption)
 
     st.caption(f"Where 9MFY26 data exists: 9MFY26 ROA/ROE used. Otherwise FY25. "
                f"★ = estimated data.")
@@ -2452,15 +2451,14 @@ with tabs[4]:
         _top20_hbar("loan_book_cr", "AUM (Loan Book)", COLOR["accent"], is_inr=True)
     with col2:
         _top20_hbar("pat_cr", "PAT", COLOR["success"], is_inr=True)
-        st.caption(_exc_caption_tr)
+    st.caption(_exc_caption_tr)
 
     col3, col4 = st.columns(2)
     with col3:
         _top20_hbar("roa_pct", "Return on Assets (ROA)", "#217858", bar_fmt="{:.2f}%")
-        st.caption(_exc_caption_tr)
     with col4:
         _top20_hbar("roe_pct", "Return on Equity (ROE)", "#2CA076", bar_fmt="{:.2f}%")
-        st.caption(_exc_caption_tr)
+    st.caption(_exc_caption_tr)
 
     note("KreditBee 9MFY26 — PAT & ROA adjusted for one-time exceptional items:  "
          "Reported 9M PAT ₹341 Cr − ₹152 Cr exceptional (₹104 Cr GST provision reversal, Karnataka HC Dec 2025 "
