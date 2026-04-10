@@ -265,6 +265,15 @@ h1 {
     font-weight: 500 !important;
     font-family: 'Inter', sans-serif !important;
 }
+/* BaseWeb renders the selected single value as a placeholder-style div — override opacity */
+[data-testid="stSidebar"] [data-baseweb="select"] [class*="placeholder"],
+[data-testid="stSidebar"] [data-baseweb="select"] [class*="singleValue"],
+[data-testid="stSidebar"] [data-baseweb="select"] [class*="value"],
+[data-testid="stSidebar"] [data-baseweb="select"] > div > div > div {
+    color: #e8eaef !important;
+    opacity: 1 !important;
+    font-weight: 500 !important;
+}
 /* Multiselect chips — match selectbox: no fill, subtle border, same text */
 [data-testid="stSidebar"] [data-baseweb="tag"] {
     background: transparent !important;
