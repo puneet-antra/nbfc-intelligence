@@ -202,19 +202,20 @@ h1 {
 }
 /* Collapse button (‹) inside open sidebar */
 [data-testid="stSidebarCollapseButton"] {
-    background: #144835 !important;
+    background: #2CA076 !important;
     border-radius: 8px !important;
-    border: 1px solid #217858 !important;
+    border: 1px solid #3dbb8d !important;
     opacity: 1 !important;
     visibility: visible !important;
 }
 [data-testid="stSidebarCollapseButton"] svg {
     color: #ffffff !important;
     fill: #ffffff !important;
+    opacity: 1 !important;
 }
 [data-testid="stSidebarCollapseButton"]:hover {
-    background: #217858 !important;
-    border-color: #4ade80 !important;
+    background: #34c98a !important;
+    border-color: #5de8a8 !important;
 }
 /* Expand button (›) on main page when sidebar is collapsed */
 [data-testid="stSidebarCollapsedControl"] {
