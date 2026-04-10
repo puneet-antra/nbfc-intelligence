@@ -2570,7 +2570,10 @@ with tabs[5]:
     else:
         st.caption(f"Last updated: {cache_ts}")
 
-    # Apply sidebar sector filter to Valuation tab
+    # Keep unfiltered copy for sector-level charts (always show all sectors)
+    val_with_price_all = val_with_price.copy()
+
+    # Apply sidebar sector filter to per-company charts only
     _val_sector_filter = sector_filter  # explicit local copy to avoid any closure issue
     if _val_sector_filter and not val_with_price.empty:
         val_with_price = val_with_price[
@@ -2642,8 +2645,9 @@ with tabs[5]:
         # P/E by sector  ·  ROE by sector
         st.markdown('<div class="section-header">Valuations &amp; Returns by Sector</div>',
                     unsafe_allow_html=True)
+        # Sector charts always use all sectors (unfiltered) regardless of sidebar filter
         _sector_map = nbfc_df.set_index("name")["sector"].to_dict()
-        val_sect = val_with_price.copy()
+        val_sect = val_with_price_all.copy()
         val_sect["sector"] = val_sect["company"].map(_sector_map)
         pe_sect = (
             val_sect.dropna(subset=["pe", "sector"])
@@ -2652,9 +2656,9 @@ with tabs[5]:
             .reset_index()
             .sort_values("pe", ascending=False)
         )
-        # ROE by sector — from latest financials snapshot
-        _roe_snap = get_latest_period_data(fin_filtered)
-        _lbl_val  = latest_period_label(fin_filtered)
+        # ROE by sector — from full unfiltered financials snapshot
+        _roe_snap = get_latest_period_data(fin_df)
+        _lbl_val  = latest_period_label(fin_df)
 
         # Sector order is set by P/E (pe_sect already sorted descending)
         _sector_order = pe_sect["sector"].tolist() if not pe_sect.empty else []
@@ -2676,10 +2680,10 @@ with tabs[5]:
         )
         roe_sect = _apply_sector_order(roe_sect)
 
-        # Revenue (NII) growth by sector — NII is the primary revenue line for NBFCs
-        _nii_growth = compute_latest_growth(fin_filtered, "net_interest_income_cr")
+        # Revenue (NII) growth by sector — always all sectors, unfiltered
+        _nii_growth = compute_latest_growth(fin_df, "net_interest_income_cr")
         _nii_growth = _nii_growth.merge(
-            fin_filtered[["name", "sector"]].drop_duplicates(), on="name", how="left"
+            fin_df[["name", "sector"]].drop_duplicates(), on="name", how="left"
         )
         nii_sect = (
             _nii_growth.dropna(subset=["growth_pct", "sector"])
