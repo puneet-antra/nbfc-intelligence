@@ -1074,10 +1074,10 @@ def chart_layout(fig, title=None):
 nbfc_df = load_nbfc_table()
 fin_df = load_financials()
 
-rbi_layer = st.sidebar.selectbox("RBI Layer", ["All", "Upper", "Middle", "Base"])
+all_layers = ["Upper", "Middle", "Base"]
+rbi_layer_filter = st.sidebar.multiselect("RBI Layer", all_layers, default=[])
 all_sectors = sorted(nbfc_df["sector"].dropna().unique().tolist())
-_default_sectors = ["Consumer Finance"] if "Consumer Finance" in all_sectors else []
-sector_filter = st.sidebar.multiselect("Sector", all_sectors, default=_default_sectors)
+sector_filter = st.sidebar.multiselect("Sector", all_sectors, default=[])
 listing_filter = st.sidebar.radio("Listing Status", ["All", "Listed Only", "Unlisted Only"])
 include_estimated = st.sidebar.checkbox("Include Estimated Data", value=True)
 
@@ -1096,10 +1096,10 @@ if _AUTH_ENABLED:
 
 # ── Active filter badge (computed here, injected into page header below) ──────
 _active_filters = []
-if sector_filter and len(sector_filter) < len(all_sectors):
+if sector_filter:  # non-empty → filter active
     _active_filters.append(", ".join(sector_filter))
-if rbi_layer != "All":
-    _active_filters.append(f"Layer: {rbi_layer}")
+if rbi_layer_filter:  # non-empty → filter active
+    _active_filters.append("Layer: " + ", ".join(rbi_layer_filter))
 if listing_filter != "All":
     _active_filters.append(listing_filter.replace(" Only", ""))
 _badge_label = " · ".join(_active_filters) if _active_filters else "All NBFCs"
@@ -1107,8 +1107,8 @@ _badge_label = " · ".join(_active_filters) if _active_filters else "All NBFCs"
 
 def apply_filters(df):
     d = df.copy()
-    if rbi_layer != "All":
-        d = d[d["rbi_layer"] == rbi_layer]
+    if rbi_layer_filter:  # non-empty list → filter active
+        d = d[d["rbi_layer"].isin(rbi_layer_filter)]
     if sector_filter:  # non-empty list → filter active
         d = d[d["sector"].isin(sector_filter)]
     if listing_filter == "Listed Only":
