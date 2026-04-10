@@ -202,17 +202,19 @@ h1 {
 }
 /* Collapse button (‹) inside open sidebar */
 [data-testid="stSidebarCollapseButton"] {
-    background: #1a1a1c !important;
-    border-radius: 6px !important;
+    background: #144835 !important;
+    border-radius: 8px !important;
+    border: 1px solid #217858 !important;
     opacity: 1 !important;
     visibility: visible !important;
 }
 [data-testid="stSidebarCollapseButton"] svg {
-    color: #D7F4E9 !important;
-    fill: #D7F4E9 !important;
+    color: #ffffff !important;
+    fill: #ffffff !important;
 }
 [data-testid="stSidebarCollapseButton"]:hover {
     background: #217858 !important;
+    border-color: #4ade80 !important;
 }
 /* Expand button (›) on main page when sidebar is collapsed */
 [data-testid="stSidebarCollapsedControl"] {
@@ -248,19 +250,50 @@ h1 {
     border-color: #1e1e20 !important;
     margin: 1rem 0 !important;
 }
+/* Selectbox / multiselect container */
 [data-testid="stSidebar"] [data-baseweb="select"] > div,
 [data-testid="stSidebar"] [data-testid="stSelectbox"] > div > div {
     background: #1a1a1c !important;
     border-color: #2a2a2e !important;
-    color: #e8e8e8 !important;
+    color: #ffffff !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 0.84rem !important;
+    font-weight: 500 !important;
 }
+/* Selectbox selected value text */
+[data-testid="stSidebar"] [data-baseweb="select"] [data-testid="stMarkdownContainer"] p,
+[data-testid="stSidebar"] [data-baseweb="select"] div[class*="ValueContainer"] span,
+[data-testid="stSidebar"] [data-baseweb="select"] div[class*="singleValue"] {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+/* Multiselect chips (selected sector tags) */
+[data-testid="stSidebar"] [data-baseweb="tag"] {
+    background: #144835 !important;
+    border-color: #217858 !important;
+}
+[data-testid="stSidebar"] [data-baseweb="tag"] span {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-size: 0.82rem !important;
+}
+/* Radio — all options */
 [data-testid="stSidebar"] [data-baseweb="radio"] label span,
 [data-testid="stSidebar"] [data-baseweb="checkbox"] label span {
     font-family: 'Inter', sans-serif !important;
     font-size: 0.84rem !important;
-    color: #B9BABD !important;
+    color: #8a8c91 !important;
+}
+/* Radio — selected option: bright white + bold */
+[data-testid="stSidebar"] [data-baseweb="radio"] label:has(input:checked) span:last-child {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+/* Radio circle fill for selected */
+[data-testid="stSidebar"] [data-baseweb="radio"] label:has(input:checked) [data-testid="stRadioCircle"],
+[data-testid="stSidebar"] [data-baseweb="radio"] label:has(input:checked) div[class*="radioInner"] {
+    background: #217858 !important;
+    border-color: #4ade80 !important;
 }
 [data-testid="stSidebar"] [data-testid="stSlider"] [data-testid="stTickBar"] {
     color: #73757A !important;
@@ -1039,7 +1072,6 @@ all_sectors = sorted(nbfc_df["sector"].dropna().unique().tolist())
 _default_sectors = ["Consumer Finance"] if "Consumer Finance" in all_sectors else []
 sector_filter = st.sidebar.multiselect("Sector", all_sectors, default=_default_sectors)
 listing_filter = st.sidebar.radio("Listing Status", ["All", "Listed Only", "Unlisted Only"])
-top_n = st.sidebar.slider("Companies in Rankings", min_value=10, max_value=80, value=40, step=5)
 include_estimated = st.sidebar.checkbox("Include Estimated Data", value=True)
 
 st.sidebar.markdown("---")
@@ -1687,9 +1719,9 @@ with tabs[7]:
     pat_cagr = compute_cagr(fin_filtered, "pat_cr").dropna()
     # filter out extreme negatives (loss → profit)
     pat_cagr = pat_cagr[pat_cagr["cagr_pct"].between(-50, 200)]
-    top_pat = pat_cagr.head(top_n).sort_values("cagr_pct", ascending=False)
+    top_pat = pat_cagr.sort_values("cagr_pct", ascending=False)
     fig = make_hbar(top_pat, "cagr_pct", "name", COLOR["accent"],
-                    f"PAT CAGR % (FY21–25) — Top {top_n}",
+                    "PAT CAGR % (FY21–25)",
                     hover_text=["FY21–FY25"] * len(top_pat), text_suffix="%")
     st.plotly_chart(fig, use_container_width=True)
 
