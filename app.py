@@ -1468,7 +1468,10 @@ with tabs[1]:
                         hover_text=all_roe["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
-    st.caption(_exc_caption)
+    st.markdown(
+        f"<p style='font-size:0.78rem;color:#444;margin-top:-0.4rem;'>{_exc_caption}</p>",
+        unsafe_allow_html=True,
+    )
 
     st.caption(f"Where 9MFY26 data exists: 9MFY26 ROA/ROE used. Otherwise FY25. "
                f"★ = estimated data.")
@@ -2450,7 +2453,10 @@ with tabs[4]:
         )
         st.plotly_chart(fig, use_container_width=True)
         if show_exc_note:
-            st.caption(_EXC_NOTE)
+            st.markdown(
+                f"<p style='font-size:0.78rem;color:#444;margin-top:-0.4rem;'>{_EXC_NOTE}</p>",
+                unsafe_allow_html=True,
+            )
 
     st.markdown(f'<div class="section-header">Rankings as of {_lbl_tr}</div>',
                 unsafe_allow_html=True)
