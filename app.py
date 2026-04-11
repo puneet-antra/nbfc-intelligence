@@ -2872,6 +2872,10 @@ with tabs[6]:
     raw = get_chart_periods(fin_filtered).copy()
     if selected_name != "All companies":
         raw = raw[raw["name"] == selected_name]
-    st.dataframe(raw.drop(columns=["id", "nbfc_id"], errors="ignore"),
-                 use_container_width=True, hide_index=True)
+    raw_display = raw.drop(columns=["id", "nbfc_id"], errors="ignore")
+    st.dataframe(raw_display, use_container_width=True, hide_index=True)
     st.caption("Raw quarterly rows (Q1, Q2, Q3) are excluded. Only annual (FY2021–FY2025) and annualised 9MFY26 rows shown.")
+
+    csv_history = raw_display.to_csv(index=False).encode("utf-8")
+    _fname = f"nbfc_history_{selected_name.replace(' ', '_')}.csv" if selected_name != "All companies" else "nbfc_history_all.csv"
+    st.download_button("⬇️ Download CSV", csv_history, _fname, "text/csv", key="dl_history")
