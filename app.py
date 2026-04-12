@@ -944,20 +944,22 @@ def split_title(title, max_len=32):
 def _title_dict(raw_title, pad_t=10, pad_b=14):
     """Build a Plotly title dict compatible with all Plotly versions.
     Uses <b> for main title and <br> + smaller text for subtitle.
+
+    xref="container" centres relative to the FULL figure card (not just the
+    plot area), so the title is always visually centred regardless of how large
+    the y-axis / left margin happens to be.  Regular spaces (not \u00a0) let
+    Plotly wrap the text if it is wider than the available space.
     """
     main, sub = split_title(raw_title)
-    main_nbsp = main.replace(" ", "\u00a0")
     if sub:
-        sub_nbsp = sub.replace(" ", "\u00a0")
-        text = f"<b>{main_nbsp}</b><br><sub>{sub_nbsp}</sub>"
+        text = f"<b>{main}</b><br><sub>{sub}</sub>"
     else:
-        text = f"<b>{main_nbsp}</b>"
+        text = f"<b>{main}</b>"
     return dict(
         text=text,
         font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT),
-        x=0.5, xanchor="center", xref="paper",
+        x=0.5, xanchor="center",
         pad=dict(t=pad_t, b=pad_b),
-        align="center",
     )
 
 
@@ -1013,6 +1015,11 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
 
     fig = px.bar(df, x=x_col, y=y_col, orientation="h", height=h)
 
+    # Compute left margin from longest y-axis label (~7 px/char, min 80).
+    # Right margin must equal left so x=0.5 paper coord is truly the visual centre.
+    max_label_chars = max((len(n) for n in names), default=10)
+    l_margin = max(int(max_label_chars * 7), 80)
+
     if label_position == "bar_end":
         # Labels anchored to each bar's end — explicit annotations so label tracks
         # the bar, not the paper edge (avoids all labels clustering at the right).
@@ -1029,7 +1036,7 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
                 xanchor="left", yanchor="middle", xshift=5,
                 font=dict(family=CHART_MONO, size=11.5, color=COLOR["text_secondary"]),
             )
-        r_margin = 16
+        r_margin = l_margin  # symmetric → title x=0.5 is visually centred
     else:
         # Fixed annotations at the far right edge (safe for charts with negative values)
         x_range = [x_left, x_max * 1.05]
@@ -1041,7 +1048,7 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
                 xanchor="left", yanchor="middle", xshift=6,
                 font=dict(family=CHART_MONO, size=11.5, color=COLOR["text_secondary"]),
             )
-        r_margin = 70
+        r_margin = max(l_margin, 70)  # keep label room, stay symmetric
 
     fig.update_layout(
         title=_title_dict(title),
@@ -1050,14 +1057,14 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
         yaxis=dict(autorange="reversed",
                    tickmode="array", tickvals=names, ticktext=tick_text,
                    tickfont=dict(family=CHART_FONT, size=12.5),
-                   showgrid=False, tickcolor="rgba(0,0,0,0)", title="",
-                   automargin=True),
+                   showgrid=False, tickcolor="rgba(0,0,0,0)", title=""),
+                   # automargin removed — we set l_margin explicitly to keep margins symmetric
         xaxis=dict(showgrid=False,
                    showticklabels=True, tickfont=dict(family=CHART_FONT, size=10, color="#aaa"),
                    range=x_range, zeroline=True, zerolinecolor=CHART_GRID,
                    zerolinewidth=1, tickcolor="rgba(0,0,0,0)", title=""),
         bargap=0.28,
-        margin=dict(l=5, r=r_margin, t=90, b=24),
+        margin=dict(l=l_margin, r=r_margin, t=90, b=24),
         hoverlabel=HOVER_LABEL,
     )
     if hover_text is not None:
@@ -1166,6 +1173,12 @@ def apply_filters(df):
 
 fin_filtered = apply_filters(fin_df)
 nbfc_filtered = apply_filters(nbfc_df)
+
+# Pre-compute once per render — avoids hashing `fin_filtered` (a large DataFrame)
+# on every individual call to @st.cache_data functions throughout the app.
+_chart_periods_df   = get_chart_periods(fin_filtered)
+_latest_period_df   = get_latest_period_data(fin_filtered)
+_latest_period_unf  = get_latest_period_data(fin_df)   # unfiltered, for all-company charts
 
 # ── Page header ───────────────────────────────────────────────────────────────
 
@@ -1420,7 +1433,7 @@ with tabs[0]:
 
     # ── Row 3: Revenue Growth vs PAT Growth bubble chart ─────────────────────
     st.markdown('<div class="section-header">Revenue Growth vs PAT Growth</div>', unsafe_allow_html=True)
-    latest_lb = get_latest_period_data(fin_filtered)[["name", "loan_book_cr", "sector"]].dropna(subset=["loan_book_cr"])
+    latest_lb = _latest_period_df[["name", "loan_book_cr", "sector"]].dropna(subset=["loan_book_cr"])
     bubble_df = (
         rev_growth_df[["name", "growth_pct", "period_label"]].rename(
             columns={"growth_pct": "rev_growth", "period_label": "rev_period"})
@@ -1488,7 +1501,7 @@ with tabs[0]:
 # ─────────────────────────────────────────────────────────────────────────────
 with tabs[1]:
     lbl = latest_period_label(fin_filtered)
-    latest_snap = get_latest_period_data(fin_filtered).dropna(subset=["roa_pct", "roe_pct"])
+    latest_snap = _latest_period_df.dropna(subset=["roa_pct", "roe_pct"])
 
     st.markdown(f'<div class="section-header">Return on Assets & Equity — {lbl}</div>',
                 unsafe_allow_html=True)
@@ -1518,7 +1531,7 @@ with tabs[1]:
         )
     # Sector breakdown — latest period (always all sectors, ignore filter)
     st.markdown(f'<div class="section-header">By Sector — {lbl}</div>', unsafe_allow_html=True)
-    _snap_all = get_latest_period_data(fin_df).dropna(subset=["roa_pct", "roe_pct"])
+    _snap_all = _latest_period_unf.dropna(subset=["roa_pct", "roe_pct"])
     sector_avg = _snap_all.groupby("sector").agg(
         roa=("roa_pct", "mean"),
         roe=("roe_pct", "mean"),
@@ -1556,7 +1569,7 @@ with tabs[1]:
     st.markdown(f'<div class="section-header">PAT Trend — Top 10 Companies (incl. {lbl})</div>',
                 unsafe_allow_html=True)
     top10_names = latest_snap.dropna(subset=["pat_cr"]).nlargest(10, "pat_cr")["name"].tolist()
-    chart_df = get_chart_periods(fin_filtered)
+    chart_df = _chart_periods_df
     pat_trend = chart_df[chart_df["name"].isin(top10_names)][["name", "period", "pat_cr"]].dropna()
     pat_trend = pat_trend.copy()
     pat_trend["period"] = pat_trend["period"].astype(str).replace("9MFY26", "9MFY26 (Ann.)")
@@ -1582,8 +1595,8 @@ with tabs[2]:
              "the P&L cost of defaults. GNPA is a stock/point-in-time measure of bad loans.")
 
     lbl = latest_period_label(fin_filtered)
-    chart_df = get_chart_periods(fin_filtered)
-    latest_snap_all = get_latest_period_data(fin_filtered)
+    chart_df = _chart_periods_df
+    latest_snap_all = _latest_period_df
     all_gnpa = latest_snap_all.dropna(subset=["gnpa_pct"]).sort_values("gnpa_pct", ascending=True)
     all_loss = latest_snap_all.dropna(subset=["credit_loss_rate_pct"]).sort_values("credit_loss_rate_pct", ascending=True)
 
@@ -1606,7 +1619,7 @@ with tabs[2]:
 
     # ── Row 2: Latest GNPA by Sector | Latest Annualized Losses by Sector ────
     # Always use unfiltered data so all sectors appear
-    _snap_cq_all = get_latest_period_data(fin_df)
+    _snap_cq_all = _latest_period_unf
     _all_gnpa_all = _snap_cq_all.dropna(subset=["gnpa_pct"])
     _all_loss_all = _snap_cq_all.dropna(subset=["credit_loss_rate_pct"])
 
@@ -1735,9 +1748,9 @@ with tabs[2]:
 # ─────────────────────────────────────────────────────────────────────────────
 with tabs[7]:
     lbl = latest_period_label(fin_filtered)
-    latest_snap = get_latest_period_data(fin_filtered)
+    latest_snap = _latest_period_df
     top10 = latest_snap.dropna(subset=["loan_book_cr"]).nlargest(10, "loan_book_cr")["name"].tolist()
-    chart_df = get_chart_periods(fin_filtered)
+    chart_df = _chart_periods_df
 
     # Stacked area — loan book (stock, Q3 as-is)
     st.markdown(f'<div class="section-header">Loan Book Growth — Top 10 (to {lbl})</div>',
@@ -2117,7 +2130,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                 )
 
             # ── Ranking badges: check if this NBFC tops any metric ──────────
-            _all_latest = get_latest_period_data(fin_filtered)
+            _all_latest = _latest_period_df
             _rank_checks = [
                 ("loan_book_cr", "🏆 Biggest AUM"),
                 ("pat_cr",       "🏆 Highest PAT"),
@@ -2388,7 +2401,8 @@ TICKER_SECTOR = {
 
 
 # ── Valuation cache helpers (module-level so both Top Ranked and Valuation tabs share them) ──
-_VAL_CACHE_PATH = "data/valuation_cache_v2.json"
+# Absolute path so it works regardless of which directory `streamlit run` is called from.
+_VAL_CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "valuation_cache_v2.json")
 
 def save_val_cache(df):
     import json
@@ -2397,18 +2411,27 @@ def save_val_cache(df):
         "data": df.to_dict(orient="records"),
     }
     try:
-        os.makedirs("data", exist_ok=True)
+        os.makedirs(os.path.dirname(_VAL_CACHE_PATH), exist_ok=True)
         with open(_VAL_CACHE_PATH, "w") as f:
             json.dump(record, f)
+        # Clear the Streamlit memory cache so the new data is picked up immediately
+        load_val_cache.clear()
     except Exception:
         pass
 
+@st.cache_data(show_spinner=False)
 def load_val_cache():
+    """Read valuation JSON cache from disk. Result is memoised in Streamlit memory
+    so subsequent reruns (sidebar interactions, tab switches) return instantly
+    without touching the filesystem."""
     import json
     try:
         with open(_VAL_CACHE_PATH) as f:
             record = json.load(f)
-        return pd.DataFrame(record["data"]), record["fetched_at"]
+        df = pd.DataFrame(record["data"])
+        if df.empty:
+            return None, None
+        return df, record["fetched_at"]
     except Exception:
         return None, None
 
@@ -2467,7 +2490,7 @@ def fetch_valuation_data():
 # ─────────────────────────────────────────────────────────────────────────────
 with tabs[4]:
     _lbl_tr = latest_period_label(fin_filtered)
-    _snap   = get_latest_period_data(fin_filtered)
+    _snap   = _latest_period_df
 
     # Map each company to the period used in _snap
     _snap_period = _snap.set_index("name")["period"].to_dict() if "period" in _snap.columns else {}
@@ -2698,7 +2721,7 @@ with tabs[5]:
             .sort_values("pe", ascending=False)
         )
         # ROE by sector — from full unfiltered financials snapshot
-        _roe_snap = get_latest_period_data(fin_df)
+        _roe_snap = _latest_period_unf
         _lbl_val  = latest_period_label(fin_df)
 
         # Sector order is set by P/E (pe_sect already sorted descending)
@@ -2859,7 +2882,7 @@ with tabs[6]:
 
     st.markdown(f'<div class="section-header">All Companies — Financial Metrics as of {lbl}</div>',
                 unsafe_allow_html=True)
-    metrics_df = get_latest_period_data(fin_filtered).copy()
+    metrics_df = _latest_period_df.copy()
     if selected_name != "All companies":
         metrics_df = metrics_df[metrics_df["name"] == selected_name]
     search = "" if selected_name == "All companies" else selected_name
@@ -2904,7 +2927,12 @@ with tabs[6]:
     for _, r in metrics_df[_m_cols].iterrows():
         cells = ""
         for i, c in enumerate(_m_cols):
-            val_str = str(r[c]) if c in ("name","rbi_layer","sector","period","Audited") else _fmt_metric_cell(c, r[c])
+            if c == "name":
+                val_str = SHORT_NAMES.get(str(r[c]), str(r[c]))
+            elif c in ("rbi_layer", "sector", "period", "Audited"):
+                val_str = str(r[c])
+            else:
+                val_str = _fmt_metric_cell(c, r[c])
             align   = "right" if i in _m_right else "left"
             extra   = _gnpa_style(r[c]) if c == "gnpa_pct" else ""
             cells  += f'<td style="{_mtd}text-align:{align};{extra}">{val_str}</td>'
@@ -2934,35 +2962,70 @@ with tabs[6]:
     # Full history
     st.markdown('<div class="section-header">Full Financial History (Annual + 9MFY26)</div>',
                 unsafe_allow_html=True)
-    raw = get_chart_periods(fin_filtered).copy()
-    if selected_name != "All companies":
-        raw = raw[raw["name"] == selected_name]
-    raw_display = raw.drop(columns=["id", "nbfc_id"], errors="ignore")
-    # Pre-format columns for display
-    disp = raw_display.copy()
-    if "name" in disp.columns:
-        disp["name"] = disp["name"].map(lambda n: SHORT_NAMES.get(n, n))
-    _cr_cols  = ["loan_book_cr","total_assets_cr","equity_cr",
-                 "net_interest_income_cr","pat_cr","credit_losses_cr"]
-    _pct_cols = ["credit_loss_rate_pct","gnpa_pct","roa_pct","roe_pct"]
-    for _c in _cr_cols:
-        if _c in disp.columns:
-            disp[_c] = disp[_c].apply(lambda v: f"₹{v:,.0f}" if pd.notna(v) else "—")
-    for _c in _pct_cols:
-        if _c in disp.columns:
-            disp[_c] = disp[_c].apply(lambda v: f"{v:.2f}%" if pd.notna(v) else "—")
 
-    disp = disp.rename(columns={
-        "name": "Company", "period": "Period",
-        "loan_book_cr": "Loan Book (₹ Cr)", "total_assets_cr": "Total Assets (₹ Cr)",
-        "equity_cr": "Equity (₹ Cr)", "net_interest_income_cr": "Revenue (₹ Cr)",
-        "pat_cr": "PAT (₹ Cr)", "credit_losses_cr": "Credit Losses (₹ Cr)",
-        "credit_loss_rate_pct": "Loss Rate %", "gnpa_pct": "GNPA %",
-        "roa_pct": "ROA %", "roe_pct": "ROE %",
-        "data_quality": "Data Quality", "source": "Source",
-    })
-    st.dataframe(disp, use_container_width=True, hide_index=True)
-    st.caption("Raw quarterly rows (Q1, Q2, Q3) are excluded. Only annual (FY2021–FY2025) and annualised 9MFY26 rows shown.")
+    _hist_cols  = ["name", "period",
+                   "loan_book_cr", "total_assets_cr", "equity_cr",
+                   "net_interest_income_cr", "pat_cr", "credit_losses_cr",
+                   "gnpa_pct", "credit_loss_rate_pct", "roa_pct", "roe_pct"]
+    _hist_heads = ["Company", "Period",
+                   "Loan Book (₹ Cr)", "Total Assets (₹ Cr)", "Equity (₹ Cr)",
+                   "Revenue (₹ Cr)", "PAT (₹ Cr)", "Credit Losses (₹ Cr)",
+                   "GNPA %", "Loss Rate %", "ROA %", "ROE %"]
+    _hist_right = set(range(2, 12))  # all numeric columns right-aligned
+
+    def _fmt_hist_cell(col, val):
+        if pd.isna(val) or val is None:
+            return "—"
+        if col in ("loan_book_cr", "total_assets_cr", "equity_cr",
+                   "net_interest_income_cr", "pat_cr", "credit_losses_cr"):
+            return f"₹{val:,.0f}"
+        if col in ("gnpa_pct", "credit_loss_rate_pct", "roa_pct", "roe_pct"):
+            return f"{val:.2f}%"
+        return str(val)
+
+    raw_all = _chart_periods_df
+    raw_display = raw_all.drop(columns=["id", "nbfc_id"], errors="ignore")
+
+    if selected_name != "All companies":
+        hist_data = raw_all[raw_all["name"] == selected_name]
+        _hist_cols_avail = [c for c in _hist_cols if c in hist_data.columns]
+        _hist_heads_avail = [_hist_heads[_hist_cols.index(c)] for c in _hist_cols_avail]
+
+        _hth = ("padding:9px 14px;font-size:12px;font-weight:700;color:#1A202C;"
+                "border-bottom:2px solid #E2E8F0;white-space:nowrap;background:#F8FAFC;")
+        _htd = "padding:8px 14px;font-size:12px;border-bottom:1px solid #f0f0f0;white-space:nowrap;"
+
+        _h_rows = ""
+        for _, r in hist_data[_hist_cols_avail].iterrows():
+            cells = ""
+            for i, c in enumerate(_hist_cols_avail):
+                if c == "name":
+                    val_str = SHORT_NAMES.get(str(r[c]), str(r[c]))
+                elif c == "period":
+                    val_str = str(r[c])
+                else:
+                    val_str = _fmt_hist_cell(c, r[c])
+                col_idx = _hist_cols.index(c)
+                align = "right" if col_idx in _hist_right else "left"
+                cells += f'<td style="{_htd}text-align:{align};">{val_str}</td>'
+            _h_rows += f"<tr>{cells}</tr>"
+
+        _h_headers = "".join(
+            f'<th style="{_hth}text-align:{"right" if _hist_cols.index(c) in _hist_right else "left"}">'
+            f'{_hist_heads_avail[i]}</th>'
+            for i, c in enumerate(_hist_cols_avail)
+        )
+        st.markdown(f"""
+        <div style="overflow-x:auto;border:1px solid #E2E8F0;border-radius:12px;margin-top:0.5rem;">
+        <table style="width:100%;border-collapse:collapse;font-family:Inter,sans-serif;">
+          <thead><tr>{_h_headers}</tr></thead>
+          <tbody>{_h_rows}</tbody>
+        </table></div>
+        """, unsafe_allow_html=True)
+    else:
+        st.info("Select a specific company above to view its full financial history.", icon="👆")
+
+    st.caption("Only annual (FY2021–FY2025) and annualised 9MFY26 rows shown. Raw quarterly rows excluded.")
 
     csv_history = raw_display.to_csv(index=False).encode("utf-8")
     _fname = f"nbfc_history_{selected_name.replace(' ', '_')}.csv" if selected_name != "All companies" else "nbfc_history_all.csv"
