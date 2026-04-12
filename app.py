@@ -693,7 +693,7 @@ def annual_only(df):
     return df[~df["period"].str.contains("Q")]
 
 
-def truncate_name(name, n=15):
+def truncate_name(name, n=20):
     return name[:n] + "…" if len(name) > n else name
 
 
@@ -967,14 +967,14 @@ def note(text, kind="info"):
     st.markdown(
         f'<div style="border-left:2px solid {p["border"]};padding:0.28rem 0.85rem;'
         f'margin:0.6rem 0;font-family:\'Inter\',sans-serif;font-size:0.7rem;'
-        f'color:{p["color"]};line-height:1.55;opacity:0.85;">{text}</div>',
+        f'color:{p["color"]};line-height:1.55;">{text}</div>',
         unsafe_allow_html=True,
     )
 
 
 MONEYVIEW_GREEN = "#1B5E20"   # Moneyview brand dark green
 
-def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text_suffix="", text_labels=None, label_position="bar_end"):
+def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text_suffix="", text_labels=None, label_position="bar_end", bar_color_overrides=None):
     """Standard horizontal bar chart — pass data sorted DESCENDING (chart reverses y-axis).
     Moneyview is automatically highlighted: dark-green bar + bold dark-green label.
     label_position: 'bar_end' = text right after each bar (default);
@@ -989,7 +989,11 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
         text_labels = df[x_col].round(1).astype(str) + text_suffix
 
     names = df[y_col].tolist()
-    bar_colors = [MONEYVIEW_GREEN if n == "Moneyview" else color for n in names]
+    _overrides = bar_color_overrides or {}
+    bar_colors = [
+        MONEYVIEW_GREEN if n == "Moneyview" else _overrides.get(n, color)
+        for n in names
+    ]
     tick_text = [
         f"<b><span style='color:{MONEYVIEW_GREEN}'>{n}</span></b>"
         if n == "Moneyview" else n
@@ -1036,7 +1040,8 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
                    tickmode="array", tickvals=names, ticktext=tick_text,
                    tickfont=dict(family=CHART_FONT, size=12.5),
                    showgrid=False, tickcolor="rgba(0,0,0,0)", title=""),
-        xaxis=dict(showgrid=False, showticklabels=False,
+        xaxis=dict(showgrid=True, gridcolor="#F0F0F0", gridwidth=1,
+                   showticklabels=True, tickfont=dict(family=CHART_FONT, size=10, color="#aaa"),
                    range=x_range, zeroline=True, zerolinecolor=CHART_GRID,
                    zerolinewidth=1, tickcolor="rgba(0,0,0,0)", title=""),
         bargap=0.28,
@@ -1295,6 +1300,15 @@ c3.metric("Combined Assets", f"₹{total_assets:.1f}L Cr", help="FY25")
 c4.metric("Avg AUM Growth", f"{avg_growth:.1f}%", help="Latest 1Y")
 c5.metric("Avg GNPA", f"{avg_gnpa:.2f}%", help="FY25")
 
+# ── Empty-state guard — show friendly message before tabs if filters yield nothing ──
+if fin_filtered.empty:
+    st.info(
+        "No companies match the selected filters. "
+        "Try broadening your sector, listing status, or data quality selection.",
+        icon="🔍",
+    )
+    st.stop()
+
 # ── Tabs ──────────────────────────────────────────────────────────────────────
 
 tabs = st.tabs([
@@ -1472,13 +1486,12 @@ with tabs[1]:
                         hover_text=all_roe["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
-    st.markdown(
-        f"<p style='font-size:0.78rem;color:#555;margin-top:-0.4rem;'>{_exc_caption}</p>",
-        unsafe_allow_html=True,
-    )
-
-    st.caption(f"Where 9MFY26 data exists: 9MFY26 ROA/ROE used. Otherwise FY25. "
-               f"★ = estimated data.")
+    st.caption(f"Where 9MFY26 data exists, 9MFY26 ROA/ROE used. Otherwise FY25. ★ = estimated data.")
+    with st.expander("📐 Adjustments for exceptional items"):
+        st.markdown(
+            f"<p style='font-size:0.78rem;color:#555;'>{_exc_caption}</p>",
+            unsafe_allow_html=True,
+        )
     # Sector breakdown — latest period (always all sectors, ignore filter)
     st.markdown(f'<div class="section-header">By Sector — {lbl}</div>', unsafe_allow_html=True)
     _snap_all = get_latest_period_data(fin_df).dropna(subset=["roa_pct", "roe_pct"])
@@ -1540,8 +1553,9 @@ with tabs[1]:
 # TAB 3: ASSET QUALITY (GNPA + Annualized Losses combined)
 # ─────────────────────────────────────────────────────────────────────────────
 with tabs[2]:
-    note("Annualized Losses = (Net Provisions + Write-offs − Recoveries) ÷ Loan Book — "
-         "the P&L cost of defaults. GNPA is a stock/point-in-time measure of bad loans.")
+    with st.expander("📐 Metric definitions"):
+        note("Annualized Losses = (Net Provisions + Write-offs − Recoveries) ÷ Loan Book — "
+             "the P&L cost of defaults. GNPA is a stock/point-in-time measure of bad loans.")
 
     lbl = latest_period_label(fin_filtered)
     chart_df = get_chart_periods(fin_filtered)
@@ -2250,21 +2264,26 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
         if has_q3:
             st.caption("9MFY26: NII & PAT are annualised (×4/3). Credit losses are raw 9-month values. ROA & ROE use annualised PAT.")
         if has_q3 and selected == "KreditBee":
-            note("KreditBee 9MFY26 — PAT & ROA adjusted for one-time exceptional items:  "
-                 "Reported 9M PAT ₹341 Cr − ₹152 Cr exceptional (₹104 Cr GST provision reversal, Karnataka HC Dec 2025 "
-                 "+ ₹48 Cr DTA recognition) = Adjusted 9M PAT ₹189 Cr × 4/3 = Annualised PAT ₹252 Cr.  "
-                 "Adjusted ROA = ₹252 Cr ÷ avg loan book ₹7,049 Cr [(₹5,649 + ₹8,448) ÷ 2] = 3.58%.", "warning")
+            with st.expander("📐 Methodology & Adjustments — KreditBee 9MFY26"):
+                note("PAT & ROA adjusted for one-time exceptional items:  "
+                     "Reported 9M PAT ₹341 Cr − ₹152 Cr exceptional (₹104 Cr GST provision reversal, Karnataka HC Dec 2025 "
+                     "+ ₹48 Cr DTA recognition) = Adjusted 9M PAT ₹189 Cr × 4/3 = Annualised PAT ₹252 Cr.  "
+                     "Adjusted ROA = ₹252 Cr ÷ avg loan book ₹7,049 Cr [(₹5,649 + ₹8,448) ÷ 2] = 3.58%.", "warning")
         if selected == "Moneyview":
-            note("Moneyview figures are for the consolidated platform business (WFPL + WFL), "
-                 "not the standalone NBFC entity. Loan book = managed AUM (on-book + off-book DLG, ₹19,815 Cr incl. co-lending). "
-                 "9MFY26: ROA & ROE use PAT before exceptional items (₹245 Cr, 9M → annualised ₹327 Cr). "
-                 "Reported 9M PAT = ₹210 Cr (after ₹35 Cr one-time charges). "
-                 "Annualised loss rate = ₹965 Cr / avg AUM ₹18,265 Cr = 5.29%. Source: DRHP Mar-2026.", "info")
+            with st.expander("📐 Methodology & Data Notes — Moneyview"):
+                note("Figures are for the consolidated platform business (WFPL + WFL), "
+                     "not the standalone NBFC entity. Loan book = managed AUM (on-book + off-book DLG, ₹19,815 Cr incl. co-lending). "
+                     "9MFY26: ROA & ROE use PAT before exceptional items (₹245 Cr, 9M → annualised ₹327 Cr). "
+                     "Reported 9M PAT = ₹210 Cr (after ₹35 Cr one-time charges). "
+                     "Annualised loss rate = ₹965 Cr / avg AUM ₹18,265 Cr = 5.29%. Source: DRHP Mar-2026.", "info")
         if selected == "Kissht":
-            note("Kissht FY2025 (latest): ROA = ₹161 Cr PAT / avg Loan Book AUM ₹3,346 Cr = 4.81% "
-                 "(DRHP reported 7.14% using avg total assets ₹2,249 Cr). "
-                 "ROE = ₹161 Cr / avg equity ₹906 Cr = 17.74%. "
-                 "Source: Kissht DRHP (OnEMI Technology Solutions) filed Aug 2025.", "info")
+            with st.expander("📐 ROA & ROE Calculations — Kissht"):
+                note("ROA uses avg Loan Book AUM (not avg total assets as per DRHP): "
+                     "FY2025 = ₹161 Cr / avg AUM [(₹2,604+₹4,087)÷2 = ₹3,346 Cr] = 4.81% "
+                     "(DRHP reported 7.14% using avg total assets ₹2,249 Cr).  "
+                     "ROE: FY2024 = ₹197 Cr / avg equity [(₹566+₹805)÷2 = ₹686 Cr] = 28.74% | "
+                     "FY2025 = ₹161 Cr / avg equity [(₹805+₹1,006)÷2 = ₹906 Cr] = 17.74%.  "
+                     "Source: Kissht DRHP (OnEMI Technology Solutions) filed Aug 2025.", "info")
 
     if selected:
         _src = nbfc_filtered[nbfc_filtered["name"] == selected]["source"].values
@@ -2471,10 +2490,11 @@ with tabs[4]:
         )
         st.plotly_chart(fig, use_container_width=True)
         if show_exc_note:
-            st.markdown(
-                f"<p style='font-size:0.78rem;color:#555;margin-top:-0.4rem;'>{_EXC_NOTE}</p>",
-                unsafe_allow_html=True,
-            )
+            with st.expander("📐 Adjustments & notes"):
+                st.markdown(
+                    f"<p style='font-size:0.78rem;color:#555;'>{_EXC_NOTE}</p>",
+                    unsafe_allow_html=True,
+                )
 
     st.markdown(f'<div class="section-header">Rankings as of {_lbl_tr}</div>',
                 unsafe_allow_html=True)
@@ -2535,13 +2555,10 @@ with tabs[5]:
     if cached_df is not None and not st.session_state.val_force_refresh:
         # Serve from cache — instant load
         val_with_price = cached_df.dropna(subset=["price"])
-        _info_col, _btn_col = st.columns([5, 1])
-        with _info_col:
-            st.caption(f"Data as of {cache_ts}.")
-        with _btn_col:
-            if st.button("🔄 Refresh", key="val_refresh_btn"):
-                st.session_state.val_force_refresh = True
-                st.rerun()
+        st.caption(f"Data as of {cache_ts}. &nbsp;|&nbsp; To fetch fresh prices, click **Refresh market data** below.")
+        if st.button("🔄 Refresh market data", key="val_refresh_btn"):
+            st.session_state.val_force_refresh = True
+            st.rerun()
     else:
         with st.spinner("Fetching market data from Yahoo Finance…"):
             val_df = fetch_valuation_data()
@@ -2569,6 +2586,13 @@ with tabs[5]:
             )
         ]
         st.caption(f"Showing: {', '.join(_val_sector_filter)} — {len(val_with_price)} companies")
+        if val_with_price.empty:
+            st.info(
+                f"No listed companies found for the selected sector(s): "
+                f"{', '.join(_val_sector_filter)}. Try selecting a different sector.",
+                icon="🔍",
+            )
+            st.stop()
     else:
         st.caption(f"Showing: All sectors — {len(val_with_price)} companies")
 
@@ -2606,27 +2630,31 @@ with tabs[5]:
 
         col1, col2 = st.columns(2)
         with col1:
-            # Include all priced companies; companies with no P/E estimate show "N/A"
+            # Include all priced companies; companies with no P/E estimate show a grey stub + "N/A"
             pe_has  = val_with_price.dropna(subset=["pe"]).sort_values("pe", ascending=False).copy()
             pe_miss = val_with_price[val_with_price["pe"].isna()].copy()
-            pe_miss["pe"] = 0  # zero-width bar for N/A companies
+            _pe_stub = pe_has["pe"].max() * 0.02 if not pe_has.empty else 0.5
+            pe_miss["pe"] = _pe_stub  # small grey stub so bar is visually intentional
             pe_df = pd.concat([pe_has, pe_miss], ignore_index=True)
             _pe_labels = (pe_has["pe"].round(1).astype(str) + "×").tolist() + ["N/A"] * len(pe_miss)
+            _pe_overrides = {truncate_name(r["company"]): "#D0D2D8" for _, r in pe_miss.iterrows()}
             fig = make_hbar(pe_df, "pe", "company", COLOR["primary"], "P/E Ratio (Fwd)",
                             height=bar_chart_height(len(pe_df)),
-                            hover_text=(["Fwd"] * len(pe_has) + ["N/A"] * len(pe_miss)),
-                            text_labels=_pe_labels)
+                            hover_text=(["Fwd"] * len(pe_has) + ["No estimate available"] * len(pe_miss)),
+                            text_labels=_pe_labels, bar_color_overrides=_pe_overrides)
             st.plotly_chart(fig, use_container_width=True)
         with col2:
             pb_has  = val_with_price.dropna(subset=["pb"]).sort_values("pb", ascending=False).copy()
             pb_miss = val_with_price[val_with_price["pb"].isna()].copy()
-            pb_miss["pb"] = 0
+            _pb_stub = pb_has["pb"].max() * 0.02 if not pb_has.empty else 0.05
+            pb_miss["pb"] = _pb_stub
             pb_df = pd.concat([pb_has, pb_miss], ignore_index=True)
             _pb_labels = (pb_has["pb"].round(2).astype(str) + "×").tolist() + ["N/A"] * len(pb_miss)
+            _pb_overrides = {truncate_name(r["company"]): "#D0D2D8" for _, r in pb_miss.iterrows()}
             fig = make_hbar(pb_df, "pb", "company", COLOR["accent"], "P/B Ratio",
                             height=bar_chart_height(len(pb_df)),
-                            hover_text=(["Latest"] * len(pb_has) + ["N/A"] * len(pb_miss)),
-                            text_labels=_pb_labels)
+                            hover_text=(["Latest"] * len(pb_has) + ["No estimate available"] * len(pb_miss)),
+                            text_labels=_pb_labels, bar_color_overrides=_pb_overrides)
             st.plotly_chart(fig, use_container_width=True)
 
         # P/E by sector  ·  ROE by sector
