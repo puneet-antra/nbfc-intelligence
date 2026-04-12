@@ -2604,10 +2604,15 @@ with tabs[5]:
     # Streamlit Cloud's /mount/src/ is read-only, so save_val_cache() may fail
     # silently on Cloud. Session state is always writable and persists for the
     # browser session, so refreshed data is stored there first.
-    if "val_cached_df" not in st.session_state:
-        file_df, file_ts = load_val_cache()
-        st.session_state.val_cached_df = file_df
-        st.session_state.val_cached_ts = file_ts
+    # Always check the committed file's timestamp. If it differs from what we
+    # loaded into session state (e.g. a new deployment updated the JSON), reload
+    # so the user sees the latest committed values without a browser refresh.
+    file_df, file_ts = load_val_cache()
+    if ("val_cached_df" not in st.session_state or
+            st.session_state.get("val_file_ts") != file_ts):
+        st.session_state.val_cached_df  = file_df
+        st.session_state.val_cached_ts  = file_ts
+        st.session_state.val_file_ts    = file_ts   # remember which version we loaded
 
     cached_df = st.session_state.val_cached_df
     cache_ts  = st.session_state.val_cached_ts
@@ -2727,6 +2732,7 @@ with tabs[5]:
                             hover_text=_pe_hover,
                             text_labels=_pe_labels, bar_color_overrides=_pe_overrides)
             st.plotly_chart(fig, use_container_width=True)
+            st.caption("Forward P/E as of April 11, 2026 (analyst consensus). Click 🔄 Refresh to update.")
         with col2:
             pb_has  = val_with_price.dropna(subset=["pb"]).sort_values("pb", ascending=False).copy()
             pb_miss = val_with_price[val_with_price["pb"].isna()].copy()
