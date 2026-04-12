@@ -1452,6 +1452,16 @@ with tabs[0]:
                 "<extra></extra>"
             )
         )
+        # Label each bubble when fewer than 10 companies are shown
+        if len(bubble_df) < 10:
+            for _, row in bubble_df.iterrows():
+                fig.add_annotation(
+                    x=row["rev_growth"], y=row["pat_growth"],
+                    text=SHORT_NAMES.get(row["name"], row["name"]),
+                    showarrow=False,
+                    xanchor="left", yanchor="middle", xshift=10,
+                    font=dict(family=CHART_FONT, size=11, color=COLOR["text"]),
+                )
         st.plotly_chart(fig, use_container_width=True)
 
         # Note any NBFCs where the growth period differs from the default
