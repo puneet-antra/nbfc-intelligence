@@ -2934,38 +2934,28 @@ with tabs[6]:
     if selected_name != "All companies":
         raw = raw[raw["name"] == selected_name]
     raw_display = raw.drop(columns=["id", "nbfc_id"], errors="ignore")
-    # Round monetary and pct columns before display
-    for _c in ["loan_book_cr","total_assets_cr","equity_cr","net_interest_income_cr",
-               "pat_cr","credit_losses_cr"]:
-        if _c in raw_display.columns:
-            raw_display[_c] = raw_display[_c].round(0)
-    for _c in ["credit_loss_rate_pct","gnpa_pct","roa_pct","roe_pct"]:
-        if _c in raw_display.columns:
-            raw_display[_c] = raw_display[_c].round(2)
+    # Pre-format columns for display
+    disp = raw_display.copy()
+    _cr_cols  = ["loan_book_cr","total_assets_cr","equity_cr",
+                 "net_interest_income_cr","pat_cr","credit_losses_cr"]
+    _pct_cols = ["credit_loss_rate_pct","gnpa_pct","roa_pct","roe_pct"]
+    for _c in _cr_cols:
+        if _c in disp.columns:
+            disp[_c] = disp[_c].apply(lambda v: f"₹{v:,.0f}" if pd.notna(v) else "—")
+    for _c in _pct_cols:
+        if _c in disp.columns:
+            disp[_c] = disp[_c].apply(lambda v: f"{v:.2f}%" if pd.notna(v) else "—")
 
-    _cr_fmt  = "₹{:,.0f}"
-    _pct_fmt = "{:.2f}%"
-    st.dataframe(
-        raw_display,
-        use_container_width=True,
-        hide_index=True,
-        column_config={
-            "name":                    st.column_config.TextColumn("Company"),
-            "period":                  st.column_config.TextColumn("Period"),
-            "loan_book_cr":            st.column_config.NumberColumn("Loan Book (₹ Cr)",    format=_cr_fmt),
-            "total_assets_cr":         st.column_config.NumberColumn("Total Assets (₹ Cr)", format=_cr_fmt),
-            "equity_cr":               st.column_config.NumberColumn("Equity (₹ Cr)",       format=_cr_fmt),
-            "net_interest_income_cr":  st.column_config.NumberColumn("Revenue (₹ Cr)",      format=_cr_fmt),
-            "pat_cr":                  st.column_config.NumberColumn("PAT (₹ Cr)",          format=_cr_fmt),
-            "credit_losses_cr":        st.column_config.NumberColumn("Credit Losses (₹ Cr)",format=_cr_fmt),
-            "credit_loss_rate_pct":    st.column_config.NumberColumn("Loss Rate %",         format=_pct_fmt),
-            "gnpa_pct":                st.column_config.NumberColumn("GNPA %",              format=_pct_fmt),
-            "roa_pct":                 st.column_config.NumberColumn("ROA %",               format=_pct_fmt),
-            "roe_pct":                 st.column_config.NumberColumn("ROE %",               format=_pct_fmt),
-            "data_quality":            st.column_config.TextColumn("Data Quality"),
-            "source":                  st.column_config.TextColumn("Source"),
-        },
-    )
+    disp = disp.rename(columns={
+        "name": "Company", "period": "Period",
+        "loan_book_cr": "Loan Book (₹ Cr)", "total_assets_cr": "Total Assets (₹ Cr)",
+        "equity_cr": "Equity (₹ Cr)", "net_interest_income_cr": "Revenue (₹ Cr)",
+        "pat_cr": "PAT (₹ Cr)", "credit_losses_cr": "Credit Losses (₹ Cr)",
+        "credit_loss_rate_pct": "Loss Rate %", "gnpa_pct": "GNPA %",
+        "roa_pct": "ROA %", "roe_pct": "ROE %",
+        "data_quality": "Data Quality", "source": "Source",
+    })
+    st.dataframe(disp, use_container_width=True, hide_index=True)
     st.caption("Raw quarterly rows (Q1, Q2, Q3) are excluded. Only annual (FY2021–FY2025) and annualised 9MFY26 rows shown.")
 
     csv_history = raw_display.to_csv(index=False).encode("utf-8")
