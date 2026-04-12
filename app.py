@@ -2401,8 +2401,7 @@ TICKER_SECTOR = {
 
 
 # ── Valuation cache helpers (module-level so both Top Ranked and Valuation tabs share them) ──
-# Absolute path so it works regardless of which directory `streamlit run` is called from.
-_VAL_CACHE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "valuation_cache_v2.json")
+_VAL_CACHE_PATH = "data/valuation_cache_v2.json"
 
 def save_val_cache(df):
     import json
@@ -2411,7 +2410,7 @@ def save_val_cache(df):
         "data": df.to_dict(orient="records"),
     }
     try:
-        os.makedirs(os.path.dirname(_VAL_CACHE_PATH), exist_ok=True)
+        os.makedirs("data", exist_ok=True)
         with open(_VAL_CACHE_PATH, "w") as f:
             json.dump(record, f)
         # Clear the Streamlit memory cache so the new data is picked up immediately
