@@ -1046,7 +1046,7 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
                    tickmode="array", tickvals=names, ticktext=tick_text,
                    tickfont=dict(family=CHART_FONT, size=12.5),
                    showgrid=False, tickcolor="rgba(0,0,0,0)", title=""),
-        xaxis=dict(showgrid=True, gridcolor="#F0F0F0", gridwidth=1,
+        xaxis=dict(showgrid=False,
                    showticklabels=True, tickfont=dict(family=CHART_FONT, size=10, color="#aaa"),
                    range=x_range, zeroline=True, zerolinecolor=CHART_GRID,
                    zerolinewidth=1, tickcolor="rgba(0,0,0,0)", title=""),
