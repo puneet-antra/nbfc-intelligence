@@ -2600,34 +2600,51 @@ with tabs[4]:
 with tabs[5]:
     note("Market data from Yahoo Finance. P/E is forward (Fwd) when analyst estimates are available; falls back to trailing TTM (marked † on chart) otherwise.")
 
-    # Always serve from cache; only hit Yahoo Finance when cache is absent or user requests refresh
-    if "val_force_refresh" not in st.session_state:
-        st.session_state.val_force_refresh = False
+    # ── Valuation data: session state (survives reruns) > committed JSON file ──
+    # Streamlit Cloud's /mount/src/ is read-only, so save_val_cache() may fail
+    # silently on Cloud. Session state is always writable and persists for the
+    # browser session, so refreshed data is stored there first.
+    if "val_cached_df" not in st.session_state:
+        file_df, file_ts = load_val_cache()
+        st.session_state.val_cached_df = file_df
+        st.session_state.val_cached_ts = file_ts
 
-    cached_df, cache_ts = load_val_cache()
-    val_with_price = pd.DataFrame()
+    cached_df = st.session_state.val_cached_df
+    cache_ts  = st.session_state.val_cached_ts
 
-    if cached_df is not None and not st.session_state.val_force_refresh:
-        # Serve from cache — instant load
-        val_with_price = cached_df.dropna(subset=["price"])
-        st.caption(f"Data as of {cache_ts}. &nbsp;|&nbsp; To fetch fresh prices, click **Refresh market data** below.")
-        if st.button("🔄 Refresh market data", key="val_refresh_btn"):
-            st.session_state.val_force_refresh = True
-            st.rerun()
-    else:
+    if cached_df is None:
+        # No committed cache either — must fetch
         with st.spinner("Fetching market data from Yahoo Finance…"):
-            val_df = fetch_valuation_data()
-        val_with_price = val_df.dropna(subset=["price"])
-        if not val_with_price.empty:
-            save_val_cache(val_with_price)
-            cache_ts = datetime.now().strftime("%Y-%m-%d %H:%M")
-        elif cached_df is not None:
-            val_with_price = cached_df.dropna(subset=["price"])
-        else:
+            _fresh = fetch_valuation_data()
+        if _fresh.empty:
             note("Could not fetch data and no cached data available. Try again later.", "error")
             st.stop()
-        st.session_state.val_force_refresh = False
-        st.caption(f"Data as of {cache_ts}.")
+        st.session_state.val_cached_df = _fresh.dropna(subset=["price"])
+        st.session_state.val_cached_ts = datetime.now().strftime("%Y-%m-%d %H:%M")
+        save_val_cache(st.session_state.val_cached_df)  # best-effort disk write
+        cached_df = st.session_state.val_cached_df
+        cache_ts  = st.session_state.val_cached_ts
+
+    # ── Refresh button — fetches live data, stores in session state ─────────────
+    _cap_col, _btn_col = st.columns([5, 1])
+    with _cap_col:
+        st.caption(f"Data as of {cache_ts}. Prices & ratios from Yahoo Finance.")
+    with _btn_col:
+        if st.button("🔄 Refresh", key="val_refresh_btn"):
+            with st.spinner("Fetching market data from Yahoo Finance…"):
+                _fresh = fetch_valuation_data()
+            _fresh_priced = _fresh.dropna(subset=["price"])
+            if not _fresh_priced.empty:
+                st.session_state.val_cached_df = _fresh_priced
+                st.session_state.val_cached_ts = datetime.now().strftime("%Y-%m-%d %H:%M")
+                save_val_cache(_fresh_priced)  # best-effort disk write (no-op on Cloud)
+                cached_df = _fresh_priced
+                cache_ts  = st.session_state.val_cached_ts
+                st.success("Updated!")
+            else:
+                st.warning("Could not fetch fresh data — showing cached values.")
+
+    val_with_price = cached_df.dropna(subset=["price"])
 
     # Keep unfiltered copy for sector-level charts (always show all sectors)
     val_with_price_all = val_with_price.copy()
