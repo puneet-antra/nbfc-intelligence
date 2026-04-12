@@ -693,7 +693,13 @@ def annual_only(df):
     return df[~df["period"].str.contains("Q")]
 
 
+SHORT_NAMES = {
+    "SBI Cards and Payment Services": "SBI Cards",
+    "Poonawalla Fincorp":             "Poonawalla",
+}
+
 def truncate_name(name, n=20):
+    name = SHORT_NAMES.get(name, name)
     return name[:n] + "…" if len(name) > n else name
 
 
@@ -947,7 +953,6 @@ def _title_dict(raw_title, pad_t=10, pad_b=14):
         font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT),
         x=0.5, xanchor="center", xref="paper",
         pad=dict(t=pad_t, b=pad_b),
-        align="center",
     )
 
 
@@ -1334,7 +1339,9 @@ with tabs[0]:
 
     def _add_star(df):
         df = df.copy()
-        df["display_name"] = df["name"].apply(lambda n: n + " ★" if n in estimated_names else n)
+        df["display_name"] = df["name"].apply(
+            lambda n: SHORT_NAMES.get(n, n) + (" ★" if n in estimated_names else "")
+        )
         return df
 
     growth_df     = _add_star(growth_df)
