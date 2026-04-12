@@ -953,6 +953,7 @@ def _title_dict(raw_title, pad_t=10, pad_b=14):
         font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT),
         x=0.5, xanchor="center", xref="paper",
         pad=dict(t=pad_t, b=pad_b),
+        align="center",
     )
 
 
@@ -1045,13 +1046,14 @@ def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text
         yaxis=dict(autorange="reversed",
                    tickmode="array", tickvals=names, ticktext=tick_text,
                    tickfont=dict(family=CHART_FONT, size=12.5),
-                   showgrid=False, tickcolor="rgba(0,0,0,0)", title=""),
+                   showgrid=False, tickcolor="rgba(0,0,0,0)", title="",
+                   automargin=True),
         xaxis=dict(showgrid=False,
                    showticklabels=True, tickfont=dict(family=CHART_FONT, size=10, color="#aaa"),
                    range=x_range, zeroline=True, zerolinecolor=CHART_GRID,
                    zerolinewidth=1, tickcolor="rgba(0,0,0,0)", title=""),
         bargap=0.28,
-        margin=dict(l=90, r=r_margin, t=90, b=24),
+        margin=dict(l=5, r=r_margin, t=90, b=24),
         hoverlabel=HOVER_LABEL,
     )
     if hover_text is not None:
@@ -2932,7 +2934,38 @@ with tabs[6]:
     if selected_name != "All companies":
         raw = raw[raw["name"] == selected_name]
     raw_display = raw.drop(columns=["id", "nbfc_id"], errors="ignore")
-    st.dataframe(raw_display, use_container_width=True, hide_index=True)
+    # Round monetary and pct columns before display
+    for _c in ["loan_book_cr","total_assets_cr","equity_cr","net_interest_income_cr",
+               "pat_cr","credit_losses_cr"]:
+        if _c in raw_display.columns:
+            raw_display[_c] = raw_display[_c].round(0)
+    for _c in ["credit_loss_rate_pct","gnpa_pct","roa_pct","roe_pct"]:
+        if _c in raw_display.columns:
+            raw_display[_c] = raw_display[_c].round(2)
+
+    _cr_fmt  = "₹{:,.0f}"
+    _pct_fmt = "{:.2f}%"
+    st.dataframe(
+        raw_display,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "name":                    st.column_config.TextColumn("Company"),
+            "period":                  st.column_config.TextColumn("Period"),
+            "loan_book_cr":            st.column_config.NumberColumn("Loan Book (₹ Cr)",    format=_cr_fmt),
+            "total_assets_cr":         st.column_config.NumberColumn("Total Assets (₹ Cr)", format=_cr_fmt),
+            "equity_cr":               st.column_config.NumberColumn("Equity (₹ Cr)",       format=_cr_fmt),
+            "net_interest_income_cr":  st.column_config.NumberColumn("Revenue (₹ Cr)",      format=_cr_fmt),
+            "pat_cr":                  st.column_config.NumberColumn("PAT (₹ Cr)",          format=_cr_fmt),
+            "credit_losses_cr":        st.column_config.NumberColumn("Credit Losses (₹ Cr)",format=_cr_fmt),
+            "credit_loss_rate_pct":    st.column_config.NumberColumn("Loss Rate %",         format=_pct_fmt),
+            "gnpa_pct":                st.column_config.NumberColumn("GNPA %",              format=_pct_fmt),
+            "roa_pct":                 st.column_config.NumberColumn("ROA %",               format=_pct_fmt),
+            "roe_pct":                 st.column_config.NumberColumn("ROE %",               format=_pct_fmt),
+            "data_quality":            st.column_config.TextColumn("Data Quality"),
+            "source":                  st.column_config.TextColumn("Source"),
+        },
+    )
     st.caption("Raw quarterly rows (Q1, Q2, Q3) are excluded. Only annual (FY2021–FY2025) and annualised 9MFY26 rows shown.")
 
     csv_history = raw_display.to_csv(index=False).encode("utf-8")
