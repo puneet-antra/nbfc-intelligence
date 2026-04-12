@@ -347,8 +347,8 @@ h1 {
 [data-testid="stTabs"] [aria-selected="true"] {
     color: #ffffff !important;
     font-weight: 600 !important;
-    background: #009B72 !important;
-    box-shadow: 0px 2px 8px rgba(0, 155, 114, 0.3) !important;
+    background: #1E3D2F !important;
+    box-shadow: 0px 2px 8px rgba(30, 61, 47, 0.35) !important;
     border-bottom: none !important;
 }
 
@@ -1345,7 +1345,7 @@ with tabs[0]:
     col1, col2, col3 = st.columns(3)
     with col1:
         fig = make_hbar(growth_df.sort_values("growth_pct", ascending=False),
-                        "growth_pct", "display_name", COLOR["success"],
+                        "growth_pct", "display_name", COLOR["primary"],
                         "AUM Growth % (Fastest → Slowest)",
                         hover_text=growth_df.sort_values("growth_pct", ascending=False)["period_label"].values,
                         text_suffix="%", label_position="right_edge")
@@ -1359,7 +1359,7 @@ with tabs[0]:
         st.plotly_chart(fig, use_container_width=True)
     with col3:
         fig = make_hbar(pat_growth_df.sort_values("growth_pct", ascending=False),
-                        "growth_pct", "display_name", COLOR["accent"],
+                        "growth_pct", "display_name", COLOR["primary"],
                         "PAT Growth % (Fastest → Slowest)",
                         hover_text=pat_growth_df.sort_values("growth_pct", ascending=False)["period_label"].values,
                         text_suffix="%", label_position="right_edge")
@@ -1390,7 +1390,7 @@ with tabs[0]:
             _rev_growth_all.groupby("sector")["growth_pct"].mean().reset_index()
             .sort_values("growth_pct", ascending=False)
         )
-        fig = make_hbar(sector_rev, "growth_pct", "sector", COLOR["success"],
+        fig = make_hbar(sector_rev, "growth_pct", "sector", COLOR["primary"],
                         "Avg Revenue Growth % by Sector",
                         hover_text=[lbl] * len(sector_rev), text_suffix="%", label_position="right_edge")
         st.plotly_chart(fig, use_container_width=True)
@@ -1399,7 +1399,7 @@ with tabs[0]:
             _pat_growth_all.groupby("sector")["growth_pct"].mean().reset_index()
             .sort_values("growth_pct", ascending=False)
         )
-        fig = make_hbar(sector_pat, "growth_pct", "sector", COLOR["accent"],
+        fig = make_hbar(sector_pat, "growth_pct", "sector", COLOR["primary"],
                         "Avg PAT Growth % by Sector",
                         hover_text=[lbl] * len(sector_pat), text_suffix="%", label_position="right_edge")
         st.plotly_chart(fig, use_container_width=True)
@@ -1481,7 +1481,7 @@ with tabs[1]:
         st.plotly_chart(fig, use_container_width=True)
     with col2:
         all_roe = latest_snap.sort_values("roe_pct", ascending=False)
-        fig = make_hbar(all_roe, "roe_pct", "name", COLOR["accent"],
+        fig = make_hbar(all_roe, "roe_pct", "name", COLOR["primary"],
                         f"ROE % ({lbl})",
                         hover_text=all_roe["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                         text_suffix="%")
@@ -1566,14 +1566,14 @@ with tabs[2]:
     # ── Row 1: GNPA bar | Annualized Losses bar ──────────────────────────────
     col1, col2 = st.columns(2)
     with col1:
-        fig = make_hbar(all_gnpa, "gnpa_pct", "name", COLOR["success"],
+        fig = make_hbar(all_gnpa, "gnpa_pct", "name", COLOR["primary"],
                         f"GNPA % ({period_label_for(all_gnpa)})",
                         hover_text=all_gnpa["period"].map(lambda p: PERIOD_SHORT.get(p, p)).values,
                         text_suffix="%")
         st.plotly_chart(fig, use_container_width=True)
         st.caption("Point-in-time metric — 9MFY26 uses Q3 value, no annualisation.")
     with col2:
-        fig = make_hbar(all_loss, "credit_loss_rate_pct", "name", COLOR["success"],
+        fig = make_hbar(all_loss, "credit_loss_rate_pct", "name", COLOR["primary"],
                         f"Annualized Losses ({period_label_for(all_loss)})",
                         hover_text=all_loss["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
                         text_suffix="%")
@@ -1772,7 +1772,7 @@ with tabs[7]:
     # filter out extreme negatives (loss → profit)
     pat_cagr = pat_cagr[pat_cagr["cagr_pct"].between(-50, 200)]
     top_pat = pat_cagr.sort_values("cagr_pct", ascending=False)
-    fig = make_hbar(top_pat, "cagr_pct", "name", COLOR["accent"],
+    fig = make_hbar(top_pat, "cagr_pct", "name", COLOR["primary"],
                     "PAT CAGR % (FY21–25)",
                     hover_text=["FY21–FY25"] * len(top_pat), text_suffix="%")
     st.plotly_chart(fig, use_container_width=True)
@@ -2501,15 +2501,15 @@ with tabs[4]:
 
     col1, col2 = st.columns(2)
     with col1:
-        _top20_hbar("loan_book_cr", "AUM (Loan Book)", COLOR["accent"], is_inr=True)
+        _top20_hbar("loan_book_cr", "AUM (Loan Book)", COLOR["primary"], is_inr=True)
     with col2:
-        _top20_hbar("pat_cr", "PAT", COLOR["success"], is_inr=True, show_exc_note=True)
+        _top20_hbar("pat_cr", "PAT", COLOR["primary"], is_inr=True, show_exc_note=True)
 
     col3, col4 = st.columns(2)
     with col3:
-        _top20_hbar("roa_pct", "Return on Assets (ROA)", "#00D09C", bar_fmt="{:.2f}%", show_exc_note=True)
+        _top20_hbar("roa_pct", "Return on Assets (ROA)", COLOR["primary"], bar_fmt="{:.2f}%", show_exc_note=True)
     with col4:
-        _top20_hbar("roe_pct", "Return on Equity (ROE)", "#009B72", bar_fmt="{:.2f}%", show_exc_note=True)
+        _top20_hbar("roe_pct", "Return on Equity (ROE)", COLOR["primary"], bar_fmt="{:.2f}%", show_exc_note=True)
 
     # Market cap — from cache (same cache as Valuation tab)
     st.markdown('<div class="section-header">Market Capitalisation (Listed NBFCs)</div>',
@@ -2651,7 +2651,7 @@ with tabs[5]:
             pb_df = pd.concat([pb_has, pb_miss], ignore_index=True)
             _pb_labels = (pb_has["pb"].round(2).astype(str) + "×").tolist() + ["N/A"] * len(pb_miss)
             _pb_overrides = {truncate_name(r["company"]): "#D0D2D8" for _, r in pb_miss.iterrows()}
-            fig = make_hbar(pb_df, "pb", "company", COLOR["accent"], "P/B Ratio",
+            fig = make_hbar(pb_df, "pb", "company", COLOR["primary"], "P/B Ratio",
                             height=bar_chart_height(len(pb_df)),
                             hover_text=(["Latest"] * len(pb_has) + ["No estimate available"] * len(pb_miss)),
                             text_labels=_pb_labels, bar_color_overrides=_pb_overrides)
