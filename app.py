@@ -947,6 +947,7 @@ def _title_dict(raw_title, pad_t=10, pad_b=14):
         font=dict(color=COLOR["text"], size=15, family=CHART_TITLE_FONT),
         x=0.5, xanchor="center", xref="paper",
         pad=dict(t=pad_t, b=pad_b),
+        align="center",
     )
 
 
