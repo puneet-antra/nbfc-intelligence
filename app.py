@@ -2451,14 +2451,20 @@ def fetch_valuation_data():
             try:
                 fi = t.fast_info
                 info = t.info
-                # Forward P/E only — no TTM fallback (TTM would mislabel the "(Fwd)" chart)
-                pe = info.get("forwardPE") or None
+                # Forward P/E preferred; fall back to trailing only when forward unavailable
+                fwd_pe = info.get("forwardPE")
+                ttm_pe = info.get("trailingPE")
+                pe = fwd_pe or ttm_pe
+                pe_type = "fwd" if fwd_pe else ("ttm" if ttm_pe else None)
                 pb = getattr(fi, "price_to_book", None) or info.get("priceToBook")
                 price = getattr(fi, "last_price", None) or info.get("currentPrice")
                 mktcap = getattr(fi, "market_cap", None) or info.get("marketCap")
             except Exception:
                 info = t.info
-                pe = info.get("forwardPE") or None
+                fwd_pe = info.get("forwardPE")
+                ttm_pe = info.get("trailingPE")
+                pe = fwd_pe or ttm_pe
+                pe_type = "fwd" if fwd_pe else ("ttm" if ttm_pe else None)
                 pb = info.get("priceToBook")
                 price = info.get("currentPrice")
                 mktcap = info.get("marketCap")
@@ -2474,6 +2480,7 @@ def fetch_valuation_data():
                 "company": company, "ticker": ticker,
                 "price": round(price, 2) if price else None,
                 "pe": round(pe, 1) if pe else None,
+                "pe_type": pe_type,
                 "pb": round(pb, 2) if pb else None,
                 "mktcap_cr": mktcap_cr,
                 "chg_12m": chg_12m,
@@ -2591,7 +2598,7 @@ with tabs[4]:
 # TAB 7: VALUATION
 # ─────────────────────────────────────────────────────────────────────────────
 with tabs[5]:
-    note("Market data from Yahoo Finance. P/E is forward only (next twelve months); shows — if analyst estimates unavailable.")
+    note("Market data from Yahoo Finance. P/E is forward (Fwd) when analyst estimates are available; falls back to trailing TTM (marked † on chart) otherwise.")
 
     # Always serve from cache; only hit Yahoo Finance when cache is absent or user requests refresh
     if "val_force_refresh" not in st.session_state:
@@ -2684,11 +2691,23 @@ with tabs[5]:
             _pe_stub = pe_has["pe"].max() * 0.02 if not pe_has.empty else 0.5
             pe_miss["pe"] = _pe_stub  # small grey stub so bar is visually intentional
             pe_df = pd.concat([pe_has, pe_miss], ignore_index=True)
-            _pe_labels = (pe_has["pe"].round(1).astype(str) + "×").tolist() + ["N/A"] * len(pe_miss)
+            # Label: forward gets plain "25.9×", trailing gets "25.9× †"
+            _pe_labels = []
+            for _, r in pe_has.iterrows():
+                suffix = " †" if r.get("pe_type") == "ttm" else ""
+                _pe_labels.append(f"{r['pe']:.1f}×{suffix}")
+            _pe_labels += ["N/A"] * len(pe_miss)
+            _pe_hover = []
+            for _, r in pe_has.iterrows():
+                lbl = "TTM (no fwd estimate)" if r.get("pe_type") == "ttm" else "Fwd P/E"
+                _pe_hover.append(lbl)
+            _pe_hover += ["No estimate available"] * len(pe_miss)
             _pe_overrides = {truncate_name(r["company"]): "#D0D2D8" for _, r in pe_miss.iterrows()}
-            fig = make_hbar(pe_df, "pe", "company", COLOR["primary"], "P/E Ratio (Fwd)",
+            _ttm_count = sum(1 for _, r in pe_has.iterrows() if r.get("pe_type") == "ttm")
+            _pe_title = "P/E Ratio (Fwd)" + (" †=TTM" if _ttm_count else "")
+            fig = make_hbar(pe_df, "pe", "company", COLOR["primary"], _pe_title,
                             height=bar_chart_height(len(pe_df)),
-                            hover_text=(["Fwd"] * len(pe_has) + ["No estimate available"] * len(pe_miss)),
+                            hover_text=_pe_hover,
                             text_labels=_pe_labels, bar_color_overrides=_pe_overrides)
             st.plotly_chart(fig, use_container_width=True)
         with col2:
