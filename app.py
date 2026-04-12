@@ -347,8 +347,8 @@ h1 {
 [data-testid="stTabs"] [aria-selected="true"] {
     color: #ffffff !important;
     font-weight: 600 !important;
-    background: #00D09C !important;
-    box-shadow: 0px 2px 8px rgba(0, 208, 156, 0.3) !important;
+    background: #009B72 !important;
+    box-shadow: 0px 2px 8px rgba(0, 155, 114, 0.3) !important;
     border-bottom: none !important;
 }
 
