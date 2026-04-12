@@ -2985,44 +2985,41 @@ with tabs[6]:
     raw_all = _chart_periods_df
     raw_display = raw_all.drop(columns=["id", "nbfc_id"], errors="ignore")
 
-    if selected_name != "All companies":
-        hist_data = raw_all[raw_all["name"] == selected_name]
-        _hist_cols_avail = [c for c in _hist_cols if c in hist_data.columns]
-        _hist_heads_avail = [_hist_heads[_hist_cols.index(c)] for c in _hist_cols_avail]
+    hist_data = raw_all if selected_name == "All companies" else raw_all[raw_all["name"] == selected_name]
+    _hist_cols_avail  = [c for c in _hist_cols  if c in hist_data.columns]
+    _hist_heads_avail = [_hist_heads[_hist_cols.index(c)] for c in _hist_cols_avail]
 
-        _hth = ("padding:9px 14px;font-size:12px;font-weight:700;color:#1A202C;"
-                "border-bottom:2px solid #E2E8F0;white-space:nowrap;background:#F8FAFC;")
-        _htd = "padding:8px 14px;font-size:12px;border-bottom:1px solid #f0f0f0;white-space:nowrap;"
+    _hth = ("padding:9px 14px;font-size:12px;font-weight:700;color:#1A202C;"
+            "border-bottom:2px solid #E2E8F0;white-space:nowrap;background:#F8FAFC;")
+    _htd = "padding:8px 14px;font-size:12px;border-bottom:1px solid #f0f0f0;white-space:nowrap;"
 
-        _h_rows = ""
-        for _, r in hist_data[_hist_cols_avail].iterrows():
-            cells = ""
-            for i, c in enumerate(_hist_cols_avail):
-                if c == "name":
-                    val_str = SHORT_NAMES.get(str(r[c]), str(r[c]))
-                elif c == "period":
-                    val_str = str(r[c])
-                else:
-                    val_str = _fmt_hist_cell(c, r[c])
-                col_idx = _hist_cols.index(c)
-                align = "right" if col_idx in _hist_right else "left"
-                cells += f'<td style="{_htd}text-align:{align};">{val_str}</td>'
-            _h_rows += f"<tr>{cells}</tr>"
+    _h_rows = ""
+    for _, r in hist_data[_hist_cols_avail].iterrows():
+        cells = ""
+        for i, c in enumerate(_hist_cols_avail):
+            if c == "name":
+                val_str = SHORT_NAMES.get(str(r[c]), str(r[c]))
+            elif c == "period":
+                val_str = str(r[c])
+            else:
+                val_str = _fmt_hist_cell(c, r[c])
+            col_idx = _hist_cols.index(c)
+            align = "right" if col_idx in _hist_right else "left"
+            cells += f'<td style="{_htd}text-align:{align};">{val_str}</td>'
+        _h_rows += f"<tr>{cells}</tr>"
 
-        _h_headers = "".join(
-            f'<th style="{_hth}text-align:{"right" if _hist_cols.index(c) in _hist_right else "left"}">'
-            f'{_hist_heads_avail[i]}</th>'
-            for i, c in enumerate(_hist_cols_avail)
-        )
-        st.markdown(f"""
-        <div style="overflow-x:auto;border:1px solid #E2E8F0;border-radius:12px;margin-top:0.5rem;">
-        <table style="width:100%;border-collapse:collapse;font-family:Inter,sans-serif;">
-          <thead><tr>{_h_headers}</tr></thead>
-          <tbody>{_h_rows}</tbody>
-        </table></div>
-        """, unsafe_allow_html=True)
-    else:
-        st.info("Select a specific company above to view its full financial history.", icon="👆")
+    _h_headers = "".join(
+        f'<th style="{_hth}text-align:{"right" if _hist_cols.index(c) in _hist_right else "left"}">'
+        f'{_hist_heads_avail[i]}</th>'
+        for i, c in enumerate(_hist_cols_avail)
+    )
+    st.markdown(f"""
+    <div style="overflow-x:auto;border:1px solid #E2E8F0;border-radius:12px;margin-top:0.5rem;">
+    <table style="width:100%;border-collapse:collapse;font-family:Inter,sans-serif;">
+      <thead><tr>{_h_headers}</tr></thead>
+      <tbody>{_h_rows}</tbody>
+    </table></div>
+    """, unsafe_allow_html=True)
 
     st.caption("Only annual (FY2021–FY2025) and annualised 9MFY26 rows shown. Raw quarterly rows excluded.")
 
