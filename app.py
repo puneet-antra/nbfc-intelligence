@@ -2451,14 +2451,14 @@ def fetch_valuation_data():
             try:
                 fi = t.fast_info
                 info = t.info
-                # Forward P/E preferred; fall back to trailing if forward not available
-                pe = info.get("forwardPE") or info.get("trailingPE")
+                # Forward P/E only — no TTM fallback (TTM would mislabel the "(Fwd)" chart)
+                pe = info.get("forwardPE") or None
                 pb = getattr(fi, "price_to_book", None) or info.get("priceToBook")
                 price = getattr(fi, "last_price", None) or info.get("currentPrice")
                 mktcap = getattr(fi, "market_cap", None) or info.get("marketCap")
             except Exception:
                 info = t.info
-                pe = info.get("forwardPE") or info.get("trailingPE")
+                pe = info.get("forwardPE") or None
                 pb = info.get("priceToBook")
                 price = info.get("currentPrice")
                 mktcap = info.get("marketCap")
@@ -2591,7 +2591,7 @@ with tabs[4]:
 # TAB 7: VALUATION
 # ─────────────────────────────────────────────────────────────────────────────
 with tabs[5]:
-    note("Market data from Yahoo Finance. P/E is forward (next twelve months); falls back to trailing if unavailable.")
+    note("Market data from Yahoo Finance. P/E is forward only (next twelve months); shows — if analyst estimates unavailable.")
 
     # Always serve from cache; only hit Yahoo Finance when cache is absent or user requests refresh
     if "val_force_refresh" not in st.session_state:
