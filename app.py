@@ -654,12 +654,14 @@ if _db_stale:
 
 # ── Data loaders ─────────────────────────────────────────────────────────────
 
+@st.cache_data(show_spinner=False)
 def load_nbfc_table():
     conn = sqlite3.connect("data/nbfc_full.db")
     df = pd.read_sql("SELECT * FROM nbfc", conn)
     conn.close()
     return df
 
+@st.cache_data(show_spinner=False)
 def load_financials():
     conn = sqlite3.connect("data/nbfc_full.db")
     df = pd.read_sql("""
@@ -801,6 +803,7 @@ def annualise_9m(df):
 
 
 
+@st.cache_data(show_spinner=False)
 def get_chart_periods(df):
     """Annual FY2021–FY2025 plus annualised 9MFY26, sorted."""
     annual = annual_only(df)
@@ -811,6 +814,7 @@ def get_chart_periods(df):
 
 
 
+@st.cache_data(show_spinner=False)
 def get_latest_period_data(df):
     """
     Per company: use 9MFY26 if FY2026-Q3 exists, else FY2025.
@@ -2936,6 +2940,8 @@ with tabs[6]:
     raw_display = raw.drop(columns=["id", "nbfc_id"], errors="ignore")
     # Pre-format columns for display
     disp = raw_display.copy()
+    if "name" in disp.columns:
+        disp["name"] = disp["name"].map(lambda n: SHORT_NAMES.get(n, n))
     _cr_cols  = ["loan_book_cr","total_assets_cr","equity_cr",
                  "net_interest_income_cr","pat_cr","credit_losses_cr"]
     _pct_cols = ["credit_loss_rate_pct","gnpa_pct","roa_pct","roe_pct"]
