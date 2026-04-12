@@ -2823,7 +2823,7 @@ with tabs[5]:
 
         # Summary table
         st.markdown('<div class="section-header">All Listed NBFCs</div>', unsafe_allow_html=True)
-        display_val = val_df.sort_values("mktcap_cr", ascending=False, na_position="last")
+        display_val = val_with_price_all.sort_values("mktcap_cr", ascending=False, na_position="last")
 
         _cols   = ["ticker", "company", "price", "pe", "pb", "mktcap_cr", "chg_12m"]
         _heads  = ["Ticker", "Company", "Price (₹)", "P/E (Fwd)", "P/B", "Mkt Cap (₹ Cr)", "12M Chg %"]
