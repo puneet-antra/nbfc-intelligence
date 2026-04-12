@@ -19,8 +19,8 @@ def _make_favicon():
     size = 64
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
-    draw.rounded_rectangle([0, 0, 63, 63], radius=12, fill=(20, 72, 53, 255))
-    light = (215, 244, 233, 255)   # #D7F4E9
+    draw.rounded_rectangle([0, 0, 63, 63], radius=12, fill=(0, 155, 114, 255))
+    light = (224, 250, 244, 255)   # #E0FAF4
     white = (255, 255, 255, 255)
     draw.rectangle([11, 40, 21, 50], fill=light)   # short bar
     draw.rectangle([26, 30, 36, 50], fill=light)   # medium bar
@@ -43,10 +43,10 @@ if _AUTH_ENABLED:
         st.markdown("""
         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
                     min-height:70vh;gap:1.2rem;font-family:'Inter',sans-serif;">
-            <div style="font-size:2rem;font-weight:800;color:#144835;letter-spacing:-0.03em;">
+            <div style="font-size:2rem;font-weight:800;color:#009B72;letter-spacing:-0.03em;">
                 NBFC Intelligence
             </div>
-            <div style="font-size:0.95rem;color:#73757A;">
+            <div style="font-size:0.95rem;color:#64748B;">
                 Restricted to MoneyView employees
             </div>
         </div>
@@ -72,7 +72,7 @@ st.markdown("""
 /* ── Base ── */
 html, body, [class*="css"] {
     font-family: 'Inter', sans-serif !important;
-    background-color: #F6F6F6 !important;
+    background-color: #FFFFFF !important;
 }
 
 /* ── Remove default Streamlit padding ── */
@@ -92,7 +92,7 @@ h1 {
     font-weight: 700 !important;
     font-size: 2.0rem !important;
     letter-spacing: -0.03em !important;
-    color: #28292D !important;
+    color: #1A202C !important;
     line-height: 1.1 !important;
     margin-bottom: 0 !important;
 }
@@ -100,7 +100,7 @@ h1 {
 /* ── Metric values ── */
 [data-testid="stMetricValue"] {
     font-family: 'Inter', sans-serif !important;
-    color: #28292D !important;
+    color: #1A202C !important;
     opacity: 1 !important;
     font-weight: 700 !important;
     font-size: 1.4rem !important;
@@ -109,7 +109,7 @@ h1 {
 }
 [data-testid="stMetricLabel"] {
     font-family: 'Inter', sans-serif !important;
-    color: #73757A !important;
+    color: #64748B !important;
     opacity: 1 !important;
     font-weight: 500 !important;
     font-size: 0.65rem !important;
@@ -134,10 +134,10 @@ h1 {
 /* ── Metric cards ── */
 [data-testid="metric-container"] {
     background: #ffffff !important;
-    border: 1px solid #EAEAEA !important;
+    border: 1px solid #E2E8F0 !important;
     border-radius: 16px !important;
     padding: 1.2rem 1.4rem 1.1rem !important;
-    box-shadow: 0px 2px 8px 0px rgba(16, 16, 18, 0.08) !important;
+    box-shadow: 0px 2px 8px 0px rgba(0, 155, 114, 0.08) !important;
     transition: box-shadow 0.25s ease, transform 0.25s ease !important;
     position: relative !important;
     overflow: hidden !important;
@@ -148,11 +148,11 @@ h1 {
     position: absolute !important;
     top: 0 !important; left: 0 !important; right: 0 !important;
     height: 3px !important;
-    background: #144835 !important;
+    background: #00D09C !important;
     border-radius: 16px 16px 0 0 !important;
 }
 [data-testid="metric-container"]:hover {
-    box-shadow: 0px 4px 16px 0px rgba(16, 16, 18, 0.12) !important;
+    box-shadow: 0px 4px 16px 0px rgba(0, 208, 156, 0.12) !important;
     transform: translateY(-2px) !important;
 }
 [data-testid="stColumns"] > div:nth-child(1) [data-testid="metric-container"] { animation-delay: 0.05s !important; }
@@ -167,11 +167,11 @@ h1 {
     font-size: 0.85rem;
     font-weight: 600;
     letter-spacing: 0.01em;
-    color: #28292D;
+    color: #1A202C;
     margin: 2.6rem 0 1.2rem 0;
     padding: 0.45rem 0.9rem 0.45rem 0.9rem;
-    background: #D7F4E9;
-    border-left: 3px solid #144835;
+    background: #E0FAF4;
+    border-left: 3px solid #009B72;
     border-radius: 0 4px 4px 0;
     display: flex;
     align-items: center;
@@ -197,14 +197,14 @@ h1 {
 
 /* ── Sidebar ── */
 [data-testid="stSidebar"] {
-    background: #101012 !important;
-    border-right: 1px solid #1e1e20 !important;
+    background: #F8FAFC !important;
+    border-right: 1px solid #E2E8F0 !important;
 }
 /* Collapse button (‹) inside open sidebar */
 [data-testid="stSidebarCollapseButton"] {
-    background: #2CA076 !important;
+    background: #00D09C !important;
     border-radius: 8px !important;
-    border: 1px solid #3dbb8d !important;
+    border: 1px solid #00B389 !important;
     opacity: 1 !important;
     visibility: visible !important;
 }
@@ -214,27 +214,27 @@ h1 {
     opacity: 1 !important;
 }
 [data-testid="stSidebarCollapseButton"]:hover {
-    background: #34c98a !important;
-    border-color: #5de8a8 !important;
+    background: #00B389 !important;
+    border-color: #00B389 !important;
 }
 /* Expand button (›) on main page when sidebar is collapsed */
 [data-testid="stSidebarCollapsedControl"] {
     opacity: 1 !important;
     visibility: visible !important;
-    background: #f0f0f0 !important;
+    background: #F0FDF9 !important;
     border-radius: 6px !important;
 }
 [data-testid="stSidebarCollapsedControl"] svg {
-    color: #144835 !important;
-    fill: #144835 !important;
+    color: #009B72 !important;
+    fill: #009B72 !important;
 }
 [data-testid="stSidebarCollapsedControl"]:hover {
-    background: #D7F4E9 !important;
+    background: #E0FAF4 !important;
 }
 [data-testid="stSidebar"] [data-testid="stWidgetLabel"],
 [data-testid="stSidebar"] label {
     font-family: 'Inter', sans-serif !important;
-    color: #73757A !important;
+    color: #64748B !important;
     font-size: 0.70rem !important;
     font-weight: 600 !important;
     letter-spacing: 0.07em !important;
@@ -245,32 +245,32 @@ h1 {
 [data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
     font-family: 'Inter', sans-serif !important;
     font-size: 0.70rem !important;
-    color: #73757A !important;
+    color: #64748B !important;
 }
 [data-testid="stSidebar"] hr {
-    border-color: #1e1e20 !important;
+    border-color: #E2E8F0 !important;
     margin: 1rem 0 !important;
 }
 /* ── Selectbox + Multiselect: consistent container ── */
 [data-testid="stSidebar"] [data-baseweb="select"] > div,
 [data-testid="stSidebar"] [data-testid="stSelectbox"] > div > div {
-    background: #1a1a1c !important;
-    border-color: #2e3a33 !important;
+    background: #FFFFFF !important;
+    border-color: #E2E8F0 !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 0.84rem !important;
 }
 /* Universal catch-all: force all text inside any select to be readable */
 [data-testid="stSidebar"] [data-baseweb="select"] *,
 [data-testid="stSidebar"] [data-testid="stSelectbox"] * {
-    color: #e8eaef !important;
+    color: #1A202C !important;
     opacity: 1 !important;
     font-weight: 500 !important;
     font-family: 'Inter', sans-serif !important;
 }
 /* Multiselect chips — same style for both RBI Layer and Sector */
 [data-testid="stSidebar"] [data-baseweb="tag"] {
-    background: #1e3028 !important;
-    border: 1px solid #2e7d54 !important;
+    background: #E0FAF4 !important;
+    border: 1px solid #00D09C !important;
     border-radius: 4px !important;
     padding: 2px 8px !important;
     margin: 2px 2px !important;
@@ -278,7 +278,7 @@ h1 {
 }
 [data-testid="stSidebar"] [data-baseweb="tag"] *,
 [data-testid="stSidebar"] [data-baseweb="tag"] span {
-    color: #e8eaef !important;
+    color: #009B72 !important;
     opacity: 1 !important;
     font-weight: 500 !important;
     font-size: 0.84rem !important;
@@ -289,25 +289,25 @@ h1 {
 [data-testid="stSidebar"] [data-baseweb="checkbox"] label span {
     font-family: 'Inter', sans-serif !important;
     font-size: 0.84rem !important;
-    color: #8a8c91 !important;
+    color: #64748B !important;
 }
 /* Radio — selected option: bright white + bold */
 [data-testid="stSidebar"] [data-baseweb="radio"] label:has(input:checked) span:last-child {
-    color: #ffffff !important;
+    color: #009B72 !important;
     font-weight: 700 !important;
 }
 /* Radio circle fill for selected */
 [data-testid="stSidebar"] [data-baseweb="radio"] label:has(input:checked) [data-testid="stRadioCircle"],
 [data-testid="stSidebar"] [data-baseweb="radio"] label:has(input:checked) div[class*="radioInner"] {
-    background: #217858 !important;
-    border-color: #4ade80 !important;
+    background: #009B72 !important;
+    border-color: #00D09C !important;
 }
 [data-testid="stSidebar"] [data-testid="stSlider"] [data-testid="stTickBar"] {
-    color: #73757A !important;
+    color: #64748B !important;
     font-size: 0.70rem !important;
 }
 [data-testid="stSidebar"] [role="slider"] {
-    background: #144835 !important;
+    background: #00D09C !important;
 }
 
 /* ── Tabs ── */
@@ -316,11 +316,11 @@ h1 {
     margin-bottom: 1.5rem !important;
 }
 [data-baseweb="tab-list"] {
-    background: #EDEDEE !important;
+    background: #F0F4F8 !important;
     border-radius: 8px !important;
     padding: 4px !important;
     gap: 0 !important;
-    border: 1px solid #DCDCDE !important;
+    border: 1px solid #E2E8F0 !important;
     display: flex !important;
     width: 100% !important;
     justify-content: space-evenly !important;
@@ -330,7 +330,7 @@ h1 {
     font-family: 'Inter', sans-serif !important;
     font-weight: 500 !important;
     font-size: 0.80rem !important;
-    color: #73757A !important;
+    color: #64748B !important;
     padding: 0.42rem 1.0rem !important;
     border-radius: 6px !important;
     background: transparent !important;
@@ -341,14 +341,14 @@ h1 {
     justify-content: center !important;
 }
 [data-testid="stTabs"] [data-baseweb="tab"]:hover {
-    color: #28292D !important;
-    background: #D7F4E9 !important;
+    color: #009B72 !important;
+    background: #E0FAF4 !important;
 }
 [data-testid="stTabs"] [aria-selected="true"] {
     color: #ffffff !important;
     font-weight: 600 !important;
-    background: #144835 !important;
-    box-shadow: 0px 2px 8px rgba(20, 72, 53, 0.3) !important;
+    background: #00D09C !important;
+    box-shadow: 0px 2px 8px rgba(0, 208, 156, 0.3) !important;
     border-bottom: none !important;
 }
 
@@ -357,9 +357,9 @@ h1 {
     font-family: 'Inter', sans-serif !important;
     font-size: 0.80rem !important;
     border-radius: 16px !important;
-    border: 1px solid #EAEAEA !important;
+    border: 1px solid #E2E8F0 !important;
     overflow: hidden !important;
-    box-shadow: 0px 2px 8px 0px rgba(16, 16, 18, 0.06) !important;
+    box-shadow: 0px 2px 8px 0px rgba(0, 155, 114, 0.06) !important;
 }
 
 /* ── Chart containers ── */
@@ -370,15 +370,15 @@ h1 {
 }
 [data-testid="stPlotlyChart"] > div {
     border-radius: 16px !important;
-    border: 1px solid #EAEAEA !important;
+    border: 1px solid #E2E8F0 !important;
     overflow: hidden !important;
-    box-shadow: 0px 2px 8px 0px rgba(16, 16, 18, 0.08) !important;
+    box-shadow: 0px 2px 8px 0px rgba(0, 155, 114, 0.08) !important;
     background: #ffffff !important;
     transition: box-shadow 0.2s ease !important;
     width: 100% !important;
 }
 [data-testid="stPlotlyChart"] > div:hover {
-    box-shadow: 0px 4px 16px 0px rgba(16, 16, 18, 0.12) !important;
+    box-shadow: 0px 4px 16px 0px rgba(0, 208, 156, 0.12) !important;
 }
 
 /* ── Badges ── */
@@ -391,12 +391,12 @@ h1 {
     border: 1px solid #fed7aa;
 }
 .estimated-badge {
-    background: #D7F4E9; color: #144835;
+    background: #E0FAF4; color: #009B72;
     padding: 2px 9px; border-radius: 4px;
     font-size: 10px; font-weight: 600;
     font-family: 'Inter', sans-serif;
     letter-spacing: 0.03em;
-    border: 1px solid #AFE9D4;
+    border: 1px solid #A0EDD8;
 }
 
 /* ── Alerts — hide native Streamlit ones (replaced by note() helper) ── */
@@ -414,7 +414,7 @@ h1 {
 [data-testid="stSelectbox"] > div > div,
 [data-testid="stTextInput"] input {
     border-radius: 4px !important;
-    border: 1px solid #DCDCDE !important;
+    border: 1px solid #E2E8F0 !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 0.84rem !important;
 }
@@ -446,7 +446,7 @@ h1 {
     width: 100% !important;
     padding: 0 !important;
     background: #ffffff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%2328292D' stroke-width='1.7' stroke-linecap='round'%3E%3Cline x1='3' y1='5' x2='17' y2='5'/%3E%3Cline x1='5.5' y1='10' x2='14.5' y2='10'/%3E%3Cline x1='8' y1='15' x2='12' y2='15'/%3E%3C/svg%3E") no-repeat center / 18px !important;
-    border: 1px solid #DCDCDE !important;
+    border: 1px solid #E2E8F0 !important;
     border-radius: 8px !important;
     color: transparent !important;
     font-size: 0 !important;
@@ -455,8 +455,8 @@ h1 {
 }
 [data-testid="stPopover"] button:hover,
 [data-testid="stPopoverButton"]:hover {
-    background-color: #f0faf4 !important;
-    border-color: #217858 !important;
+    background-color: #F0FDF9 !important;
+    border-color: #009B72 !important;
 }
 
 /* ── Deep Dive: "pick a company" animated hint ── */
@@ -468,7 +468,7 @@ h1 {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #217858;
+    color: #009B72;
     font-size: 0.82rem;
     font-weight: 500;
     font-family: 'Inter', sans-serif;
@@ -486,7 +486,7 @@ h1 {
     border-radius: 999px;
     border: 1.5px solid #D0D2D8;
     background: #FFFFFF;
-    color: #28292D;
+    color: #1A202C;
     font-size: 0.78rem;
     font-weight: 500;
     font-family: 'Inter', sans-serif;
@@ -497,24 +497,24 @@ h1 {
     line-height: 1.5;
 }
 .qs-chip:hover {
-    background: #F0FBF5;
-    border-color: #2CA076;
-    color: #144835;
-    box-shadow: 0 1px 4px rgba(20,72,53,0.10);
+    background: #F0FDF9;
+    border-color: #00D09C;
+    color: #009B72;
+    box-shadow: 0 1px 4px rgba(0,155,114,0.10);
     text-decoration: none !important;
 }
 .qs-chip.qs-active {
-    background: #E8F5EE;
-    border-color: #2CA076;
-    color: #144835;
+    background: #E0FAF4;
+    border-color: #00D09C;
+    color: #009B72;
     font-weight: 600;
-    box-shadow: 0 0 0 2px rgba(44,160,118,0.20);
+    box-shadow: 0 0 0 2px rgba(0,208,156,0.20);
 }
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #DCDCDE; border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
 
 /* ── Mobile ── */
 @media (max-width: 640px) {
@@ -598,26 +598,26 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 COLOR = {
-    "primary":        "#144835",   # MoneyView primary green
-    "success":        "#217858",   # MoneyView mid green
-    "teal":           "#2CA076",   # MoneyView teal accent
-    "accent":         "#2CA076",   # MoneyView teal (replaces amber)
-    "danger":         "#E7554A",   # MoneyView red
-    "warning":        "#DE5E2B",   # MoneyView rust orange
-    "blue":           "#2562BD",   # MoneyView blue
-    "yellow":         "#FCC945",   # MoneyView yellow
-    "purple":         "#9769B2",   # MoneyView purple
-    "text":           "#28292D",   # MoneyView primary text
-    "text_secondary": "#73757A",   # MoneyView secondary text
+    "primary":        "#009B72",   # deep teal
+    "success":        "#00D09C",   # main teal
+    "teal":           "#00D09C",   # main teal
+    "accent":         "#00D09C",   # main teal
+    "danger":         "#E7554A",   # red
+    "warning":        "#DE5E2B",   # rust orange
+    "blue":           "#2562BD",   # blue
+    "yellow":         "#FCC945",   # yellow
+    "purple":         "#9769B2",   # purple
+    "text":           "#1A202C",   # deep navy
+    "text_secondary": "#64748B",   # slate
     "card_bg":        "#ffffff",
-    "border":         "#EAEAEA",
+    "border":         "#E2E8F0",
     "chart_bg":       "#ffffff",
 }
 
 # Ordered palette for multi-series charts — MoneyView brand sequence
 MV_PALETTE = [
-    "#144835",  # deep forest green
-    "#2CA076",  # teal
+    "#009B72",  # deep teal
+    "#00D09C",  # main teal
     "#DE5E2B",  # rust orange
     "#2562BD",  # blue
     "#FCC945",  # yellow
@@ -625,7 +625,7 @@ MV_PALETTE = [
     "#37C893",  # bright green
     "#E7554A",  # red
     "#505259",  # charcoal
-    "#73757A",  # grey
+    "#64748B",  # slate
 ]
 
 PERIOD_ORDER = ["FY2021", "FY2022", "FY2023", "FY2024", "FY2025", "9MFY26"]
@@ -897,10 +897,10 @@ CHART_TITLE_FONT = "Inter"
 CHART_MONO  = "Inter"
 CHART_BG    = "#ffffff"
 CHART_PAPER = "#ffffff"
-CHART_GRID  = "#EAEAEA"
+CHART_GRID  = "#E2E8F0"
 HOVER_LABEL = dict(
-    bgcolor="#101012", bordercolor="#144835",
-    font=dict(family=CHART_FONT, size=11, color="#e8e8e8"),
+    bgcolor="#FFFFFF", bordercolor="#00D09C",
+    font=dict(family=CHART_FONT, size=11, color="#1A202C"),
     align="left",
     namelength=0,
 )
@@ -959,7 +959,7 @@ def wrap_title(title, max_len=32):
 def note(text, kind="info"):
     """Render a minimal, elegant disclosure note with a left-border accent."""
     palette = {
-        "info":    {"border": "#144835", "color": "#217858"},
+        "info":    {"border": "#009B72", "color": "#009B72"},
         "warning": {"border": "#d97706", "color": "#7c4a00"},
         "error":   {"border": "#c0392b", "color": "#7f1d1d"},
     }
@@ -972,7 +972,7 @@ def note(text, kind="info"):
     )
 
 
-MONEYVIEW_GREEN = "#1B5E20"   # Moneyview brand dark green
+MONEYVIEW_GREEN = "#007A5E"   # Moneyview brand dark teal
 
 def make_hbar(df, x_col, y_col, color, title, height=None, hover_text=None, text_suffix="", text_labels=None, label_position="bar_end", bar_color_overrides=None):
     """Standard horizontal bar chart — pass data sorted DESCENDING (chart reverses y-axis).
@@ -1068,7 +1068,7 @@ def chart_layout(fig, title=None):
         title=_title_dict(raw) if raw else {},
         xaxis=dict(
             showgrid=False,
-            tickfont=dict(family=CHART_MONO, size=11, color="#73757A"),
+            tickfont=dict(family=CHART_MONO, size=11, color="#64748B"),
             zeroline=False,
             tickcolor="rgba(0,0,0,0)", linecolor="rgba(0,0,0,0)", title="",
             tickvals=list(PERIOD_SHORT.keys()),
@@ -1076,13 +1076,13 @@ def chart_layout(fig, title=None):
         ),
         yaxis=dict(
             showgrid=False,
-            tickfont=dict(family=CHART_MONO, size=11, color="#73757A"),
-            zeroline=True, zerolinecolor="#EAEAEA", zerolinewidth=1,
+            tickfont=dict(family=CHART_MONO, size=11, color="#64748B"),
+            zeroline=True, zerolinecolor="#E2E8F0", zerolinewidth=1,
             tickcolor="rgba(0,0,0,0)", linecolor="rgba(0,0,0,0)", title="",
         ),
         margin=dict(t=86, b=90, l=10, r=24),
         legend=dict(
-            font=dict(family=CHART_FONT, size=11, color="#73757A"),
+            font=dict(family=CHART_FONT, size=11, color="#64748B"),
             bgcolor="rgba(249,251,249,0.85)",
             bordercolor="rgba(35,107,53,0.12)",
             borderwidth=1,
@@ -1174,16 +1174,16 @@ st.markdown("""
     font-size: 2.0rem;
     letter-spacing: -0.03em;
     line-height: 1.1;
-    color: #28292D;
+    color: #1A202C;
     display: inline;
 }
 .page-badge {
     font-family: 'Inter', sans-serif;
     font-size: 0.68rem;
     font-weight: 600;
-    color: #144835;
-    background: #D7F4E9;
-    border: 1px solid #AFE9D4;
+    color: #009B72;
+    background: #E0FAF4;
+    border: 1px solid #A0EDD8;
     padding: 3px 10px;
     border-radius: 4px;
     letter-spacing: 0.07em;
@@ -1194,14 +1194,14 @@ st.markdown("""
 .page-subtitle {
     font-family: 'Inter', sans-serif;
     font-size: 0.84rem;
-    color: #73757A;
+    color: #64748B;
     margin: 0.4rem 0 0 0;
     font-weight: 400;
     letter-spacing: 0.01em;
 }
 .header-rule {
     border: none;
-    border-top: 1px solid #EAEAEA;
+    border-top: 1px solid #E2E8F0;
     margin: 1rem 0 1.4rem 0;
 }
 </style>
@@ -1225,9 +1225,9 @@ components.html(f"""
   var MY_TS  = String(Date.now());
   var CSS    = "position:fixed;top:0.62rem;left:3.4rem;z-index:2147483647;"
              + "display:inline-flex;align-items:center;gap:0.4rem;"
-             + "background:#EAF4EE;border:1.5px solid #144835;border-radius:20px;"
+             + "background:#E0FAF4;border:1.5px solid #009B72;border-radius:20px;"
              + "padding:0.26rem 0.8rem 0.26rem 0.65rem;cursor:pointer;user-select:none;"
-             + "font-size:0.78rem;font-weight:700;color:#144835;"
+             + "font-size:0.78rem;font-weight:700;color:#009B72;"
              + "box-shadow:0 2px 8px rgba(0,0,0,0.18);font-family:Inter,sans-serif;"
              + "max-width:calc(100vw - 9rem);";
 
@@ -1241,11 +1241,11 @@ components.html(f"""
   }}
 
   var INNER = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="flex-shrink:0">'
-            + '<path d="M2 4h12M4 8h8M6 12h4" stroke="#144835" stroke-width="2.2" stroke-linecap="round"/>'
+            + '<path d="M2 4h12M4 8h8M6 12h4" stroke="#009B72" stroke-width="2.2" stroke-linecap="round"/>'
             + '</svg>'
             + '<span class="nbfc-bl" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0">' + LABEL + '</span>'
             + '<svg width="10" height="10" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-left:1px">'
-            + '<path d="M6 3l5 5-5 5" stroke="#144835" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'
+            + '<path d="M6 3l5 5-5 5" stroke="#009B72" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'
             + '</svg>';
   function syncBadge() {{
     try {{
@@ -1312,9 +1312,9 @@ if fin_filtered.empty:
 # ── Tabs ──────────────────────────────────────────────────────────────────────
 
 tabs = st.tabs([
-    "Growth", "Profitability", "Credit Quality",
-    "NBFC Specific", "Top Ranked",
-    "Valuation", "Data", "Trends",
+    "Growth", "Profitability", "Risk Monitor",
+    "Deep Dive", "Rankings",
+    "Valuation", "Data Explorer", "Trends",
 ])
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1698,7 +1698,7 @@ with tabs[2]:
         height=bar_chart_height(len(wf)),
         xaxis=dict(title="", showgrid=False, showticklabels=False,
                    range=[-(wf_max * 1.5), wf_max * 1.5], zeroline=True,
-                   zerolinecolor="#EAEAEA", zerolinewidth=1, tickcolor="rgba(0,0,0,0)"),
+                   zerolinecolor="#E2E8F0", zerolinewidth=1, tickcolor="rgba(0,0,0,0)"),
         yaxis=dict(showgrid=False, tickcolor="rgba(0,0,0,0)", title=""),
         margin=dict(t=82, b=20, l=10, r=130),
         hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6",
@@ -1747,7 +1747,7 @@ with tabs[7]:
                     unsafe_allow_html=True)
         layer_df = chart_df.groupby(["period", "rbi_layer"])["total_assets_cr"].sum().reset_index()
         fig = px.area(layer_df, x="period", y="total_assets_cr", color="rbi_layer",
-                      color_discrete_map={"Upper": "#144835", "Middle": "#2CA076", "Base": "#73757A"},
+                      color_discrete_map={"Upper": "#009B72", "Middle": "#00D09C", "Base": "#64748B"},
                       title=f"Total Industry Assets by RBI Layer (₹ Crore, to {lbl})", height=420,
                       category_orders={"period": PERIOD_ORDER})
         chart_layout(fig)
@@ -1860,7 +1860,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
     with filter_col:
         with st.popover(" ", use_container_width=True):
             st.markdown(
-                "<div style='font-size:0.75rem;font-weight:600;color:#28292D;"
+                "<div style='font-size:0.75rem;font-weight:600;color:#1A202C;"
                 "margin-bottom:0.6rem;'>Narrow the list</div>",
                 unsafe_allow_html=True,
             )
@@ -2022,15 +2022,15 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
       btn.style.fontSize     = '0.76rem';
       btn.style.transition   = 'background 0.15s, border-color 0.15s';
       if (txt === activeLabel) {{
-        btn.style.background = '#E8F5EE';
-        btn.style.border     = '1.5px solid #2CA076';
-        btn.style.color      = '#144835';
+        btn.style.background = '#E0FAF4';
+        btn.style.border     = '1.5px solid #00D09C';
+        btn.style.color      = '#009B72';
         btn.style.fontWeight = '600';
-        btn.style.boxShadow  = '0 0 0 2px rgba(44,160,118,0.20)';
+        btn.style.boxShadow  = '0 0 0 2px rgba(0,208,156,0.20)';
       }} else {{
         btn.style.background = '#FFFFFF';
         btn.style.border     = '1.5px solid #D0D2D8';
-        btn.style.color      = '#28292D';
+        btn.style.color      = '#1A202C';
         btn.style.fontWeight = '500';
         btn.style.boxShadow  = 'none';
       }}
@@ -2059,7 +2059,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
 
         # Header: badges + data source
         if company_info is not None:
-            layer_colors = {"Upper": "#144835", "Middle": "#217858", "Base": "#73757A"}
+            layer_colors = {"Upper": "#009B72", "Middle": "#00D09C", "Base": "#64748B"}
             layer = company_info.get("rbi_layer", "Unknown")
             dq = company_info.get("data_quality", "")
             listed_val = company_info.get("listed", 0)
@@ -2071,9 +2071,9 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
             )
             if dq == "audited":
                 badges.append(
-                    '<span style="background:#D7F4E9;color:#144835;padding:3px 10px;'
+                    '<span style="background:#E0FAF4;color:#009B72;padding:3px 10px;'
                     'border-radius:4px;font-size:12px;font-weight:600;'
-                    'border:1px solid #a7f3d0">✓ Audited</span>'
+                    'border:1px solid #A0EDD8">✓ Audited</span>'
                 )
             elif dq == "DRHP":
                 badges.append(
@@ -2152,7 +2152,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                 columns={"total_assets_cr": "Total Assets", "loan_book_cr": "Loan Book"})
             fig = px.bar(bar_df, x="period", y=["Total Assets", "Loan Book"],
                          barmode="group", text_auto=".3s",
-                         color_discrete_sequence=["#144835", "#2CA076"],
+                         color_discrete_sequence=["#009B72", "#00D09C"],
                          title=f"Assets & Loan Book (₹ Crore)", height=400,
                          category_orders={"period": PERIOD_ORDER})
             fig.update_traces(textposition="outside", textfont=dict(family=CHART_MONO, size=11),
@@ -2173,7 +2173,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                 fig.add_trace(go.Scatter(
                     x=nii_df["period"], y=nii_df["net_interest_income_cr"],
                     mode="lines+markers", name="Revenues",
-                    line=dict(color="#144835", width=2),
+                    line=dict(color="#009B72", width=2),
                     marker=dict(size=6),
                     hovertemplate="₹%{y:,.0f} Cr<extra>Revenues</extra>",
                 ))
@@ -2224,7 +2224,7 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
             ror_df = chart_df[["period", "roa_pct", "roe_pct"]].dropna().rename(
                 columns={"roa_pct": "ROA %", "roe_pct": "ROE %"})
             fig = px.line(ror_df, x="period", y=["ROA %", "ROE %"],
-                          color_discrete_sequence=["#144835", "#2CA076"],
+                          color_discrete_sequence=["#009B72", "#00D09C"],
                           title=f"ROA & ROE %", markers=True, height=380,
                           category_orders={"period": PERIOD_ORDER})
             chart_layout(fig)
@@ -2507,9 +2507,9 @@ with tabs[4]:
 
     col3, col4 = st.columns(2)
     with col3:
-        _top20_hbar("roa_pct", "Return on Assets (ROA)", "#217858", bar_fmt="{:.2f}%", show_exc_note=True)
+        _top20_hbar("roa_pct", "Return on Assets (ROA)", "#00D09C", bar_fmt="{:.2f}%", show_exc_note=True)
     with col4:
-        _top20_hbar("roe_pct", "Return on Equity (ROE)", "#2CA076", bar_fmt="{:.2f}%", show_exc_note=True)
+        _top20_hbar("roe_pct", "Return on Equity (ROE)", "#009B72", bar_fmt="{:.2f}%", show_exc_note=True)
 
     # Market cap — from cache (same cache as Valuation tab)
     st.markdown('<div class="section-header">Market Capitalisation (Listed NBFCs)</div>',
@@ -2604,24 +2604,24 @@ with tabs[5]:
         pe_val   = f"{med_pe:.1f}x"   if pd.notna(med_pe)  else "N/A"
         pb_val   = f"{med_pb:.2f}x"   if pd.notna(med_pb)  else "N/A"
         chg_val  = f"{med_chg:.1f}%"  if pd.notna(med_chg) else "N/A"
-        chg_color = "#144835" if pd.notna(med_chg) and med_chg >= 0 else "#c0392b"
+        chg_color = "#009B72" if pd.notna(med_chg) and med_chg >= 0 else "#c0392b"
         st.markdown(f"""
         <div style="display:flex;gap:1.2rem;margin:0.6rem 0 1.4rem;">
-            <div style="flex:1;background:#f8fafb;border:1px solid #EAEAEA;border-radius:14px;
+            <div style="flex:1;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:14px;
                         padding:1.1rem 1.5rem;text-align:center;">
-                <div style="font-size:0.68rem;font-weight:600;color:#8B8FA8;letter-spacing:0.08em;
+                <div style="font-size:0.68rem;font-weight:600;color:#64748B;letter-spacing:0.08em;
                             text-transform:uppercase;margin-bottom:0.45rem;">Median P/E (Fwd)</div>
-                <div style="font-size:1.65rem;font-weight:700;color:#1a1a1a;line-height:1.1;">{pe_val}</div>
+                <div style="font-size:1.65rem;font-weight:700;color:#1A202C;line-height:1.1;">{pe_val}</div>
             </div>
-            <div style="flex:1;background:#f8fafb;border:1px solid #EAEAEA;border-radius:14px;
+            <div style="flex:1;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:14px;
                         padding:1.1rem 1.5rem;text-align:center;">
-                <div style="font-size:0.68rem;font-weight:600;color:#8B8FA8;letter-spacing:0.08em;
+                <div style="font-size:0.68rem;font-weight:600;color:#64748B;letter-spacing:0.08em;
                             text-transform:uppercase;margin-bottom:0.45rem;">Median P/B</div>
-                <div style="font-size:1.65rem;font-weight:700;color:#1a1a1a;line-height:1.1;">{pb_val}</div>
+                <div style="font-size:1.65rem;font-weight:700;color:#1A202C;line-height:1.1;">{pb_val}</div>
             </div>
-            <div style="flex:1;background:#f8fafb;border:1px solid #EAEAEA;border-radius:14px;
+            <div style="flex:1;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:14px;
                         padding:1.1rem 1.5rem;text-align:center;">
-                <div style="font-size:0.68rem;font-weight:600;color:#8B8FA8;letter-spacing:0.08em;
+                <div style="font-size:0.68rem;font-weight:600;color:#64748B;letter-spacing:0.08em;
                             text-transform:uppercase;margin-bottom:0.45rem;">Median 12M Return</div>
                 <div style="font-size:1.65rem;font-weight:700;color:{chg_color};line-height:1.1;">{chg_val}</div>
             </div>
@@ -2765,7 +2765,7 @@ with tabs[5]:
                        showgrid=False, tickcolor="rgba(0,0,0,0)", title=""),
             xaxis=dict(title="", showgrid=False, showticklabels=False,
                        range=[-(chg_max * 1.5), chg_max * 1.5],
-                       zeroline=True, zerolinecolor="#EAEAEA", zerolinewidth=1,
+                       zeroline=True, zerolinecolor="#E2E8F0", zerolinewidth=1,
                        tickcolor="rgba(0,0,0,0)"),
             margin=dict(t=82, b=20, l=10, r=130),
             hoverlabel=dict(bgcolor="#ffffff", bordercolor="#e4ede6",
@@ -2790,8 +2790,8 @@ with tabs[5]:
             if col == "chg_12m":  return f"{val:+.1f}%"
             return str(val)
 
-        _th = ("padding:9px 14px;font-size:12px;font-weight:700;color:#1a1a1a;"
-               "border-bottom:2px solid #DCDCDE;white-space:nowrap;background:#f8fafb;")
+        _th = ("padding:9px 14px;font-size:12px;font-weight:700;color:#1A202C;"
+               "border-bottom:2px solid #E2E8F0;white-space:nowrap;background:#F8FAFC;")
         _td = "padding:8px 14px;font-size:13px;border-bottom:1px solid #f0f0f0;white-space:nowrap;"
 
         rows_html = ""
@@ -2801,7 +2801,7 @@ with tabs[5]:
                 val_str = _fmt_val_cell(c, r[c])
                 color   = ""
                 if c == "chg_12m" and pd.notna(r[c]):
-                    color = "color:#144835;" if r[c] >= 0 else "color:#c0392b;"
+                    color = "color:#009B72;" if r[c] >= 0 else "color:#c0392b;"
                 align = "right" if i in _right else "left"
                 cells += f'<td style="{_td}text-align:{align};{color}">{val_str}</td>'
             rows_html += f"<tr>{cells}</tr>"
@@ -2812,7 +2812,7 @@ with tabs[5]:
         )
 
         st.markdown(f"""
-        <div style="overflow-x:auto;border:1px solid #EAEAEA;border-radius:12px;margin-top:0.5rem;">
+        <div style="overflow-x:auto;border:1px solid #E2E8F0;border-radius:12px;margin-top:0.5rem;">
         <table style="width:100%;border-collapse:collapse;font-family:Inter,sans-serif;">
           <thead><tr>{headers_html}</tr></thead>
           <tbody>{rows_html}</tbody>
@@ -2856,13 +2856,23 @@ with tabs[6]:
         if col in ("gnpa_pct", "credit_loss_rate_pct", "roa_pct", "roe_pct"): return f"{val:.2f}%"
         return str(val)
 
-    _mth = ("padding:9px 14px;font-size:12px;font-weight:700;color:#1a1a1a;"
-            "border-bottom:2px solid #DCDCDE;white-space:nowrap;background:#f8fafb;")
+    _mth = ("padding:9px 14px;font-size:12px;font-weight:700;color:#1A202C;"
+            "border-bottom:2px solid #E2E8F0;white-space:nowrap;background:#F8FAFC;")
     _mtd = "padding:8px 14px;font-size:12px;border-bottom:1px solid #f0f0f0;white-space:nowrap;"
 
     # Only keep columns that actually exist (guard against schema changes)
     _m_cols  = [c for c in _m_cols  if c in metrics_df.columns]
     _m_heads = _m_heads[:len(_m_cols)]
+
+    def _gnpa_style(val):
+        """Return inline CSS for GNPA conditional formatting."""
+        try:
+            v = float(val)
+            if v > 5: return "background-color:#FEE2E2;color:#991B1B;"
+            if v > 3: return "background-color:#FEF9C3;color:#854D0E;"
+        except (TypeError, ValueError):
+            pass
+        return ""
 
     _m_rows = ""
     for _, r in metrics_df[_m_cols].iterrows():
@@ -2870,7 +2880,8 @@ with tabs[6]:
         for i, c in enumerate(_m_cols):
             val_str = str(r[c]) if c in ("name","rbi_layer","sector","period","Audited") else _fmt_metric_cell(c, r[c])
             align   = "right" if i in _m_right else "left"
-            cells  += f'<td style="{_mtd}text-align:{align};">{val_str}</td>'
+            extra   = _gnpa_style(r[c]) if c == "gnpa_pct" else ""
+            cells  += f'<td style="{_mtd}text-align:{align};{extra}">{val_str}</td>'
         _m_rows += f"<tr>{cells}</tr>"
 
     _m_headers = "".join(
@@ -2878,7 +2889,7 @@ with tabs[6]:
         for i, h in enumerate(_m_heads)
     )
     st.markdown(f"""
-    <div style="overflow-x:auto;border:1px solid #EAEAEA;border-radius:12px;margin-top:0.5rem;">
+    <div style="overflow-x:auto;border:1px solid #E2E8F0;border-radius:12px;margin-top:0.5rem;">
     <table style="width:100%;border-collapse:collapse;font-family:Inter,sans-serif;">
       <thead><tr>{_m_headers}</tr></thead>
       <tbody>{_m_rows}</tbody>
