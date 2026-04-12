@@ -1491,7 +1491,7 @@ with tabs[1]:
                     "Moneyview 9MFY26: pre-exceptional PAT ₹245 Cr × 4/3 = ₹327 Cr annualised.")
     col1, col2 = st.columns(2)
     with col1:
-        all_roa = latest_snap.sort_values("roa_pct", ascending=False)
+        all_roa = latest_snap[latest_snap["name"] != "Moneyview"].sort_values("roa_pct", ascending=False)
         fig = make_hbar(all_roa, "roa_pct", "name", COLOR["primary"],
                         f"ROA % ({lbl})",
                         hover_text=all_roa["period"].map(lambda p: PERIOD_SHORT_ANN.get(p, p)).values,
@@ -1775,7 +1775,7 @@ with tabs[7]:
     # ROA trend
     st.markdown(f'<div class="section-header">Return on Assets Trend (to {lbl})</div>',
                 unsafe_allow_html=True)
-    roa_df = chart_df[chart_df["name"].isin(top10)][["name", "period", "roa_pct"]].dropna()
+    roa_df = chart_df[chart_df["name"].isin(top10) & (chart_df["name"] != "Moneyview")][["name", "period", "roa_pct"]].dropna()
     fig = px.line(roa_df, x="period", y="roa_pct", color="name",
                   color_discrete_sequence=MV_PALETTE,
                   title=f"ROA % Trend — Top 10 NBFCs (to {lbl})", height=460,
@@ -2471,9 +2471,10 @@ with tabs[4]:
                  "Moneyview 9MFY26: pre-exceptional PAT ₹245 Cr × 4/3 = ₹327 Cr annualised.  "
                  "Moneyview figures are for the consolidated platform business (WFPL + WFL), not the standalone NBFC.")
 
-    def _top20_hbar(metric, label, color, bar_fmt=None, hover_fmt=None, is_inr=False, show_exc_note=False):
-        cols = ["name", metric] + (["period"] if "period" in _snap.columns else [])
-        df = _snap[cols].dropna(subset=[metric]).sort_values(metric, ascending=False).head(10).copy()
+    def _top20_hbar(metric, label, color, bar_fmt=None, hover_fmt=None, is_inr=False, show_exc_note=False, _override_snap=None):
+        src = _override_snap if _override_snap is not None else _snap
+        cols = ["name", metric] + (["period"] if "period" in src.columns else [])
+        df = src[cols].dropna(subset=[metric]).sort_values(metric, ascending=False).head(10).copy()
         period_col = df["period"] if "period" in df.columns else df["name"].map(_snap_period)
 
         # Bar label: formatted value
@@ -2525,7 +2526,8 @@ with tabs[4]:
 
     col3, col4 = st.columns(2)
     with col3:
-        _top20_hbar("roa_pct", "Return on Assets (ROA)", COLOR["primary"], bar_fmt="{:.2f}%", show_exc_note=True)
+        _snap_no_mv = _snap[_snap["name"] != "Moneyview"]
+        _top20_hbar("roa_pct", "Return on Assets (ROA)", COLOR["primary"], bar_fmt="{:.2f}%", show_exc_note=True, _override_snap=_snap_no_mv)
     with col4:
         _top20_hbar("roe_pct", "Return on Equity (ROE)", COLOR["primary"], bar_fmt="{:.2f}%", show_exc_note=True)
 
