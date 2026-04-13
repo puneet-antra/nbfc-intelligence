@@ -1590,7 +1590,7 @@ with tabs[1]:
 # TAB 3: ASSET QUALITY (GNPA + Annualized Losses combined)
 # ─────────────────────────────────────────────────────────────────────────────
 with tabs[2]:
-    with st.expander("📐 Metric definitions"):
+    with st.expander("📋 Metric definitions"):
         note("Annualized Losses = (Net Provisions + Write-offs − Recoveries) ÷ Loan Book — "
              "the P&L cost of defaults. GNPA is a stock/point-in-time measure of bad loans.")
 
@@ -1686,8 +1686,12 @@ with tabs[2]:
     st.markdown('<div class="section-header">Annualized Losses vs GNPA</div>', unsafe_allow_html=True)
     scatter_df = latest_snap_all.dropna(subset=["credit_loss_rate_pct", "gnpa_pct", "loan_book_cr"])
     if not scatter_df.empty:
+        _show_labels = len(scatter_df) <= 10
+        scatter_df = scatter_df.copy()
+        scatter_df["_label"] = scatter_df["name"].apply(truncate_name) if _show_labels else ""
         fig = px.scatter(scatter_df, x="gnpa_pct", y="credit_loss_rate_pct",
                          size="loan_book_cr", color="sector", hover_name="name",
+                         text="_label" if _show_labels else None,
                          color_discrete_sequence=MV_PALETTE,
                          labels={"gnpa_pct": "GNPA %", "credit_loss_rate_pct": "Annualized Losses %"},
                          title=f"Annualized Losses vs GNPA — {lbl} (bubble = loan book)", height=500)
@@ -1698,7 +1702,9 @@ with tabs[2]:
                 "GNPA = %{x:.1f}%<br>"
                 "Ann. Losses = %{y:.1f}%"
                 "<extra></extra>"
-            )
+            ),
+            textposition="top center",
+            textfont=dict(family=CHART_FONT, size=11, color=COLOR["text_secondary"]),
         )
         fig.update_layout(
             xaxis=dict(title="GNPA %", title_font=dict(size=12, family=CHART_FONT),
@@ -1708,20 +1714,20 @@ with tabs[2]:
         )
         st.plotly_chart(fig, use_container_width=True)
 
-    # ── Waterfall: FY2021 → FY2025 change ────────────────────────────────────
-    st.markdown('<div class="section-header">Annualized Losses Change — FY2021 to FY2025</div>',
-                unsafe_allow_html=True)
-    st.caption("Uses FY2021 vs FY2025 annual data only — 9MFY26 excluded to avoid period mismatch.")
+    # ── Waterfall: FY2024 → latest (FY2025 or 9MFY26) change ─────────────────
+    _wf_latest = _latest_period_df[["name", "credit_loss_rate_pct"]].rename(
+        columns={"credit_loss_rate_pct": "latest"})
+    _wf_lbl = latest_period_label(fin_filtered)
     ann = annual_only(fin_filtered)
-    fy21 = ann[ann["period"] == "FY2021"][["name", "credit_loss_rate_pct"]].rename(
-        columns={"credit_loss_rate_pct": "fy21"})
-    fy25 = ann[ann["period"] == "FY2025"][["name", "credit_loss_rate_pct"]].rename(
-        columns={"credit_loss_rate_pct": "fy25"})
-    wf = fy21.merge(fy25, on="name").dropna()
-    wf["change"] = wf["fy25"] - wf["fy21"]
+    fy24 = ann[ann["period"] == "FY2024"][["name", "credit_loss_rate_pct"]].rename(
+        columns={"credit_loss_rate_pct": "fy24"})
+    wf = fy24.merge(_wf_latest, on="name").dropna()
+    wf["change"] = wf["latest"] - wf["fy24"]
     wf = wf.sort_values("change")
     wf["color"] = wf["change"].apply(lambda x: COLOR["success"] if x < 0 else COLOR["danger"])
     wf["label"] = wf["name"].apply(truncate_name)
+    st.markdown(f'<div class="section-header">Annualized Losses Change — FY2024 to {_wf_lbl}</div>',
+                unsafe_allow_html=True)
     fig = go.Figure(go.Bar(x=wf["change"], y=wf["label"], orientation="h",
                            marker_color=wf["color"],
                            text=wf["change"].round(2), textposition="outside",
@@ -1729,7 +1735,7 @@ with tabs[2]:
                            cliponaxis=False))
     wf_max = wf["change"].abs().max() if not wf.empty else 1
     fig.update_layout(
-        title=_title_dict("Change in Annualized Losses: FY2021 → FY2025 (green = improved)"),
+        title=_title_dict(f"Change in Annualized Losses: FY2024 → {_wf_lbl} (green = improved)"),
         paper_bgcolor=CHART_BG, plot_bgcolor=CHART_BG,
         font=dict(color=COLOR["text_secondary"], family=CHART_FONT),
         height=bar_chart_height(len(wf)),
@@ -2544,7 +2550,7 @@ with tabs[4]:
         )
         st.plotly_chart(fig, use_container_width=True)
         if show_exc_note:
-            with st.expander("📐 Adjustments & notes"):
+            with st.expander("📋 Adjustments & notes"):
                 st.markdown(
                     f"<p style='font-size:0.78rem;color:#555;'>{_EXC_NOTE}</p>",
                     unsafe_allow_html=True,
@@ -2761,37 +2767,44 @@ with tabs[5]:
             .reset_index()
             .sort_values("pe", ascending=False)
         )
-        # ROE by sector — from full unfiltered financials snapshot
-        _roe_snap = _latest_period_unf
+        # ROE & NII by sector — use TICKER_SECTOR to assign sectors to valuation universe,
+        # then join financial data. This ensures all sectors appear regardless of sidebar filter.
         _lbl_val  = latest_period_label(fin_df)
 
-        # Sector order is set by P/E (pe_sect already sorted descending)
-        _sector_order = pe_sect["sector"].tolist() if not pe_sect.empty else []
+        # Sector order: P/E sectors (desc) first, then remaining sectors in TICKER_SECTOR order
+        _pe_sectors   = pe_sect["sector"].tolist() if not pe_sect.empty else []
+        _all_val_sects = list(dict.fromkeys(TICKER_SECTOR.values()))  # unique, insertion-order
+        _sector_order = _pe_sectors + [s for s in _all_val_sects if s not in _pe_sectors]
 
         def _apply_sector_order(df, sector_col="sector"):
-            """Reindex df rows to match _sector_order; drop sectors not in order."""
+            """Sort df rows to match _sector_order; keeps all sectors (not filtered)."""
             if not _sector_order:
                 return df
             order_map = {s: i for i, s in enumerate(_sector_order)}
-            df = df[df[sector_col].isin(order_map)].copy()
-            df["_ord"] = df[sector_col].map(order_map)
+            df = df.copy()
+            df["_ord"] = df[sector_col].map(order_map).fillna(len(_sector_order))
             return df.sort_values("_ord").drop(columns="_ord")
 
+        # ROE by sector — join financial snapshot onto valuation universe via TICKER_SECTOR
+        _roe_snap = _latest_period_unf.copy()
+        _roe_snap["sector"] = _roe_snap["name"].map(TICKER_SECTOR).fillna(
+            _roe_snap.get("sector", pd.Series(dtype=str))
+        )
         roe_sect = (
-            _roe_snap.dropna(subset=["roe_pct", "sector"])
+            _roe_snap[_roe_snap["name"].isin(TICKER_SECTOR)]
+            .dropna(subset=["roe_pct"])
             .groupby("sector")["roe_pct"]
             .median()
             .reset_index()
         )
         roe_sect = _apply_sector_order(roe_sect)
 
-        # Revenue (NII) growth by sector — always all sectors, unfiltered
+        # Revenue (NII) growth by sector — valuation universe companies, sector via TICKER_SECTOR
         _nii_growth = compute_latest_growth(fin_df, "net_interest_income_cr")
-        _nii_growth = _nii_growth.merge(
-            fin_df[["name", "sector"]].drop_duplicates(), on="name", how="left"
-        )
+        _nii_growth["sector"] = _nii_growth["name"].map(TICKER_SECTOR)
         nii_sect = (
-            _nii_growth.dropna(subset=["growth_pct", "sector"])
+            _nii_growth[_nii_growth["name"].isin(TICKER_SECTOR)]
+            .dropna(subset=["growth_pct", "sector"])
             .groupby("sector")["growth_pct"]
             .median()
             .reset_index()
