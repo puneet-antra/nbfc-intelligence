@@ -1338,7 +1338,7 @@ if fin_filtered.empty:
 
 tabs = st.tabs([
     "Growth", "Profitability", "Risk Monitor",
-    "Deep Dive", "Rankings",
+    "Company Specific", "Rankings",
     "Valuation", "Data Explorer", "Trends",
 ])
 
