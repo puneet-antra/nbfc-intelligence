@@ -2313,7 +2313,12 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                      "+ ₹48 Cr DTA recognition) = Adjusted 9M PAT ₹189 Cr × 4/3 = Annualised PAT ₹252 Cr.  "
                      "Adjusted ROA = ₹252 Cr ÷ avg loan book ₹7,049 Cr [(₹5,649 + ₹8,448) ÷ 2] = 3.58%.", "warning")
         if selected == "Moneyview":
-            with st.expander("📐 Methodology & Data Notes — Moneyview"):
+            st.info(
+                "📌 Moneyview data covers its entire platform business (WFPL + WFL), including its NBFC. "
+                "All other companies report lending/NBFC entity financials only.",
+                icon=None,
+            )
+            with st.expander("📋 Methodology & Data Notes — Moneyview"):
                 note("Figures are for the consolidated platform business (WFPL + WFL), "
                      "not the standalone NBFC entity. Loan book = managed AUM (on-book + off-book DLG, ₹19,815 Cr incl. co-lending). "
                      "9MFY26: ROA & ROE use PAT before exceptional items (₹245 Cr, 9M → annualised ₹327 Cr). "
