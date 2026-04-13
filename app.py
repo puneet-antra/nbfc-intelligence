@@ -859,11 +859,18 @@ def compute_cagr(df, metric_col, start_year="FY2021", end_year="FY2025"):
     return merged[["name", "cagr_pct"]].sort_values("cagr_pct", ascending=False)
 
 
-def compute_latest_growth(df, metric_col):
+def compute_latest_growth(df, metric_col, is_stock=False):
     """
-    Per-company 1-year AUM growth using the most recent pair available:
-      - If 9MFY26 exists → annualised growth: ((9MFY26/FY2025)^(12/9) − 1)
-      - Otherwise             → (FY2025 − FY2024) / FY2024
+    Per-company 1-year growth for metric_col using the most recent pair available:
+      - If 9MFY26 exists → annualised growth vs FY2025
+      - Otherwise        → (FY2025 − FY2024) / FY2024
+
+    is_stock=True  → metric is a balance/stock (e.g. AUM, loan book).
+                     Only the 9-month *increment* is extrapolated to 12 months:
+                     growth = (FY25 + (9M − FY25) × 4/3) / FY25 − 1
+    is_stock=False → metric is a flow (e.g. NII, PAT).
+                     The 9-month total is extrapolated: growth = 9M × 4/3 / FY25 − 1
+
     Returns DataFrame with columns: name, growth_pct, period_label
     """
     ann_9m = annualise_9m(df)
@@ -878,8 +885,16 @@ def compute_latest_growth(df, metric_col):
         ann = ann_9m[["nbfc_id", "name", metric_col]].rename(columns={metric_col: "recent"})
         merged = ann.merge(fy25, on=["nbfc_id", "name"], how="inner")
         merged = merged[merged["fy25"] != 0]  # only exclude zero FY25 (avoid division by zero)
-        # Annualise: 9MFY26 covers 9 months vs FY25's 12 months
-        merged["growth_pct"] = (merged["recent"] * (4 / 3) / merged["fy25"] - 1) * 100
+        if is_stock:
+            # Stock metric: annualise only the increment, then compare to FY25
+            # implied_annual = FY25 + (9M_balance − FY25) × 4/3
+            merged["growth_pct"] = (
+                (merged["fy25"] + (merged["recent"] - merged["fy25"]) * (4 / 3))
+                / merged["fy25"] - 1
+            ) * 100
+        else:
+            # Flow metric: annualise the 9-month total
+            merged["growth_pct"] = (merged["recent"] * (4 / 3) / merged["fy25"] - 1) * 100
         merged["period_label"] = "9MFY26 (Ann.) vs FY25"
         rows.append(merged[["name", "growth_pct", "period_label"]])
 
@@ -1315,7 +1330,7 @@ with_data = nbfc_filtered[nbfc_filtered["has_financials"] == 1].shape[0]
 total_assets = latest_annual["total_assets_cr"].sum() / 1e5  # to Lakh Crore
 avg_gnpa = latest_annual["gnpa_pct"].mean()
 
-growth_df_header = compute_latest_growth(fin_filtered, "loan_book_cr")
+growth_df_header = compute_latest_growth(fin_filtered, "loan_book_cr", is_stock=True)
 avg_growth = growth_df_header["growth_pct"].mean() if not growth_df_header.empty else 0.0
 
 _gap, c1, c2, c3, c4, c5, _gap2 = st.columns([0.3, 1, 1, 1, 1, 1, 0.3])
@@ -1352,7 +1367,7 @@ with tabs[0]:
     )
     sectors_df = fin_filtered[["name", "sector"]].drop_duplicates()
 
-    growth_df    = compute_latest_growth(fin_filtered, "loan_book_cr").dropna(subset=["growth_pct"])
+    growth_df    = compute_latest_growth(fin_filtered, "loan_book_cr", is_stock=True).dropna(subset=["growth_pct"])
     rev_growth_df = compute_latest_growth(fin_filtered, "net_interest_income_cr").dropna(subset=["growth_pct"])
     pat_growth_df = compute_latest_growth(fin_filtered, "pat_cr").dropna(subset=["growth_pct"])
 
@@ -1397,7 +1412,7 @@ with tabs[0]:
     # ── Row 2: AUM | Revenue | PAT Growth by Sector ──────────────────────────
     # Use unfiltered fin_df so sector charts always show all sectors
     _sectors_map = fin_df[["name", "sector"]].drop_duplicates()
-    _growth_all     = compute_latest_growth(fin_df, "loan_book_cr").dropna(subset=["growth_pct"]).merge(_sectors_map, on="name", how="left")
+    _growth_all     = compute_latest_growth(fin_df, "loan_book_cr", is_stock=True).dropna(subset=["growth_pct"]).merge(_sectors_map, on="name", how="left")
     _rev_growth_all = compute_latest_growth(fin_df, "net_interest_income_cr").dropna(subset=["growth_pct"]).merge(_sectors_map, on="name", how="left")
     _pat_growth_all = compute_latest_growth(fin_df, "pat_cr").dropna(subset=["growth_pct"]).merge(_sectors_map, on="name", how="left")
 
@@ -2327,7 +2342,10 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                 note("AUM Growth calculation — Managed AUM (on-book + off-book DLG): "
                      "FY2023 ₹7,644 Cr → FY2024 ₹12,885 Cr (+68.6%) → FY2025 ₹16,715 Cr (+29.7%). "
                      "9MFY26 (Apr–Dec 2025): AUM ₹19,815 Cr. "
-                     "Annualised growth vs FY2025: ₹19,815 Cr × 4/3 ÷ ₹16,715 Cr − 1 = +58.0% (annualised run-rate). "
+                     "Annualised growth vs FY2025: AUM is a stock metric, so the 9-month increment "
+                     "(₹19,815 − ₹16,715 = ₹3,100 Cr) is extrapolated to 12 months (×4/3 = ₹4,133 Cr), "
+                     "giving an implied Mar'26 AUM of ₹20,848 Cr. "
+                     "Annualised growth = (₹16,715 + ₹4,133) ÷ ₹16,715 − 1 = +24.7%. "
                      "Source: Moneyview DRHP Mar-2026.", "info")
         if selected == "Kissht":
             with st.expander("📐 ROA & ROE Calculations — Kissht"):
