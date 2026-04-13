@@ -349,8 +349,8 @@ FINANCIALS = [
      "Moneyview DRHP Mar-2026. FY24: managed AUM ₹12,885 Cr; total assets ₹3,520 Cr; equity ₹1,607 Cr; revenue ₹1,342 Cr; PAT ₹171 Cr; GNPA 0.90% (WFPL Gross Stage 3). WFPL on-book impairment not separately disclosed for FY24. credit_losses_cr = NULL."),
     ("Moneyview", "FY2025",  16715, 5632, 1919, 2339, 240,  346,  2.07, 1.90,  1.62, 13.63, "DRHP",
      "Moneyview DRHP Mar-2026. FY25: managed AUM ₹16,715 Cr; total assets ₹5,632 Cr; equity ₹1,919 Cr; revenue ₹2,339 Cr; PAT ₹240 Cr; WFPL on-book ECL impairment ₹346 Cr (actual P&L); credit_loss_rate_pct = 346/16715 = 2.07% (on-book ECL / ending managed AUM); GNPA 1.90%."),
-    ("Moneyview", "FY2026-Q3", 19815, 7719, 2169, 2373, 245,  724,  None, 2.53,  1.79, 15.98, "DRHP",
-     "Moneyview DRHP Mar-2026. 9MFY26 (Apr-Dec 2025): managed AUM ₹19,815 Cr; total assets ₹7,719 Cr; equity ₹2,169 Cr; PAT ₹245 Cr before exceptional items; WFPL on-book impairment ₹724 Cr (9M only; total managed losses not separately disclosed for 9M). annualise_9m computes: ann. ₹965 Cr / avg AUM ₹18,265 Cr = 5.29% (on-book proxy). GNPA 2.53%. ROE per DRHP avg equity."),
+    ("Moneyview", "FY2026-Q3", 19815, 7719, 2169, 2373, 245,  724,  None, 2.10,  1.79, 15.98, "DRHP",
+     "Moneyview DRHP Mar-2026. 9MFY26 (Apr-Dec 2025): managed AUM ₹19,815 Cr; total assets ₹7,719 Cr; equity ₹2,169 Cr; PAT ₹245 Cr before exceptional items; WFPL on-book impairment ₹724 Cr (9M only; total managed losses not separately disclosed for 9M). annualise_9m computes: ann. ₹965 Cr / avg AUM ₹18,265 Cr = 5.29% (on-book proxy). GNPA 2.10% (Dec-2025). ROE per DRHP avg equity."),
 ]
 
 

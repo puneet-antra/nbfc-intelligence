@@ -1135,8 +1135,8 @@ st.sidebar.caption(
     "Live valuations from Yahoo Finance."
 )
 st.sidebar.caption(
-    "📌 Moneyview figures reflect the consolidated platform business (WFPL + WFL). "
-    "All other NBFCs report lending/NBFC entity financials only."
+    "📌 Moneyview data covers its entire platform business (WFPL + WFL), including its NBFC. "
+    "All other companies report lending/NBFC entity financials only."
 )
 st.sidebar.markdown("---")
 if _AUTH_ENABLED:
