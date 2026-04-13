@@ -2324,6 +2324,11 @@ def deep_dive_tab(fin_filtered, nbfc_filtered):
                      "9MFY26: ROA & ROE use PAT before exceptional items (₹245 Cr, 9M → annualised ₹327 Cr). "
                      "Reported 9M PAT = ₹210 Cr (after ₹35 Cr one-time charges). "
                      "Annualised loss rate = ₹965 Cr / avg AUM ₹18,265 Cr = 5.29%. Source: DRHP Mar-2026.", "info")
+                note("AUM Growth calculation — Managed AUM (on-book + off-book DLG): "
+                     "FY2023 ₹7,644 Cr → FY2024 ₹12,885 Cr (+68.6%) → FY2025 ₹16,715 Cr (+29.7%). "
+                     "9MFY26 (Apr–Dec 2025): AUM ₹19,815 Cr. "
+                     "Annualised growth vs FY2025: ₹19,815 Cr × 4/3 ÷ ₹16,715 Cr − 1 = +58.0% (annualised run-rate). "
+                     "Source: Moneyview DRHP Mar-2026.", "info")
         if selected == "Kissht":
             with st.expander("📐 ROA & ROE Calculations — Kissht"):
                 note("ROA uses avg Loan Book AUM (not avg total assets as per DRHP): "
